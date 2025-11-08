@@ -21,14 +21,16 @@ export default function AuthCallbackPage() {
       }
 
       try {
-        // Ensure user has a role
-        await fetch("/api/users/ensure-role");
+        // Ensure user has a role (auto-assigns RIDER if none)
+        const ensureRes = await fetch("/api/users/ensure-role");
+        if (!ensureRes.ok) {
+          throw new Error("Failed to ensure role");
+        }
 
         // Fetch user data to get role
         const res = await fetch("/api/users/me");
         if (!res.ok) {
-          router.push("/");
-          return;
+          throw new Error("Failed to fetch user data");
         }
 
         const data = await res.json();
@@ -44,12 +46,13 @@ export default function AuthCallbackPage() {
         } else if (userRole === "ADMIN") {
           router.push("/admin");
         } else {
-          // No role yet, redirect to home
-          router.push("/");
+          // Fallback: if still no role, redirect to rider
+          router.push("/rider");
         }
       } catch (error) {
         console.error("Error in auth callback:", error);
-        router.push("/");
+        // On error, still try to redirect to rider (default role)
+        router.push("/rider");
       }
     }
 

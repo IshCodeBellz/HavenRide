@@ -31,17 +31,17 @@ export default function HomePage() {
             } else if (role === "ADMIN") {
               router.push("/admin");
             } else {
-              // No role assigned, redirect to role selection
-              router.push("/role-select");
+              // No role assigned, redirect to auth callback to auto-assign RIDER
+              router.push("/auth-callback");
             }
           } else {
-            // Failed to fetch role, redirect to role selection
-            router.push("/role-select");
+            // Failed to fetch role, redirect to auth callback to create user
+            router.push("/auth-callback");
           }
         } catch (error) {
           console.error("Error redirecting user:", error);
-          // On error, redirect to role selection
-          router.push("/role-select");
+          // On error, redirect to auth callback
+          router.push("/auth-callback");
         }
       }
     }

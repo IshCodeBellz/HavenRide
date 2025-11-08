@@ -12,51 +12,72 @@ export default function AuthCallbackPage() {
   const { user, isLoaded } = useUser();
 
   useEffect(() => {
+    let isMounted = true;
+
     async function redirectUser() {
       if (!isLoaded) return;
 
       if (!user?.id) {
-        router.push("/");
+        if (isMounted) router.push("/");
         return;
       }
 
       try {
+        // Small delay to ensure Clerk session is fully established
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         // Ensure user has a role (auto-assigns RIDER if none)
         const ensureRes = await fetch("/api/users/ensure-role");
         if (!ensureRes.ok) {
+          const errorData = await ensureRes.json();
+          console.error("Failed to ensure role:", errorData);
           throw new Error("Failed to ensure role");
         }
+
+        const ensureData = await ensureRes.json();
+        console.log("Role ensured:", ensureData);
+
+        // Wait a bit for DB to commit
+        await new Promise(resolve => setTimeout(resolve, 300));
 
         // Fetch user data to get role
         const res = await fetch("/api/users/me");
         if (!res.ok) {
+          console.error("Failed to fetch user data");
           throw new Error("Failed to fetch user data");
         }
 
         const data = await res.json();
         const userRole = data.role;
+        console.log("User role:", userRole);
 
-        // Redirect based on role
+        if (!isMounted) return;
+
+        // Redirect based on role with replace to prevent back button loop
         if (userRole === "DRIVER") {
-          router.push("/driver");
+          router.replace("/driver");
         } else if (userRole === "RIDER") {
-          router.push("/rider");
+          router.replace("/rider");
         } else if (userRole === "DISPATCHER") {
-          router.push("/dispatcher");
+          router.replace("/dispatcher");
         } else if (userRole === "ADMIN") {
-          router.push("/admin");
+          router.replace("/admin");
         } else {
           // Fallback: if still no role, redirect to rider
-          router.push("/rider");
+          router.replace("/rider");
         }
       } catch (error) {
         console.error("Error in auth callback:", error);
         // On error, still try to redirect to rider (default role)
-        router.push("/rider");
+        if (isMounted) router.replace("/rider");
       }
     }
 
     redirectUser();
+
+    return () => {
+      isMounted = false;
+    };
   }, [user, isLoaded, router]);
 
   return (

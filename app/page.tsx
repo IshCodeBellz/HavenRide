@@ -23,25 +23,25 @@ export default function HomePage() {
             const role = userData.role;
 
             if (role === "RIDER") {
-              router.push("/rider");
+              router.replace("/rider");
             } else if (role === "DRIVER") {
-              router.push("/driver");
+              router.replace("/driver");
             } else if (role === "DISPATCHER") {
-              router.push("/dispatcher");
+              router.replace("/dispatcher");
             } else if (role === "ADMIN") {
-              router.push("/admin");
+              router.replace("/admin");
             } else {
               // No role assigned, redirect to auth callback to auto-assign RIDER
-              router.push("/auth-callback");
+              router.replace("/auth-callback");
             }
           } else {
             // Failed to fetch role, redirect to auth callback to create user
-            router.push("/auth-callback");
+            router.replace("/auth-callback");
           }
         } catch (error) {
           console.error("Error redirecting user:", error);
           // On error, redirect to auth callback
-          router.push("/auth-callback");
+          router.replace("/auth-callback");
         }
       }
     }

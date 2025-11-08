@@ -7,6 +7,7 @@ import BookingMap from "@/components/BookingMap";
 import AppLayout from "@/components/AppLayout";
 import { getChannel } from "@/lib/realtime/ably";
 import RoleGate from "@/components/RoleGate";
+import RideConfirmation from "@/components/RideConfirmation";
 
 function RiderPageContent() {
   const { user } = useUser();
@@ -24,6 +25,7 @@ function RiderPageContent() {
   const [wheelchair, setWheelchair] = useState(false);
   const [estimate, setEstimate] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingLocation, setLoadingLocation] = useState(false);
   const [booking, setBooking] = useState<any>(null);
   const [bookings, setBookings] = useState<any[]>([]);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
@@ -100,6 +102,64 @@ function RiderPageContent() {
       }
     };
   }, [user?.id, fetchBookings]);
+
+  async function handleUseCurrentLocation() {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setLoadingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        
+        try {
+          // Reverse geocode to get address from coordinates
+          const response = await fetch(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`
+          );
+          const data = await response.json();
+          
+          if (data.features && data.features.length > 0) {
+            const address = data.features[0].place_name;
+            setPickup(address);
+            setPickupCoords({ lat: latitude, lng: longitude });
+          }
+        } catch (error) {
+          console.error("Error reverse geocoding:", error);
+          // Still set coordinates even if reverse geocoding fails
+          setPickup(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+          setPickupCoords({ lat: latitude, lng: longitude });
+        } finally {
+          setLoadingLocation(false);
+        }
+      },
+      (error) => {
+        setLoadingLocation(false);
+        let message = "Unable to retrieve your location";
+        
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            message = "Location access denied. Please enable location services in your browser settings.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            message = "Location information unavailable";
+            break;
+          case error.TIMEOUT:
+            message = "Location request timed out";
+            break;
+        }
+        
+        alert(message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  }
 
   async function handleEstimate() {
     if (
@@ -188,6 +248,174 @@ function RiderPageContent() {
     }
   }
 
+  async function handleCancelBooking(bookingId: string) {
+    if (!confirm("Are you sure you want to cancel this ride?")) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "CANCELED" }),
+      });
+
+      if (res.ok) {
+        await fetchBookings();
+      } else {
+        alert("Failed to cancel booking");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to cancel booking");
+    }
+  }
+
+  // Check if there's a pending booking (REQUESTED status)
+  const pendingBooking = bookings.find((b) => b.status === "REQUESTED");
+
+  // Check if current booking has driver assigned (show confirmation screen)
+  const activeBooking = bookings.find(
+    (b) => b.status === "ASSIGNED" || b.status === "EN_ROUTE" || b.status === "ARRIVED"
+  );
+
+  // Show loading screen for pending booking
+  if (pendingBooking) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+        <div className="max-w-lg w-full">
+          <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-blue-500">
+            {/* Header */}
+            <div className="text-center mb-6">
+              <div className="inline-block p-3 bg-yellow-100 rounded-full mb-4">
+                <svg
+                  className="w-12 h-12 text-yellow-600 animate-pulse"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-[#0F3D3E] mb-2">
+                Finding Your Driver
+              </h2>
+              <p className="text-gray-600">
+                Please wait while we match you with a nearby driver...
+              </p>
+            </div>
+
+            {/* Booking Details */}
+            <div className="bg-blue-50 rounded-xl p-6 mb-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-gray-700">
+                  Status
+                </span>
+                <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
+                  {pendingBooking.status}
+                </span>
+              </div>
+
+              <div className="border-t border-blue-200 pt-4 space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-[#00796B] rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-bold text-sm">A</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-600 font-medium">Pickup</p>
+                    <p className="text-sm font-semibold text-[#0F3D3E]">
+                      {pendingBooking.pickupAddress}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-[#0F3D3E] rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-bold text-sm">B</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-600 font-medium">Dropoff</p>
+                    <p className="text-sm font-semibold text-[#0F3D3E]">
+                      {pendingBooking.dropoffAddress}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {pendingBooking.pinCode && (
+                <div className="border-t border-blue-200 pt-4">
+                  <div className="bg-white rounded-lg p-4 text-center">
+                    <p className="text-xs text-gray-600 mb-1">Your PIN:</p>
+                    <p className="text-3xl font-bold text-[#00796B] tracking-wider">
+                      {pendingBooking.pinCode}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Give this to your driver
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {pendingBooking.priceEstimate && (
+                <div className="border-t border-blue-200 pt-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Estimated Fare</span>
+                    <span className="text-xl font-bold text-[#0F3D3E]">
+                      £{pendingBooking.priceEstimate.amount?.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <div className="text-center text-xs text-gray-500 pt-2">
+                Requested: {new Date(pendingBooking.createdAt).toLocaleString()}
+              </div>
+            </div>
+
+            {/* Loading Animation */}
+            <div className="flex justify-center mb-6">
+              <div className="flex space-x-2">
+                <div className="w-3 h-3 bg-[#00796B] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-3 h-3 bg-[#00796B] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-3 h-3 bg-[#00796B] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              </div>
+            </div>
+
+            {/* Cancel Button */}
+            <button
+              onClick={() => handleCancelBooking(pendingBooking.id)}
+              className="w-full px-6 py-3 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors font-semibold"
+            >
+              Cancel Ride
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show confirmation screen if driver accepted
+  if (activeBooking && activeBooking.driverId) {
+    return (
+      <RideConfirmation
+        booking={activeBooking}
+        userRole="RIDER"
+        onConfirm={async () => {
+          // Handle ride confirmation
+          alert("Ride confirmed! Driver is on the way.");
+        }}
+        onCancel={async () => {
+          await handleCancelBooking(activeBooking.id);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="px-8 py-6 max-w-7xl mx-auto">
       {/* Header with Welcome Message */}
@@ -206,16 +434,50 @@ function RiderPageContent() {
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-6">
-              <MapboxAutocomplete
-                value={pickup}
-                onChange={(address, coords) => {
-                  setPickup(address);
-                  setPickupCoords(coords);
-                }}
-                placeholder="Pickup location"
-                label="Pickup Address"
-                required
-              />
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Pickup Address
+                  </label>
+                  <button
+                    onClick={handleUseCurrentLocation}
+                    disabled={loadingLocation}
+                    className="flex items-center gap-2 text-sm text-[#00796B] hover:text-[#0F3D3E] font-medium disabled:opacity-50"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                    {loadingLocation ? "Getting location..." : "Use my location"}
+                  </button>
+                </div>
+                <MapboxAutocomplete
+                  value={pickup}
+                  onChange={(address, coords) => {
+                    setPickup(address);
+                    setPickupCoords(coords);
+                  }}
+                  placeholder="Pickup location"
+                  label=""
+                  required
+                />
+              </div>
 
               <MapboxAutocomplete
                 value={dropoff}
@@ -342,6 +604,19 @@ function RiderPageContent() {
                           Give this to your driver
                         </div>
                       </div>
+                    )}
+                  {b.status !== "COMPLETED" &&
+                    b.status !== "CANCELED" &&
+                    b.status !== "IN_PROGRESS" && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCancelBooking(b.id);
+                        }}
+                        className="mt-3 w-full px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded hover:bg-red-100 transition-colors text-sm font-medium"
+                      >
+                        Cancel Ride
+                      </button>
                     )}
                   {b.status === "COMPLETED" && b.rideQuality && (
                     <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded">

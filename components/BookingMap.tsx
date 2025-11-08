@@ -51,16 +51,19 @@ export default function BookingMap({
       pickupMarker.current.setLngLat([pickup.lng, pickup.lat]);
     } else {
       const el = document.createElement("div");
-      el.className = "w-10 h-10";
+      el.className = "w-12 h-12";
       el.innerHTML = `
-        <div class="relative">
-          <div class="absolute inset-0 bg-[#00796B] rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
-            A
-          </div>
-        </div>
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M24 2C15.716 2 9 8.716 9 17C9 28.5 24 46 24 46C24 46 39 28.5 39 17C39 8.716 32.284 2 24 2Z" 
+                fill="#00796B" 
+                stroke="white" 
+                stroke-width="2"/>
+          <circle cx="24" cy="17" r="6" fill="white"/>
+          <text x="24" y="21" text-anchor="middle" font-size="12" font-weight="bold" fill="#00796B">A</text>
+        </svg>
       `;
 
-      pickupMarker.current = new mapboxgl.Marker({ element: el })
+      pickupMarker.current = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
         .setLngLat([pickup.lng, pickup.lat])
         .setPopup(
           new mapboxgl.Popup().setHTML("<strong>Pickup Location</strong>")
@@ -79,16 +82,19 @@ export default function BookingMap({
       dropoffMarker.current.setLngLat([dropoff.lng, dropoff.lat]);
     } else {
       const el = document.createElement("div");
-      el.className = "w-10 h-10";
+      el.className = "w-12 h-12";
       el.innerHTML = `
-        <div class="relative">
-          <div class="absolute inset-0 bg-[#26A69A] rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
-            B
-          </div>
-        </div>
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M24 2C15.716 2 9 8.716 9 17C9 28.5 24 46 24 46C24 46 39 28.5 39 17C39 8.716 32.284 2 24 2Z" 
+                fill="#0F3D3E" 
+                stroke="white" 
+                stroke-width="2"/>
+          <circle cx="24" cy="17" r="6" fill="white"/>
+          <text x="24" y="21" text-anchor="middle" font-size="12" font-weight="bold" fill="#0F3D3E">B</text>
+        </svg>
       `;
 
-      dropoffMarker.current = new mapboxgl.Marker({ element: el })
+      dropoffMarker.current = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
         .setLngLat([dropoff.lng, dropoff.lat])
         .setPopup(
           new mapboxgl.Popup().setHTML("<strong>Drop-off Location</strong>")

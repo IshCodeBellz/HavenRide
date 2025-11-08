@@ -40,10 +40,15 @@ export default clerkMiddleware(async (auth, req) => {
           return NextResponse.redirect(new URL("/dispatcher", req.url));
         } else if (role === "ADMIN") {
           return NextResponse.redirect(new URL("/admin", req.url));
+        } else {
+          // User has no role, redirect to role selection
+          return NextResponse.redirect(new URL("/role-select", req.url));
         }
       }
     } catch (error) {
       console.error("Error fetching user role:", error);
+      // On error, redirect to role selection to be safe
+      return NextResponse.redirect(new URL("/role-select", req.url));
     }
   }
 

@@ -39,7 +39,14 @@ model Rider {
   id    String    @id
   user  User      @relation(fields: [id], references: [id])
   phone String?
-  bookings Booking[] @relation("RiderBookings")
+  
+  // Accessibility preferences
+  alwaysRequestWheelchair Boolean @default(false)
+  needsAssistance         Boolean @default(false)
+  
+  bookings         Booking[]        @relation("RiderBookings")
+  savedLocations   SavedLocation[]
+  paymentMethods   PaymentMethod[]
 }
 
 model Driver {
@@ -124,4 +131,38 @@ model Settings {
   requirePickupPin  Boolean  @default(true)
   sendReceipts      Boolean  @default(true)
   updatedAt         DateTime @updatedAt
+}
+
+model SavedLocation {
+  id        String   @id @default(cuid())
+  rider     Rider    @relation(fields: [riderId], references: [id], onDelete: Cascade)
+  riderId   String
+  
+  label     String   // "Home", "Work", "Hospital", etc.
+  address   String
+  latitude  Float
+  longitude Float
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([riderId])
+}
+
+model PaymentMethod {
+  id               String   @id @default(cuid())
+  rider            Rider    @relation(fields: [riderId], references: [id], onDelete: Cascade)
+  riderId          String
+  
+  stripePaymentMethodId String @unique
+  last4            String   // Last 4 digits of card
+  brand            String   // "visa", "mastercard", etc.
+  expiryMonth      Int
+  expiryYear       Int
+  isDefault        Boolean  @default(false)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  @@index([riderId])
 }

@@ -8,6 +8,7 @@ import AppLayout from "@/components/AppLayout";
 import RideDocumentationForm, {
   RideDocumentation,
 } from "@/components/RideDocumentationForm";
+import RideConfirmation from "@/components/RideConfirmation";
 
 function DriverPageContent() {
   const { user } = useUser();
@@ -17,6 +18,7 @@ function DriverPageContent() {
   const [documentingBookingId, setDocumentingBookingId] = useState<
     string | null
   >(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const fetchingRef = useRef(false);
   const initialLoadRef = useRef(true);
 
@@ -25,10 +27,6 @@ function DriverPageContent() {
       bookings.find((b) => b.driverId === user?.id && b.status !== "COMPLETED"),
     [bookings, user?.id]
   );
-
-  useEffect(() => {
-    if (assigned?.id) setActiveBookingId(assigned.id);
-  }, [assigned?.id]);
 
   async function toggleOnline(next: boolean) {
     const res = await fetch("/api/drivers/set-online", {
@@ -190,137 +188,431 @@ function DriverPageContent() {
     }
   }
 
-  return (
-    <div className="max-w-5xl mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Driver Console</h1>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={online}
-            onChange={(e) => toggleOnline(e.target.checked)}
-          />
-          <span>{online ? "Online" : "Offline"}</span>
-        </label>
-      </div>
+  // Show confirmation screen if driver has accepted a ride
+  if (assigned && assigned.status === "ASSIGNED") {
+    return (
+      <RideConfirmation
+        booking={assigned}
+        userRole="DRIVER"
+        onConfirm={async () => {
+          // Mark as en route
+          await fetch(`/api/bookings/${assigned.id}/status`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "EN_ROUTE" }),
+          });
+          fetchBookings();
+        }}
+        onCancel={async () => {
+          if (!confirm("Are you sure you want to cancel this ride? The rider will need to find another driver.")) {
+            return;
+          }
+          // Unassign driver and set back to REQUESTED
+          await fetch(`/api/bookings/${assigned.id}/status`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "REQUESTED", driverId: null }),
+          });
+          fetchBookings();
+        }}
+      />
+    );
+  }
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-3">
-          {initialLoadRef.current ? (
-            <div className="text-center text-gray-500 py-4">
-              Loading bookings...
-            </div>
-          ) : bookings.length === 0 ? (
-            <div className="text-center text-gray-500 py-4">
-              No bookings yet
-            </div>
-          ) : (
-            bookings.map((b: any) => (
-              <div
-                key={b.id}
-                className={`border rounded p-3 ${
-                  activeBookingId === b.id ? "ring-2 ring-blue-400" : ""
-                }`}
+  // Filter only requested bookings and sort by creation time (oldest first)
+  const requestedBookings = bookings
+    .filter((b) => b.status === "REQUESTED")
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  
+  const currentBooking = requestedBookings[currentIndex];
+
+  const goToNext = () => {
+    if (currentIndex < requestedBookings.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  };
+
+  const goToPrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+      <div className="max-w-2xl w-full">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-[#0F3D3E]">Driver Console</h1>
+            <p className="text-sm text-gray-600">
+              {requestedBookings.length} ride{requestedBookings.length !== 1 ? 's' : ''} available
+            </p>
+          </div>
+          <label className="flex items-center gap-3 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200">
+            <span className="text-sm font-medium text-gray-700">
+              {online ? "Online" : "Offline"}
+            </span>
+            <input
+              type="checkbox"
+              checked={online}
+              onChange={(e) => toggleOnline(e.target.checked)}
+              className="w-12 h-6 appearance-none bg-gray-300 rounded-full relative cursor-pointer transition-colors checked:bg-[#00796B] before:content-[''] before:absolute before:w-5 before:h-5 before:rounded-full before:bg-white before:top-0.5 before:left-0.5 before:transition-transform checked:before:translate-x-6"
+            />
+          </label>
+        </div>
+
+        {/* Main Card */}
+        {initialLoadRef.current ? (
+          <div className="bg-white rounded-2xl p-12 shadow-lg text-center">
+            <div className="inline-block p-4 bg-gray-100 rounded-full mb-4">
+              <svg
+                className="w-12 h-12 text-gray-400 animate-spin"
+                fill="none"
+                viewBox="0 0 24 24"
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-semibold">
-                      {b.pickupAddress} → {b.dropoffAddress}
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+            </div>
+            <p className="text-gray-600">Loading bookings...</p>
+          </div>
+        ) : requestedBookings.length === 0 ? (
+          <div className="bg-white rounded-2xl p-12 shadow-lg text-center">
+            <div className="inline-block p-4 bg-[#E0F2F1] rounded-full mb-4">
+              <svg
+                className="w-12 h-12 text-[#00796B]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-[#0F3D3E] mb-2">
+              No Available Jobs
+            </h2>
+            <p className="text-gray-600 mb-4">
+              {online
+                ? "All jobs are currently assigned. New ride requests will appear here."
+                : "Go online to start receiving ride requests"}
+            </p>
+            {!online && (
+              <button
+                onClick={() => toggleOnline(true)}
+                className="px-6 py-3 bg-[#00796B] text-white rounded-lg font-semibold hover:bg-[#00695C] transition-colors"
+              >
+                Go Online
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="relative">
+            {/* Main Carousel Container with Preview */}
+            <div className="relative overflow-visible">
+              <div className="flex items-center gap-4">
+                {/* Current Card */}
+                <div 
+                  className="bg-white rounded-2xl shadow-lg border-2 border-blue-500 flex-shrink-0 transition-all duration-300"
+                  style={{ width: requestedBookings.length > 1 ? 'calc(100% - 120px)' : '100%' }}
+                >
+                  <div className="p-8">
+                {/* Status Badge */}
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-sm font-medium text-gray-600">
+                    Status
+                  </span>
+                  <span className="px-4 py-1.5 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold">
+                    {currentBooking.status}
+                  </span>
+                </div>
+
+                {/* Route Information */}
+                <div className="space-y-4 mb-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-[#00796B] rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-bold">A</span>
                     </div>
-                    <div className="text-xs text-gray-600">
-                      Status: {b.status} {b.requiresWheelchair ? "• ♿" : ""}
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-600 font-medium mb-1">
+                        Pickup
+                      </p>
+                      <p className="text-base font-semibold text-[#0F3D3E]">
+                        {currentBooking.pickupAddress}
+                      </p>
                     </div>
-                    {typeof b.finalFareAmount === "number" && (
-                      <div className="text-xs text-gray-700">
-                        Final fare: £{b.finalFareAmount.toFixed(2)}
-                      </div>
-                    )}
                   </div>
-                  <div className="flex gap-2">
-                    {!b.driverId && (
-                      <button
-                        className="px-3 py-1 border rounded"
-                        onClick={() => take(b.id)}
-                      >
-                        Take
-                      </button>
-                    )}
-                    {b.status !== "ARRIVED" && (
-                      <button
-                        className="px-3 py-1 border rounded"
-                        onClick={() => arrive(b.id)}
-                      >
-                        Arrived
-                      </button>
-                    )}
-                    {b.status === "ARRIVED" && (
-                      <button
-                        className="px-3 py-1 border rounded"
-                        onClick={() => startWithPin(b.id)}
-                      >
-                        Start (PIN)
-                      </button>
-                    )}
-                    {b.status === "IN_PROGRESS" && (
-                      <button
-                        className="px-3 py-1 border rounded"
-                        onClick={() => complete(b.id)}
-                      >
-                        Complete
-                      </button>
-                    )}
+
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-[#0F3D3E] rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-bold">B</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-600 font-medium mb-1">
+                        Dropoff
+                      </p>
+                      <p className="text-base font-semibold text-[#0F3D3E]">
+                        {currentBooking.dropoffAddress}
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  Booking ID: <code>{b.id.slice(0, 8)}…</code>
+
+                {/* Additional Info */}
+                <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2">
+                  {currentBooking.requiresWheelchair && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-2xl">♿</span>
+                      <span className="font-medium text-gray-700">
+                        Wheelchair accessible vehicle required
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Booking ID:</span>
+                    <code className="font-mono font-medium text-gray-800">
+                      {currentBooking.id.slice(0, 8)}...
+                    </code>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Requested:</span>
+                    <span className="font-medium text-gray-800">
+                      {new Date(currentBooking.createdAt).toLocaleString()}
+                    </span>
+                  </div>
+                  {currentBooking.priceEstimate && (
+                    <div className="flex justify-between text-sm pt-2 border-t border-gray-200">
+                      <span className="text-gray-600">Estimated Fare:</span>
+                      <span className="text-xl font-bold text-[#0F3D3E]">
+                        £{currentBooking.priceEstimate.amount?.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <div className="mt-2">
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
                   <button
-                    className="text-xs underline"
-                    onClick={() => setActiveBookingId(b.id)}
+                    onClick={() => take(currentBooking.id)}
+                    className="flex-1 bg-[#00796B] text-white py-4 rounded-lg font-semibold hover:bg-[#00695C] transition-colors"
                   >
-                    Open Chat
+                    Take Ride
+                  </button>
+                  <button
+                    onClick={() => arrive(currentBooking.id)}
+                    className="px-6 py-4 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+                  >
+                    Arrived
                   </button>
                 </div>
-              </div>
-            ))
-          )}
-        </div>
-        <div>
-          {activeBookingId ? (
-            (() => {
-              const activeBooking = bookings.find(
-                (b) => b.id === activeBookingId
-              );
-              const isCompleted =
-                activeBooking?.status === "COMPLETED" ||
-                activeBooking?.status === "CANCELED";
 
-              if (isCompleted) {
-                return (
-                  <div className="text-sm text-gray-500 border rounded p-4 h-80 flex items-center justify-center">
-                    <div className="text-center">
-                      <p className="font-semibold">Chat Closed</p>
-                      <p className="mt-2">This ride has been completed</p>
+                {/* Open Chat Link */}
+                <button
+                  onClick={() => setActiveBookingId(currentBooking.id)}
+                  className="w-full mt-3 text-sm text-[#00796B] hover:text-[#0F3D3E] font-medium underline"
+                >
+                  Open Chat
+                </button>
+                  </div>
+                </div>
+
+                {/* Next Ride Preview */}
+                {requestedBookings.length > 1 && currentIndex < requestedBookings.length - 1 && (
+                  <div
+                    onClick={goToNext}
+                    className="bg-white rounded-2xl shadow-md border border-gray-300 w-[100px] flex-shrink-0 overflow-hidden cursor-pointer hover:border-blue-400 hover:shadow-lg transition-all duration-300"
+                  >
+                    <div className="p-3 h-full flex flex-col justify-between">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-[#00796B] rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-white text-xs font-bold">A</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[10px] text-gray-600 truncate">
+                              {requestedBookings[currentIndex + 1].pickupAddress.split(',')[0]}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-[#0F3D3E] rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-white text-xs font-bold">B</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[10px] text-gray-600 truncate">
+                              {requestedBookings[currentIndex + 1].dropoffAddress.split(',')[0]}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      {requestedBookings[currentIndex + 1].priceEstimate && (
+                        <div className="mt-2 pt-2 border-t border-gray-200">
+                          <p className="text-xs font-bold text-[#0F3D3E] text-center">
+                            £{requestedBookings[currentIndex + 1].priceEstimate.amount?.toFixed(2)}
+                          </p>
+                        </div>
+                      )}
+                      <div className="mt-2 flex justify-center">
+                        <svg
+                          className="w-4 h-4 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </div>
                     </div>
                   </div>
-                );
-              }
-
-              return (
-                <ChatWidget
-                  key={activeBookingId}
-                  bookingId={activeBookingId}
-                  sender="DRIVER"
-                />
-              );
-            })()
-          ) : (
-            <div className="text-sm text-gray-500 border rounded p-4">
-              Select a booking to open chat.
+                )}
+              </div>
             </div>
-          )}
-        </div>
+
+            {/* Carousel Navigation */}
+            {requestedBookings.length > 1 && (
+              <div className="mt-6 flex items-center justify-between">
+                <button
+                  onClick={goToPrevious}
+                  disabled={currentIndex === 0}
+                  className="p-3 rounded-full bg-white shadow-md border border-gray-200 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                >
+                  <svg
+                    className="w-6 h-6 text-gray-700"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  {requestedBookings.map((_: any, index: number) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentIndex(index)}
+                      className={`h-2 rounded-full transition-all ${
+                        index === currentIndex
+                          ? "w-8 bg-[#00796B]"
+                          : "w-2 bg-gray-300"
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={goToNext}
+                  disabled={currentIndex === requestedBookings.length - 1}
+                  className="p-3 rounded-full bg-white shadow-md border border-gray-200 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                >
+                  <svg
+                    className="w-6 h-6 text-gray-700"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Chat Modal */}
+        {activeBookingId && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-6 z-50">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-[#0F3D3E]">
+                  Chat with Rider
+                </h3>
+                <button
+                  onClick={() => setActiveBookingId(null)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <svg
+                    className="w-6 h-6 text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                {(() => {
+                  const activeBooking = bookings.find(
+                    (b) => b.id === activeBookingId
+                  );
+                  const isCompleted =
+                    activeBooking?.status === "COMPLETED" ||
+                    activeBooking?.status === "CANCELED";
+
+                  if (isCompleted) {
+                    return (
+                      <div className="h-full flex items-center justify-center p-6">
+                        <div className="text-center">
+                          <p className="font-semibold text-gray-800 mb-2">
+                            Chat Closed
+                          </p>
+                          <p className="text-gray-600">
+                            This ride has been completed
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <ChatWidget
+                      key={activeBookingId}
+                      bookingId={activeBookingId}
+                      sender="DRIVER"
+                    />
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Ride Documentation Modal */}

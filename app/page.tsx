@@ -30,11 +30,18 @@ export default function HomePage() {
               router.push("/dispatcher");
             } else if (role === "ADMIN") {
               router.push("/admin");
+            } else {
+              // No role assigned, redirect to role selection
+              router.push("/role-select");
             }
+          } else {
+            // Failed to fetch role, redirect to role selection
+            router.push("/role-select");
           }
         } catch (error) {
           console.error("Error redirecting user:", error);
-          setIsRedirecting(false);
+          // On error, redirect to role selection
+          router.push("/role-select");
         }
       }
     }

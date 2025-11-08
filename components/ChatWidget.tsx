@@ -188,57 +188,125 @@ export default function ChatWidget({
   );
 
   return (
-    <div className="border rounded-lg flex flex-col h-80">
-      <div className="p-2 border-b font-semibold bg-gray-50 flex items-center justify-between">
-        <span>Chat</span>
-        {!realtimeEnabled && (
-          <span className="text-xs text-gray-500">(polling mode)</span>
-        )}
-      </div>
-      <div className="flex-1 overflow-auto p-2 space-y-1 text-sm">
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-auto p-4 space-y-3">
         {loading ? (
-          <div className="text-center text-gray-500 py-4">
-            Loading messages...
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="inline-block p-3 bg-white rounded-full shadow-sm mb-3">
+                <svg
+                  className="w-6 h-6 text-[#00796B] animate-spin"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+              </div>
+              <p className="text-gray-600 text-sm">Loading messages...</p>
+            </div>
           </div>
         ) : messages.length === 0 ? (
-          <div className="text-center text-gray-500 py-4">
-            No messages yet. Start the conversation!
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="inline-block p-4 bg-white rounded-full shadow-sm mb-3">
+                <svg
+                  className="w-8 h-8 text-[#00796B]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                  />
+                </svg>
+              </div>
+              <p className="text-gray-600 text-sm font-medium">No messages yet</p>
+              <p className="text-gray-500 text-xs mt-1">Start the conversation!</p>
+            </div>
           </div>
         ) : (
           messages.map((m) => (
             <div
               key={m.id}
-              className={
-                m.sender === "RIDER"
-                  ? "text-blue-700"
-                  : m.sender === "DRIVER"
-                  ? "text-green-700"
-                  : "text-gray-800"
-              }
+              className={`flex ${m.sender === sender ? "justify-end" : "justify-start"}`}
             >
-              <span className="font-semibold mr-1">{m.sender}:</span>
-              {m.text}
+              <div
+                className={`max-w-[70%] rounded-2xl px-4 py-2 shadow-sm ${
+                  m.sender === sender
+                    ? "bg-[#00796B] text-white rounded-br-sm"
+                    : "bg-white text-gray-800 rounded-bl-sm"
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`text-xs font-semibold ${
+                    m.sender === sender ? "text-[#E0F2F1]" : "text-[#00796B]"
+                  }`}>
+                    {m.sender === "RIDER" ? "Rider" : m.sender === "DRIVER" ? "Driver" : "Dispatcher"}
+                  </span>
+                  <span className={`text-xs ${
+                    m.sender === sender ? "text-[#E0F2F1]/70" : "text-gray-500"
+                  }`}>
+                    {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+                <p className="text-sm break-words">{m.text}</p>
+              </div>
             </div>
           ))
         )}
         <div ref={endRef} />
       </div>
-      <div className="p-2 flex gap-2 border-t bg-gray-50">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
-          className="border rounded px-2 py-1 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Type a message…"
-          autoComplete="off"
-        />
-        <button
-          onClick={send}
-          disabled={!input.trim()}
-          className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Send
-        </button>
+      <div className="p-4 bg-white border-t border-gray-200">
+        <div className="flex gap-3">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#00796B] focus:ring-2 focus:ring-[#00796B]/20 transition-colors"
+            placeholder="Type a message..."
+            autoComplete="off"
+          />
+          <button
+            onClick={send}
+            disabled={!input.trim()}
+            className="px-6 py-3 bg-[#00796B] text-white rounded-xl hover:bg-[#00695C] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 font-semibold shadow-sm"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+              />
+            </svg>
+            Send
+          </button>
+        </div>
+        {!realtimeEnabled && (
+          <p className="text-xs text-gray-500 mt-2 text-center">
+            Messages update every 3 seconds
+          </p>
+        )}
       </div>
     </div>
   );

@@ -45,16 +45,36 @@ export default function BookingMap({
 
   // Update pickup marker
   useEffect(() => {
-    if (!map.current || !pickup || pickup.lat === 0) return;
+    console.log('Pickup marker effect triggered:', { pickup, hasMap: !!map.current });
+    
+    if (!map.current) {
+      console.log('No map instance yet');
+      return;
+    }
+    
+    if (!pickup) {
+      console.log('No pickup coordinates');
+      return;
+    }
+    
+    if (pickup.lat === 0) {
+      console.log('Pickup lat is 0, skipping');
+      return;
+    }
+
+    console.log('Creating/updating pickup marker at:', pickup);
 
     if (pickupMarker.current) {
+      console.log('Updating existing pickup marker');
       pickupMarker.current.setLngLat([pickup.lng, pickup.lat]);
     } else {
+      console.log('Creating new pickup marker');
       // Create custom marker element for pickup (A)
       const el = document.createElement("div");
       el.style.width = "40px";
       el.style.height = "50px";
       el.style.position = "relative";
+      el.style.zIndex = "1000";
       el.innerHTML = `
         <div style="position: relative; width: 40px; height: 50px;">
           <svg width="40" height="50" viewBox="0 0 40 50" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
@@ -74,6 +94,8 @@ export default function BookingMap({
           new mapboxgl.Popup({ offset: 25 }).setHTML("<strong>Pickup Location</strong>")
         )
         .addTo(map.current);
+      
+      console.log('Pickup marker added to map');
     }
 
     updateMapBounds();

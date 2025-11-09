@@ -683,6 +683,16 @@ function RiderPageContent() {
     );
   }
 
+  // Debug logging for coordinates
+  useEffect(() => {
+    console.log('Rider page coordinates:', { 
+      pickup, 
+      pickupCoords, 
+      dropoff, 
+      dropoffCoords 
+    });
+  }, [pickup, pickupCoords, dropoff, dropoffCoords]);
+
   return (
     <div className="h-full flex flex-col bg-gray-50 relative">
       {/* Map Section - Full height on mobile */}

@@ -4,24 +4,45 @@ import { useUser } from "@clerk/nextjs";
 import { getChannel } from "@/lib/realtime/ably";
 import RoleGate from "@/components/RoleGate";
 import AppLayout from "@/components/AppLayout";
+import Link from "next/link";
 
 function DispatcherPageContent() {
   const { user } = useUser();
   const [bookings, setBookings] = useState<any[]>([]);
+  const [drivers, setDrivers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateBooking, setShowCreateBooking] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  
+  // Create booking form state
+  const [createForm, setCreateForm] = useState({
+    riderIdentifier: "",
+    pickupAddress: "",
+    dropoffAddress: "",
+    wheelchairRequired: false,
+    scheduledFor: "",
+    notes: "",
+  });
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     fetchBookings();
+    fetchDrivers();
 
     // Subscribe to real-time dispatcher channel
     const channel = getChannel("dispatch");
     const handler = () => {
       fetchBookings();
+      fetchDrivers();
     };
     (channel as any)?.subscribe?.(handler);
 
     // Fallback polling
-    const timer = setInterval(fetchBookings, 10000);
+    const timer = setInterval(() => {
+      fetchBookings();
+      fetchDrivers();
+    }, 10000);
 
     return () => {
       (channel as any)?.unsubscribe?.(handler);
@@ -41,6 +62,18 @@ function DispatcherPageContent() {
     }
   }
 
+  async function fetchDrivers() {
+    try {
+      const res = await fetch("/api/dispatcher/drivers");
+      if (res.ok) {
+        const data = await res.json();
+        setDrivers(Array.isArray(data.drivers) ? data.drivers : []);
+      }
+    } catch (e) {
+      console.error("Failed to fetch drivers:", e);
+    }
+  }
+
   async function assignDriver(bookingId: string, driverId: string) {
     const res = await fetch(`/api/bookings/${bookingId}/status`, {
       method: "POST",
@@ -50,6 +83,44 @@ function DispatcherPageContent() {
     if (res.ok) fetchBookings();
   }
 
+  async function handleCreateBooking() {
+    if (!createForm.riderIdentifier || !createForm.pickupAddress || !createForm.dropoffAddress) {
+      alert("Please fill in rider identifier, pickup, and dropoff addresses");
+      return;
+    }
+
+    setCreating(true);
+    try {
+      const res = await fetch("/api/dispatcher/bookings/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(createForm),
+      });
+
+      if (res.ok) {
+        alert("Booking created successfully!");
+        setShowCreateBooking(false);
+        setCreateForm({
+          riderIdentifier: "",
+          pickupAddress: "",
+          dropoffAddress: "",
+          wheelchairRequired: false,
+          scheduledFor: "",
+          notes: "",
+        });
+        fetchBookings();
+      } else {
+        const data = await res.json();
+        alert(`Failed to create booking: ${data.error}`);
+      }
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      alert("Failed to create booking");
+    } finally {
+      setCreating(false);
+    }
+  }
+
   const requested = bookings.filter((b) => b.status === "REQUESTED");
   const active = bookings.filter(
     (b) => b.status !== "COMPLETED" && b.status !== "CANCELED" && b.driverId
@@ -57,13 +128,35 @@ function DispatcherPageContent() {
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-[#263238] mb-2">
-          Dispatcher Console
-        </h1>
-        <p className="text-neutral-600">
-          Assign rides and monitor operations in real-time
-        </p>
+      <div className="mb-8 flex justify-between items-center">
+        <div>
+          <h1 className="text-4xl font-bold text-[#263238] mb-2">
+            Dispatcher Console
+          </h1>
+          <p className="text-neutral-600">
+            Assign rides and monitor operations in real-time
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <Link
+            href="/dispatcher/map"
+            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Live Map
+          </Link>
+          <Link
+            href="/dispatcher/reports"
+            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Reports
+          </Link>
+          <button
+            onClick={() => setShowCreateBooking(true)}
+            className="px-4 py-2 bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors font-medium"
+          >
+            + Create Booking
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -131,7 +224,10 @@ function DispatcherPageContent() {
                       </span>
                     </div>
                     <button
-                      onClick={() => assignDriver(booking.id, user?.id || "")}
+                      onClick={() => {
+                        setSelectedBooking(booking);
+                        setShowAssignModal(true);
+                      }}
                       className="w-full px-4 py-2 bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors font-medium"
                     >
                       Assign to Driver
@@ -174,7 +270,7 @@ function DispatcherPageContent() {
                 active.map((booking) => (
                   <div
                     key={booking.id}
-                    className="border border-gray-200 rounded-lg p-4 bg-gradient-to-r from-green-50/50 to-transparent"
+                    className="border border-gray-200 rounded-lg p-4 bg-green-50/50"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
@@ -268,6 +364,212 @@ function DispatcherPageContent() {
           </div>
         )}
       </div>
+
+      {/* Create Booking Modal */}
+      {showCreateBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-[#263238]">Create Booking</h2>
+              <button
+                onClick={() => setShowCreateBooking(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Rider Email or Phone
+                </label>
+                <input
+                  type="text"
+                  value={createForm.riderIdentifier}
+                  onChange={(e) => setCreateForm({ ...createForm, riderIdentifier: e.target.value })}
+                  placeholder="rider@example.com or +1234567890"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Pickup Address
+                </label>
+                <input
+                  type="text"
+                  value={createForm.pickupAddress}
+                  onChange={(e) => setCreateForm({ ...createForm, pickupAddress: e.target.value })}
+                  placeholder="Enter pickup location"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Dropoff Address
+                </label>
+                <input
+                  type="text"
+                  value={createForm.dropoffAddress}
+                  onChange={(e) => setCreateForm({ ...createForm, dropoffAddress: e.target.value })}
+                  placeholder="Enter dropoff location"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="flex items-center space-x-2">
+                    <input 
+                      type="checkbox" 
+                      checked={createForm.wheelchairRequired}
+                      onChange={(e) => setCreateForm({ ...createForm, wheelchairRequired: e.target.checked })}
+                      className="rounded text-[#00796B]" 
+                    />
+                    <span className="text-sm text-gray-700">Wheelchair Required</span>
+                  </label>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Scheduled Time (Optional)
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={createForm.scheduledFor}
+                    onChange={(e) => setCreateForm({ ...createForm, scheduledFor: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Notes (Optional)
+                </label>
+                <textarea
+                  rows={3}
+                  value={createForm.notes}
+                  onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })}
+                  placeholder="Add any special instructions..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                />
+              </div>
+            </div>
+            <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+              <button
+                onClick={() => setShowCreateBooking(false)}
+                disabled={creating}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateBooking}
+                disabled={creating}
+                className="px-6 py-2 bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {creating ? "Creating..." : "Create Booking"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Driver Assignment Modal */}
+      {showAssignModal && selectedBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-[#263238]">Assign Driver</h2>
+              <button
+                onClick={() => {
+                  setShowAssignModal(false);
+                  setSelectedBooking(null);
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                <div className="text-sm text-gray-600 mb-2">Booking Details</div>
+                <div className="text-sm">
+                  <div className="font-medium text-[#263238]">
+                    Pickup: {selectedBooking.pickupAddress}
+                  </div>
+                  <div className="text-gray-600">
+                    Dropoff: {selectedBooking.dropoffAddress}
+                  </div>
+                  {selectedBooking.requiresWheelchair && (
+                    <div className="mt-2 text-amber-700">
+                      ♿ Wheelchair Required
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Available Drivers ({drivers.filter(d => d.isOnline).length} online)
+                </label>
+                <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                  {drivers
+                    .filter(d => d.isOnline && (!selectedBooking.requiresWheelchair || d.wheelchairCapable))
+                    .map((driver) => (
+                      <button
+                        key={driver.id}
+                        onClick={() => {
+                          assignDriver(selectedBooking.id, driver.id);
+                          setShowAssignModal(false);
+                          setSelectedBooking(null);
+                        }}
+                        className="w-full p-4 border border-gray-200 rounded-lg hover:border-[#00796B] hover:bg-[#00796B]/5 transition-all text-left"
+                      >
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <div className="font-medium text-[#263238]">
+                              {driver.user.name || "Driver"}
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              {driver.vehicleMake} {driver.vehicleModel}
+                            </div>
+                            {driver.wheelchairCapable && (
+                              <span className="text-xs text-amber-600">♿ Wheelchair Accessible</span>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-medium text-green-600">Online</div>
+                            <div className="text-xs text-gray-500">
+                              Rating: {driver.rating?.toFixed(1) || "N/A"}
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  {drivers.filter(d => d.isOnline && (!selectedBooking.requiresWheelchair || d.wheelchairCapable)).length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      No available drivers matching requirements
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="p-6 border-t border-gray-200 flex justify-end">
+              <button
+                onClick={() => {
+                  setShowAssignModal(false);
+                  setSelectedBooking(null);
+                }}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

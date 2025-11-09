@@ -123,6 +123,7 @@ function RiderPageContent() {
     null
   );
   const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
+  const [findingAnotherDriver, setFindingAnotherDriver] = useState(false);
 
   // Track unread messages for the active chat
   const { markAsRead } = useUnreadMessages(activeBookingId || "", "RIDER");
@@ -184,6 +185,30 @@ function RiderPageContent() {
       const res = await fetch("/api/bookings");
       const data = await res.json();
       const myBookings = data.filter((b: any) => b.riderId === user?.id);
+      
+      // Check if any booking went from ASSIGNED/EN_ROUTE/ARRIVED back to REQUESTED (driver cancelled)
+      const previousBookings = bookings;
+      myBookings.forEach((newBooking: any) => {
+        const oldBooking = previousBookings.find((b: any) => b.id === newBooking.id);
+        if (
+          oldBooking &&
+          (oldBooking.status === "ASSIGNED" || 
+           oldBooking.status === "EN_ROUTE" || 
+           oldBooking.status === "ARRIVED") &&
+          newBooking.status === "REQUESTED" &&
+          !newBooking.driverId
+        ) {
+          // Driver cancelled! Show the "finding another driver" screen
+          console.log("Driver cancelled ride:", newBooking.id);
+          setFindingAnotherDriver(true);
+          
+          // After 5 seconds, hide the screen and return to normal "finding driver" view
+          setTimeout(() => {
+            setFindingAnotherDriver(false);
+          }, 5000);
+        }
+      });
+      
       setBookings(myBookings);
 
       // Auto-select most recent active booking
@@ -198,7 +223,7 @@ function RiderPageContent() {
     } finally {
       fetchingRef.current = false;
     }
-  }, [user?.id, selectedBookingId]);
+  }, [user?.id, selectedBookingId, bookings]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -397,6 +422,101 @@ function RiderPageContent() {
       b.status === "EN_ROUTE" ||
       b.status === "ARRIVED"
   );
+
+  // Show "Finding Another Driver" screen when driver cancels
+  if (findingAnotherDriver && pendingBooking) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="bg-white rounded-2xl p-5 shadow-lg border-2 border-orange-500">
+            {/* Header */}
+            <div className="text-center mb-4">
+              <div className="inline-block p-2 bg-orange-100 rounded-full mb-3">
+                <svg
+                  className="w-8 h-8 text-orange-600 animate-spin"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-xl font-bold text-[#0F3D3E] mb-1">
+                Finding Another Driver
+              </h2>
+              <p className="text-sm text-gray-600">
+                Your previous driver cancelled. We're matching you with another nearby driver...
+              </p>
+            </div>
+
+            {/* Booking Details - Minimal */}
+            <div className="bg-orange-50 rounded-xl p-4 mb-4 space-y-2">
+              <div className="flex items-start gap-2">
+                <div className="w-6 h-6 bg-[#00796B] rounded-full flex items-center justify-center shrink-0">
+                  <span className="text-white font-bold text-xs">A</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-600 font-medium">Pickup</p>
+                  <p className="text-sm font-semibold text-[#0F3D3E] truncate">
+                    {pendingBooking.pickupAddress.split(",")[0]}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2">
+                <div className="w-6 h-6 bg-[#0F3D3E] rounded-full flex items-center justify-center shrink-0">
+                  <span className="text-white font-bold text-xs">B</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-600 font-medium">Dropoff</p>
+                  <p className="text-sm font-semibold text-[#0F3D3E] truncate">
+                    {pendingBooking.dropoffAddress.split(",")[0]}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Loading Animation */}
+            <div className="flex justify-center mb-4">
+              <div className="flex space-x-2">
+                <div
+                  className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
+                  style={{ animationDelay: "0ms" }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
+                  style={{ animationDelay: "150ms" }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
+                  style={{ animationDelay: "300ms" }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Cancel Button */}
+            <button
+              onClick={() => handleCancelBooking(pendingBooking.id)}
+              className="w-full px-4 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors font-semibold text-sm"
+            >
+              Cancel Ride
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Show loading screen for pending booking
   if (pendingBooking) {

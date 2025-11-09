@@ -73,15 +73,21 @@ function DriverPageContent() {
     setOnline(next);
   }
 
-  // Track driver's real location
+  // Track driver's real location when online OR when they have an active ride
   useEffect(() => {
     let timer: any;
     let watchId: number;
 
-    if (online && user?.id) {
+    // Track location if driver is online OR has an active ride
+    const shouldTrackLocation = online || (assigned && user?.id);
+    
+    if (shouldTrackLocation && user?.id) {
+      console.log("Starting location tracking:", { online, hasActiveRide: !!assigned });
+      
       // Function to update location
       const updateLocation = (position: GeolocationPosition) => {
         const { latitude, longitude } = position.coords;
+        console.log("Updating driver location:", { latitude, longitude });
         fetch("/api/drivers/update-location", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -133,13 +139,15 @@ function DriverPageContent() {
           });
         }, 8000);
       }
+    } else {
+      console.log("Location tracking stopped");
     }
 
     return () => {
       if (timer) clearInterval(timer);
       if (watchId) navigator.geolocation.clearWatch(watchId);
     };
-  }, [online, user?.id]);
+  }, [online, user?.id, assigned]);
 
   // Memoized fetch function to prevent re-creating on every render
   const fetchBookings = useCallback(async () => {

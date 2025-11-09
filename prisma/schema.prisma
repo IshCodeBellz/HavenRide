@@ -150,6 +150,7 @@ model Booking {
 
   pinCode            Int
   pickupVerified     Boolean       @default(false)
+  riderConfirmed     Boolean       @default(false)  // Rider confirmed pickup location
   
   // Ride documentation (filled by driver at completion)
   rideQuality        String?       // "excellent" | "good" | "fair" | "poor"

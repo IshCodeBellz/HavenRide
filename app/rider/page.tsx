@@ -669,8 +669,34 @@ function RiderPageContent() {
         booking={activeBooking}
         userRole="RIDER"
         onConfirm={async () => {
-          // Handle ride confirmation
-          alert("Ride confirmed! Driver is on the way.");
+          // Show confirmation dialog with pickup location
+          const confirmed = confirm(
+            `Please confirm your pickup location:\n\n📍 ${activeBooking.pickupAddress}\n\nIs this correct?`
+          );
+          
+          if (confirmed) {
+            try {
+              // Update booking to indicate rider confirmed pickup location
+              const response = await fetch(`/api/bookings/${activeBooking.id}/status`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                  status: activeBooking.status, // Keep current status
+                  riderConfirmed: true // Add confirmation flag
+                }),
+              });
+
+              if (response.ok) {
+                alert("✓ Pickup location confirmed! Your driver is on the way.");
+                fetchBookings(); // Refresh to get updated booking
+              } else {
+                alert("Failed to confirm pickup location. Please try again.");
+              }
+            } catch (error) {
+              console.error("Error confirming pickup:", error);
+              alert("Failed to confirm pickup location. Please try again.");
+            }
+          }
         }}
         onCancel={async () => {
           await handleCancelBooking(activeBooking.id);

@@ -277,38 +277,38 @@ function DriverPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-3 sm:p-6">
       <div className="max-w-5xl w-full">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-[#0F3D3E]">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#0F3D3E]">
               Driver Console
             </h1>
-            <p className="text-base text-gray-600 mt-1">
+            <p className="text-sm sm:text-base text-gray-600 mt-1">
               {requestedBookings.length} ride
               {requestedBookings.length !== 1 ? "s" : ""} available
             </p>
           </div>
-          <label className="flex items-center gap-3 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200">
-            <span className="text-sm font-medium text-gray-700">
+          <label className="flex items-center gap-2 sm:gap-3 bg-white px-3 sm:px-4 py-2 rounded-lg shadow-sm border border-gray-200 self-start">
+            <span className="text-xs sm:text-sm font-medium text-gray-700">
               {online ? "Online" : "Offline"}
             </span>
             <input
               type="checkbox"
               checked={online}
               onChange={(e) => toggleOnline(e.target.checked)}
-              className="w-12 h-6 appearance-none bg-gray-300 rounded-full relative cursor-pointer transition-colors checked:bg-[#00796B] before:content-[''] before:absolute before:w-5 before:h-5 before:rounded-full before:bg-white before:top-0.5 before:left-0.5 before:transition-transform checked:before:translate-x-6"
+              className="w-10 h-5 sm:w-12 sm:h-6 appearance-none bg-gray-300 rounded-full relative cursor-pointer transition-colors checked:bg-[#00796B] before:content-[''] before:absolute before:w-4 before:h-4 sm:before:w-5 sm:before:h-5 before:rounded-full before:bg-white before:top-0.5 before:left-0.5 before:transition-transform checked:before:translate-x-5 sm:checked:before:translate-x-6"
             />
           </label>
         </div>
 
         {/* Main Card */}
         {initialLoadRef.current ? (
-          <div className="bg-white rounded-2xl p-12 shadow-lg text-center">
-            <div className="inline-block p-4 bg-gray-100 rounded-full mb-4">
+          <div className="bg-white rounded-xl sm:rounded-2xl p-8 sm:p-12 shadow-lg text-center">
+            <div className="inline-block p-3 sm:p-4 bg-gray-100 rounded-full mb-4">
               <svg
-                className="w-12 h-12 text-gray-400 animate-spin"
+                className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 animate-spin"
                 fill="none"
                 viewBox="0 0 24 24"
               >
@@ -327,13 +327,13 @@ function DriverPageContent() {
                 />
               </svg>
             </div>
-            <p className="text-gray-600">Loading bookings...</p>
+            <p className="text-sm sm:text-base text-gray-600">Loading bookings...</p>
           </div>
         ) : requestedBookings.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 shadow-lg text-center">
-            <div className="inline-block p-4 bg-[#E0F2F1] rounded-full mb-4">
+          <div className="bg-white rounded-xl sm:rounded-2xl p-8 sm:p-12 shadow-lg text-center">
+            <div className="inline-block p-3 sm:p-4 bg-[#E0F2F1] rounded-full mb-4">
               <svg
-                className="w-12 h-12 text-[#00796B]"
+                className="w-10 h-10 sm:w-12 sm:h-12 text-[#00796B]"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -346,7 +346,7 @@ function DriverPageContent() {
                 />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-[#0F3D3E] mb-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#0F3D3E] mb-2">
               No Available Jobs
             </h2>
             <p className="text-gray-600 mb-4">

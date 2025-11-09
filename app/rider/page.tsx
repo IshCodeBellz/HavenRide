@@ -71,11 +71,11 @@ function ActiveBookingCard({
       )}
 
       {/* Action Buttons */}
-      <div className="mt-4 flex gap-3">
+      <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:gap-3">
         {booking.status !== "IN_PROGRESS" && (
           <button
             onClick={() => onCancelBooking(booking.id)}
-            className="flex-1 px-4 py-3 bg-red-50 text-red-600 border-2 border-red-200 rounded-xl hover:bg-red-100 transition-colors font-semibold"
+            className="w-full sm:flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-red-50 text-red-600 border-2 border-red-200 rounded-lg sm:rounded-xl hover:bg-red-100 transition-colors font-semibold"
           >
             Cancel Ride
           </button>
@@ -85,11 +85,11 @@ function ActiveBookingCard({
             markAsRead();
             onOpenChat(booking.id);
           }}
-          className="flex-1 px-4 py-3 bg-[#00796B] text-white rounded-xl hover:bg-[#00695C] transition-colors font-semibold relative"
+          className="w-full sm:flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-[#00796B] text-white rounded-lg sm:rounded-xl hover:bg-[#00695C] transition-colors font-semibold relative"
         >
           Open Chat
           {unreadCount > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center animate-pulse">
+            <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center animate-pulse">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
@@ -549,7 +549,7 @@ function RiderPageContent() {
   return (
     <div className="h-full flex flex-col bg-gray-50">
       {/* Map Section - Fixed at top */}
-      <div className="relative h-[40vh] bg-gray-200">
+      <div className="relative h-[35vh] sm:h-[40vh] bg-gray-200">
         {(pickupCoords || dropoffCoords) && (
           <BookingMap
             pickup={pickupCoords}
@@ -561,7 +561,7 @@ function RiderPageContent() {
           <div className="w-full h-full flex items-center justify-center bg-gray-100">
             <div className="text-center text-gray-500">
               <svg
-                className="w-16 h-16 mx-auto mb-2 text-gray-400"
+                className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 text-gray-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -573,15 +573,15 @@ function RiderPageContent() {
                   d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
                 />
               </svg>
-              <p className="text-sm font-medium">Map will appear here</p>
+              <p className="text-xs sm:text-sm font-medium">Map will appear here</p>
             </div>
           </div>
         )}
 
         {/* Menu Button - Top Left */}
-        <button className="absolute top-4 left-4 bg-white rounded-full p-3 shadow-lg">
+        <button className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-white rounded-full p-2 sm:p-3 shadow-lg">
           <svg
-            className="w-6 h-6 text-gray-700"
+            className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

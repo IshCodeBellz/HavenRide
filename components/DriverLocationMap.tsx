@@ -270,12 +270,17 @@ export default function DriverLocationMap({
           }
         }
 
-        map.current.fitBounds(bounds, {
-          padding,
-          maxZoom,
-          duration: 1000, // Smooth animation
-        });
-      } else if (pickupLat && pickupLng) {
+        // Verify bounds is valid before fitting
+        const ne = bounds.getNorthEast();
+        const sw = bounds.getSouthWest();
+        if (!isNaN(ne.lng) && !isNaN(ne.lat) && !isNaN(sw.lng) && !isNaN(sw.lat)) {
+          map.current.fitBounds(bounds, {
+            padding,
+            maxZoom,
+            duration: 1000, // Smooth animation
+          });
+        }
+      } else if (pickupLat && pickupLng && !isNaN(pickupLat) && !isNaN(pickupLng)) {
         // If only one point, center on it
         map.current.setCenter([pickupLng, pickupLat]);
         map.current.setZoom(14);

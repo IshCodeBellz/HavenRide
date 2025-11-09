@@ -103,6 +103,7 @@ function RiderPageContent() {
   const { user } = useUser();
   const router = useRouter();
   const fetchingRef = useRef(false);
+  const previousBookingsRef = useRef<any[]>([]);
   const [pickup, setPickup] = useState("");
   const [pickupCoords, setPickupCoords] = useState<{
     lat: number;
@@ -187,9 +188,18 @@ function RiderPageContent() {
       const myBookings = data.filter((b: any) => b.riderId === user?.id);
       
       // Check if any booking went from ASSIGNED/EN_ROUTE/ARRIVED back to REQUESTED (driver cancelled)
-      const previousBookings = bookings;
+      const previousBookings = previousBookingsRef.current;
       myBookings.forEach((newBooking: any) => {
         const oldBooking = previousBookings.find((b: any) => b.id === newBooking.id);
+        
+        console.log("Checking booking:", {
+          bookingId: newBooking.id,
+          oldStatus: oldBooking?.status,
+          newStatus: newBooking.status,
+          oldDriverId: oldBooking?.driverId,
+          newDriverId: newBooking.driverId
+        });
+        
         if (
           oldBooking &&
           (oldBooking.status === "ASSIGNED" || 
@@ -199,16 +209,19 @@ function RiderPageContent() {
           !newBooking.driverId
         ) {
           // Driver cancelled! Show the "finding another driver" screen
-          console.log("Driver cancelled ride:", newBooking.id);
+          console.log("🚨 Driver cancelled ride:", newBooking.id);
           setFindingAnotherDriver(true);
           
           // After 5 seconds, hide the screen and return to normal "finding driver" view
           setTimeout(() => {
+            console.log("Hiding finding another driver screen");
             setFindingAnotherDriver(false);
           }, 5000);
         }
       });
       
+      // Update the ref for next comparison
+      previousBookingsRef.current = myBookings;
       setBookings(myBookings);
 
       // Auto-select most recent active booking
@@ -223,7 +236,7 @@ function RiderPageContent() {
     } finally {
       fetchingRef.current = false;
     }
-  }, [user?.id, selectedBookingId, bookings]);
+  }, [user?.id, selectedBookingId]);
 
   useEffect(() => {
     if (!user?.id) return;

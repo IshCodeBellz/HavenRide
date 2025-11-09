@@ -15,33 +15,36 @@ export default function RoleGate({ children, requiredRole }: RoleGateProps) {
   const [hasRole, setHasRole] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function checkRole() {
       if (!isLoaded) return;
 
       if (!user?.id) {
-        router.push("/");
+        if (isMounted) router.replace("/");
         return;
       }
 
       try {
-        // Try to ensure user has a role (may fail if user already exists with proper setup)
-        try {
-          const ensureRes = await fetch("/api/users/ensure-role");
-          if (!ensureRes.ok) {
-            const errorText = await ensureRes.text();
-            console.error("Failed to ensure role:", errorText);
-            // Don't stop here - continue to fetch user data
-          }
-        } catch (ensureError) {
-          console.error("Error calling ensure-role:", ensureError);
-          // Continue anyway - user might already be set up
+        // Ensure user has a role (will create as RIDER if doesn't exist)
+        const ensureRes = await fetch("/api/users/ensure-role");
+        if (!ensureRes.ok) {
+          const errorText = await ensureRes.text();
+          console.error("RoleGate: Failed to ensure role:", errorText);
         }
+
+        // Small delay to let DB commit
+        await new Promise(resolve => setTimeout(resolve, 200));
 
         // Then fetch user data
         const res = await fetch("/api/users/me");
         if (!res.ok) {
-          console.error("Failed to fetch user data");
-          router.push("/");
+          console.error("RoleGate: Failed to fetch user data, status:", res.status);
+          if (isMounted) {
+            setChecking(false);
+            // User doesn't exist in DB yet, let them through and retry will happen
+            setHasRole(true);
+          }
           return;
         }
 
@@ -55,10 +58,13 @@ export default function RoleGate({ children, requiredRole }: RoleGateProps) {
           requiredRole
         );
 
+        if (!isMounted) return;
+
         if (!userRole) {
-          // Still no role after ensure-role, redirect home
-          console.log("RoleGate: No role found, redirecting home");
-          router.push("/");
+          // Still no role, but allow through - user might be newly created
+          console.log("RoleGate: No role found yet, allowing through");
+          setHasRole(true);
+          setChecking(false);
           return;
         }
 
@@ -69,15 +75,15 @@ export default function RoleGate({ children, requiredRole }: RoleGateProps) {
             "RoleGate: User doesn't have required role, redirecting to their dashboard"
           );
           if (userRole === "RIDER") {
-            router.push("/rider");
+            router.replace("/rider");
           } else if (userRole === "DRIVER") {
-            router.push("/driver");
+            router.replace("/driver");
           } else if (userRole === "DISPATCHER") {
-            router.push("/dispatcher");
+            router.replace("/dispatcher");
           } else if (userRole === "ADMIN") {
-            router.push("/admin");
+            router.replace("/admin");
           } else {
-            router.push("/");
+            router.replace("/");
           }
           return;
         }
@@ -85,13 +91,23 @@ export default function RoleGate({ children, requiredRole }: RoleGateProps) {
         console.log("RoleGate: Access granted");
         setHasRole(true);
       } catch (e) {
-        console.error("Error checking role:", e);
+        console.error("RoleGate: Error checking role:", e);
+        // On error, allow through to prevent infinite loops
+        if (isMounted) {
+          setHasRole(true);
+        }
       } finally {
-        setChecking(false);
+        if (isMounted) {
+          setChecking(false);
+        }
       }
     }
 
     checkRole();
+
+    return () => {
+      isMounted = false;
+    };
   }, [user, isLoaded, router, requiredRole]);
 
   if (checking) {

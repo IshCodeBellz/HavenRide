@@ -202,8 +202,18 @@ export default function DriverLocationMap({
     const isValidCoord = (val: any): val is number => 
       typeof val === 'number' && !isNaN(val) && isFinite(val);
     
+    // Debug logging
+    console.log('Map update - Coordinates:', { 
+      pickupLat, pickupLng, dropoffLat, dropoffLng, 
+      currentDriverLocation 
+    });
+    
     if (!isValidCoord(pickupLat) || !isValidCoord(pickupLng)) {
-      console.log('Invalid pickup coordinates, skipping map bounds update');
+      console.log('Invalid pickup coordinates, skipping map bounds update', {
+        pickupLat, pickupLng,
+        pickupLatType: typeof pickupLat,
+        pickupLngType: typeof pickupLng
+      });
       return;
     }
     
@@ -280,15 +290,28 @@ export default function DriverLocationMap({
       }
 
       // Verify bounds is valid before fitting
-      const ne = bounds.getNorthEast();
-      const sw = bounds.getSouthWest();
-      if (isValidCoord(ne.lng) && isValidCoord(ne.lat) && 
-          isValidCoord(sw.lng) && isValidCoord(sw.lat)) {
-        map.current.fitBounds(bounds, {
-          padding,
-          maxZoom,
-          duration: 1000, // Smooth animation
-        });
+      try {
+        const ne = bounds.getNorthEast();
+        const sw = bounds.getSouthWest();
+        
+        // Check if bounds has valid coordinates
+        if (isValidCoord(ne.lng) && isValidCoord(ne.lat) && 
+            isValidCoord(sw.lng) && isValidCoord(sw.lat)) {
+          map.current!.fitBounds(bounds, {
+            padding,
+            maxZoom,
+            duration: 1000, // Smooth animation
+          });
+        } else {
+          console.log('Bounds coordinates invalid, skipping fitBounds');
+        }
+      } catch (error) {
+        console.log('Error fitting bounds:', error);
+        // Fallback to centering on pickup
+        if (map.current) {
+          map.current.setCenter([pickupLng, pickupLat]);
+          map.current.setZoom(14);
+        }
       }
     } else {
       // If only one point (just pickup), center on it

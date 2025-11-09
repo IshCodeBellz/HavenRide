@@ -11,6 +11,7 @@ function ReportsPageContent() {
     from: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
     to: new Date().toISOString().split("T")[0],
   });
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     fetchBookings();
@@ -45,6 +46,90 @@ function ReportsPageContent() {
   const completed = bookings.filter((b) => b.status === "COMPLETED");
   const canceled = bookings.filter((b) => b.status === "CANCELED");
   const totalRevenue = completed.reduce((sum, b) => sum + (b.finalFareAmount || 0), 0);
+
+  // Filter bookings by date range
+  const filteredBookings = bookings.filter((b) => {
+    const bookingDate = new Date(b.pickupTime).toISOString().split("T")[0];
+    return bookingDate >= dateRange.from && bookingDate <= dateRange.to;
+  });
+
+  // CSV export functions
+  const exportBookingsCSV = () => {
+    setExporting(true);
+    try {
+      const headers = ["ID", "Pickup Address", "Dropoff Address", "Status", "Fare", "Wheelchair", "Date"];
+      const rows = filteredBookings.map((booking) => [
+        booking.id,
+        booking.pickupAddress.replace(/,/g, " "),
+        booking.dropoffAddress.replace(/,/g, " "),
+        booking.status,
+        booking.finalFareAmount?.toFixed(2) || "N/A",
+        booking.requiresWheelchair ? "Yes" : "No",
+        new Date(booking.pickupTime).toLocaleString(),
+      ]);
+
+      const csvContent = [
+        headers.join(","),
+        ...rows.map((row) => row.join(",")),
+      ].join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `bookings_${dateRange.from}_to_${dateRange.to}.csv`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error exporting CSV:", error);
+      alert("Failed to export CSV");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const exportDriverPerformanceCSV = () => {
+    setExporting(true);
+    try {
+      const headers = ["Driver Name", "Vehicle", "Plate", "Total Rides", "Completed Rides", "Rating", "Status"];
+      const rows = drivers.map((driver) => {
+        const driverBookings = bookings.filter((b) => b.driverId === driver.id);
+        const completedRides = driverBookings.filter((b) => b.status === "COMPLETED").length;
+        
+        return [
+          driver.user.name || "N/A",
+          `${driver.vehicleMake || ""} ${driver.vehicleModel || ""}`.trim() || "N/A",
+          driver.vehiclePlate || "N/A",
+          driverBookings.length,
+          completedRides,
+          driver.rating?.toFixed(1) || "N/A",
+          driver.isOnline ? "Online" : "Offline",
+        ];
+      });
+
+      const csvContent = [
+        headers.join(","),
+        ...rows.map((row) => row.join(",")),
+      ].join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `driver_performance_${dateRange.from}_to_${dateRange.to}.csv`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error exporting CSV:", error);
+      alert("Failed to export CSV");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -102,11 +187,48 @@ function ReportsPageContent() {
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
               />
             </div>
-            <button className="px-6 py-2 bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors">
+            <button 
+              className="px-6 py-2 bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors"
+              onClick={() => {
+                fetchBookings();
+                fetchDrivers();
+              }}
+            >
               Apply Filter
             </button>
-            <button className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-              Export CSV
+            <div className="relative">
+              <button 
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                onClick={exportBookingsCSV}
+                disabled={exporting}
+              >
+                {exporting ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                    </svg>
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Export Bookings
+                  </>
+                )}
+              </button>
+            </div>
+            <button 
+              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+              onClick={exportDriverPerformanceCSV}
+              disabled={exporting}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Export Drivers
             </button>
           </div>
         </div>
@@ -197,7 +319,7 @@ function ReportsPageContent() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {bookings.slice(0, 10).map((booking) => (
+                {filteredBookings.slice(0, 20).map((booking) => (
                   <tr key={booking.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm font-mono text-gray-600">
                       {booking.id.slice(0, 8)}...
@@ -226,10 +348,10 @@ function ReportsPageContent() {
                     </td>
                   </tr>
                 ))}
-                {bookings.length === 0 && (
+                {filteredBookings.length === 0 && (
                   <tr>
                     <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
-                      No bookings found
+                      No bookings found in selected date range
                     </td>
                   </tr>
                 )}

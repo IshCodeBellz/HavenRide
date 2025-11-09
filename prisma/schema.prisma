@@ -67,6 +67,8 @@ model User {
   supportTickets      SupportTicket[]
   createdNotifications SystemNotification[]
   complianceLogs      ComplianceLog[]
+  reportedIncidents   Incident[]          @relation("IncidentReporter")
+  assignedIncidents   Incident[]          @relation("IncidentAssignee")
 }
 
 model Rider {
@@ -160,6 +162,7 @@ model Booking {
   updatedAt          DateTime      @updatedAt
 
   messages           Message[]
+  incidents          Incident[]
 }
 
 model Message {
@@ -304,5 +307,60 @@ model ComplianceLog {
   
   @@index([adminId])
   @@index([targetType])
+  @@index([createdAt])
+}
+
+enum IncidentType {
+  SOS
+  ACCIDENT
+  MECHANICAL
+  BEHAVIOR
+  DELAY
+  OTHER
+}
+
+enum IncidentPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum IncidentStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  ESCALATED
+  CLOSED
+}
+
+model Incident {
+  id          String            @id @default(cuid())
+  booking     Booking?          @relation(fields: [bookingId], references: [id])
+  bookingId   String?
+  
+  type        IncidentType
+  priority    IncidentPriority  @default(MEDIUM)
+  status      IncidentStatus    @default(OPEN)
+  
+  title       String
+  description String
+  location    String?
+  
+  reportedBy  User              @relation("IncidentReporter", fields: [reporterId], references: [id])
+  reporterId  String
+  
+  assignedTo  User?             @relation("IncidentAssignee", fields: [assigneeId], references: [id])
+  assigneeId  String?
+  
+  resolution  String?
+  resolvedAt  DateTime?
+  
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  
+  @@index([bookingId])
+  @@index([status])
+  @@index([priority])
   @@index([createdAt])
 }

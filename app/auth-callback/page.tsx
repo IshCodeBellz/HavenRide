@@ -24,7 +24,7 @@ export default function AuthCallbackPage() {
 
       try {
         // Small delay to ensure Clerk session is fully established
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         // Ensure user has a role (auto-assigns RIDER if none)
         const ensureRes = await fetch("/api/users/ensure-role");
@@ -38,7 +38,7 @@ export default function AuthCallbackPage() {
         console.log("Role ensured:", ensureData);
 
         // Wait a bit for DB to commit
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise((resolve) => setTimeout(resolve, 300));
 
         // Fetch user data to get role
         const res = await fetch("/api/users/me");

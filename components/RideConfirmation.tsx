@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import ChatWidget from "./ChatWidget";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 
 // Dynamically import map component to avoid SSR issues
 const DynamicMap = dynamic(() => import("./DriverLocationMap"), {
@@ -66,6 +67,7 @@ export default function RideConfirmation({
     booking.estimatedDuration || 8
   );
   const [showChat, setShowChat] = useState(false);
+  const { unreadCount, markAsRead } = useUnreadMessages(booking.id, userRole);
 
   // Calculate distance between two coordinates (Haversine formula)
   const calculateDistance = (
@@ -220,16 +222,26 @@ export default function RideConfirmation({
               <button
                 onClick={() => {
                   if (userRole === "DRIVER" && booking.pickupLat && booking.pickupLng) {
-                    // Open navigation to pickup location
+                    // Open navigation to pickup or dropoff location based on status
                     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-                    const destination = `${booking.pickupLat},${booking.pickupLng}`;
+                    let destination;
                     
-                    if (isIOS) {
-                      // Open Apple Maps on iOS
-                      window.open(`maps://maps.apple.com/?daddr=${destination}&dirflg=d`, '_blank');
-                    } else {
-                      // Open Google Maps on other platforms
-                      window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`, '_blank');
+                    if (booking.status === "ASSIGNED" || booking.status === "EN_ROUTE") {
+                      // Navigate to pickup location
+                      destination = `${booking.pickupLat},${booking.pickupLng}`;
+                    } else if (booking.status === "ARRIVED" && booking.dropoffLat && booking.dropoffLng) {
+                      // Navigate to dropoff location
+                      destination = `${booking.dropoffLat},${booking.dropoffLng}`;
+                    }
+                    
+                    if (destination) {
+                      if (isIOS) {
+                        // Open Apple Maps on iOS
+                        window.open(`maps://maps.apple.com/?daddr=${destination}&dirflg=d`, '_blank');
+                      } else {
+                        // Open Google Maps on other platforms
+                        window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`, '_blank');
+                      }
                     }
                   }
                   onConfirm?.();
@@ -251,14 +263,25 @@ export default function RideConfirmation({
                     />
                   </svg>
                 )}
-                {userRole === "RIDER" ? "Confirm Ride" : "Start Navigation"}
+                {userRole === "RIDER" 
+                  ? "Confirm Ride" 
+                  : booking.status === "ASSIGNED" 
+                    ? "Start Navigation" 
+                    : booking.status === "EN_ROUTE"
+                      ? "I've Arrived"
+                      : booking.status === "ARRIVED"
+                        ? "Start Trip"
+                        : "Continue"}
               </button>
             </div>
 
             {/* Chat Button */}
             <button
-              onClick={() => setShowChat(true)}
-              className="w-full mt-3 py-3 bg-white border-2 border-[#00796B] text-[#00796B] rounded-lg font-semibold hover:bg-[#E0F2F1] transition-colors flex items-center justify-center gap-2"
+              onClick={() => {
+                setShowChat(true);
+                markAsRead();
+              }}
+              className="w-full mt-3 py-3 bg-white border-2 border-[#00796B] text-[#00796B] rounded-lg font-semibold hover:bg-[#E0F2F1] transition-colors flex items-center justify-center gap-2 relative"
             >
               <svg
                 className="w-5 h-5"
@@ -274,6 +297,11 @@ export default function RideConfirmation({
                 />
               </svg>
               Chat with {userRole === "RIDER" ? "Driver" : "Rider"}
+              {unreadCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -446,6 +474,7 @@ export default function RideConfirmation({
               <ChatWidget
                 bookingId={booking.id}
                 sender={userRole}
+                onMarkAsRead={markAsRead}
               />
             </div>
           </div>

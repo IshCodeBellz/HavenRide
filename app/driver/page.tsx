@@ -9,6 +9,7 @@ import RideDocumentationForm, {
   RideDocumentation,
 } from "@/components/RideDocumentationForm";
 import RideConfirmation from "@/components/RideConfirmation";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 
 function DriverPageContent() {
   const { user } = useUser();
@@ -26,6 +27,31 @@ function DriverPageContent() {
     () =>
       bookings.find((b) => b.driverId === user?.id && b.status !== "COMPLETED"),
     [bookings, user?.id]
+  );
+
+  // Calculate requested bookings and current booking before any hooks
+  const requestedBookings = useMemo(
+    () =>
+      bookings
+        .filter((b) => b.status === "REQUESTED")
+        .sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        ),
+    [bookings]
+  );
+
+  const currentBooking = requestedBookings[currentIndex];
+
+  // Hooks must be called before any early returns
+  const { unreadCount, markAsRead } = useUnreadMessages(
+    currentBooking?.id || "",
+    "DRIVER"
+  );
+
+  const { markAsRead: markActiveChatAsRead } = useUnreadMessages(
+    activeBookingId || "",
+    "DRIVER"
   );
 
   async function toggleOnline(next: boolean) {
@@ -189,22 +215,36 @@ function DriverPageContent() {
   }
 
   // Show confirmation screen if driver has accepted a ride
-  if (assigned && assigned.status === "ASSIGNED") {
+  if (assigned && (assigned.status === "ASSIGNED" || assigned.status === "EN_ROUTE" || assigned.status === "ARRIVED")) {
     return (
       <RideConfirmation
         booking={assigned}
         userRole="DRIVER"
         onConfirm={async () => {
-          // Mark as en route
-          await fetch(`/api/bookings/${assigned.id}/status`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: "EN_ROUTE" }),
-          });
+          // Update status based on current status
+          if (assigned.status === "ASSIGNED") {
+            // Mark as en route (navigation started)
+            await fetch(`/api/bookings/${assigned.id}/status`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ status: "EN_ROUTE" }),
+            });
+          } else if (assigned.status === "EN_ROUTE") {
+            // Mark as arrived at pickup
+            await fetch(`/api/bookings/${assigned.id}/status`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ status: "ARRIVED" }),
+            });
+          }
           fetchBookings();
         }}
         onCancel={async () => {
-          if (!confirm("Are you sure you want to cancel this ride? The rider will need to find another driver.")) {
+          if (
+            !confirm(
+              "Are you sure you want to cancel this ride? The rider will need to find another driver."
+            )
+          ) {
             return;
           }
           // Unassign driver and set back to REQUESTED
@@ -218,13 +258,6 @@ function DriverPageContent() {
       />
     );
   }
-
-  // Filter only requested bookings and sort by creation time (oldest first)
-  const requestedBookings = bookings
-    .filter((b) => b.status === "REQUESTED")
-    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-  
-  const currentBooking = requestedBookings[currentIndex];
 
   const goToNext = () => {
     if (currentIndex < requestedBookings.length - 1) {
@@ -240,13 +273,16 @@ function DriverPageContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-      <div className="max-w-2xl w-full">
+      <div className="max-w-5xl w-full">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-[#0F3D3E]">Driver Console</h1>
-            <p className="text-sm text-gray-600">
-              {requestedBookings.length} ride{requestedBookings.length !== 1 ? 's' : ''} available
+            <h1 className="text-3xl font-bold text-[#0F3D3E]">
+              Driver Console
+            </h1>
+            <p className="text-base text-gray-600 mt-1">
+              {requestedBookings.length} ride
+              {requestedBookings.length !== 1 ? "s" : ""} available
             </p>
           </div>
           <label className="flex items-center gap-3 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200">
@@ -326,166 +362,248 @@ function DriverPageContent() {
           <div className="relative">
             {/* Main Carousel Container with Preview */}
             <div className="relative overflow-visible">
-              <div className="flex items-center gap-4">
-                {/* Current Card */}
-                <div 
-                  className="bg-white rounded-2xl shadow-lg border-2 border-blue-500 flex-shrink-0 transition-all duration-300"
-                  style={{ width: requestedBookings.length > 1 ? 'calc(100% - 120px)' : '100%' }}
-                >
-                  <div className="p-8">
-                {/* Status Badge */}
-                <div className="flex items-center justify-between mb-6">
-                  <span className="text-sm font-medium text-gray-600">
-                    Status
-                  </span>
-                  <span className="px-4 py-1.5 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold">
-                    {currentBooking.status}
-                  </span>
-                </div>
-
-                {/* Route Information */}
-                <div className="space-y-4 mb-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-[#00796B] rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-bold">A</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xs text-gray-600 font-medium mb-1">
-                        Pickup
-                      </p>
-                      <p className="text-base font-semibold text-[#0F3D3E]">
-                        {currentBooking.pickupAddress}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-[#0F3D3E] rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-bold">B</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xs text-gray-600 font-medium mb-1">
-                        Dropoff
-                      </p>
-                      <p className="text-base font-semibold text-[#0F3D3E]">
-                        {currentBooking.dropoffAddress}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Additional Info */}
-                <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2">
-                  {currentBooking.requiresWheelchair && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-2xl">♿</span>
-                      <span className="font-medium text-gray-700">
-                        Wheelchair accessible vehicle required
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Booking ID:</span>
-                    <code className="font-mono font-medium text-gray-800">
-                      {currentBooking.id.slice(0, 8)}...
-                    </code>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Requested:</span>
-                    <span className="font-medium text-gray-800">
-                      {new Date(currentBooking.createdAt).toLocaleString()}
-                    </span>
-                  </div>
-                  {currentBooking.priceEstimate && (
-                    <div className="flex justify-between text-sm pt-2 border-t border-gray-200">
-                      <span className="text-gray-600">Estimated Fare:</span>
-                      <span className="text-xl font-bold text-[#0F3D3E]">
-                        £{currentBooking.priceEstimate.amount?.toFixed(2)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => take(currentBooking.id)}
-                    className="flex-1 bg-[#00796B] text-white py-4 rounded-lg font-semibold hover:bg-[#00695C] transition-colors"
-                  >
-                    Take Ride
-                  </button>
-                  <button
-                    onClick={() => arrive(currentBooking.id)}
-                    className="px-6 py-4 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
-                  >
-                    Arrived
-                  </button>
-                </div>
-
-                {/* Open Chat Link */}
-                <button
-                  onClick={() => setActiveBookingId(currentBooking.id)}
-                  className="w-full mt-3 text-sm text-[#00796B] hover:text-[#0F3D3E] font-medium underline"
-                >
-                  Open Chat
-                </button>
-                  </div>
-                </div>
-
-                {/* Next Ride Preview */}
-                {requestedBookings.length > 1 && currentIndex < requestedBookings.length - 1 && (
+              <div className="flex items-center justify-center gap-4">
+                {/* Previous Ride Preview (Left) */}
+                {requestedBookings.length > 1 && currentIndex > 0 && (
                   <div
-                    onClick={goToNext}
+                    onClick={goToPrevious}
                     className="bg-white rounded-2xl shadow-md border border-gray-300 w-[100px] flex-shrink-0 overflow-hidden cursor-pointer hover:border-blue-400 hover:shadow-lg transition-all duration-300"
                   >
                     <div className="p-3 h-full flex flex-col justify-between">
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 bg-[#00796B] rounded-full flex items-center justify-center flex-shrink-0">
-                            <span className="text-white text-xs font-bold">A</span>
+                            <span className="text-white text-xs font-bold">
+                              A
+                            </span>
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-[10px] text-gray-600 truncate">
-                              {requestedBookings[currentIndex + 1].pickupAddress.split(',')[0]}
+                              {
+                                requestedBookings[
+                                  currentIndex - 1
+                                ].pickupAddress.split(",")[0]
+                              }
                             </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 bg-[#0F3D3E] rounded-full flex items-center justify-center flex-shrink-0">
-                            <span className="text-white text-xs font-bold">B</span>
+                            <span className="text-white text-xs font-bold">
+                              B
+                            </span>
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-[10px] text-gray-600 truncate">
-                              {requestedBookings[currentIndex + 1].dropoffAddress.split(',')[0]}
+                              {
+                                requestedBookings[
+                                  currentIndex - 1
+                                ].dropoffAddress.split(",")[0]
+                              }
                             </p>
                           </div>
                         </div>
                       </div>
-                      {requestedBookings[currentIndex + 1].priceEstimate && (
-                        <div className="mt-2 pt-2 border-t border-gray-200">
-                          <p className="text-xs font-bold text-[#0F3D3E] text-center">
-                            £{requestedBookings[currentIndex + 1].priceEstimate.amount?.toFixed(2)}
-                          </p>
-                        </div>
-                      )}
-                      <div className="mt-2 flex justify-center">
-                        <svg
-                          className="w-4 h-4 text-gray-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 5l7 7-7 7"
-                          />
-                        </svg>
+                      <div className="mt-2 pt-2 border-t border-gray-200">
+                        <p className="text-[10px] text-gray-500 font-medium text-center">
+                          £
+                          {requestedBookings[
+                            currentIndex - 1
+                          ].priceEstimate?.amount?.toFixed(2) || "0.00"}
+                        </p>
                       </div>
                     </div>
                   </div>
                 )}
+
+                {/* Current Card */}
+                <div
+                  className="bg-white rounded-2xl shadow-lg border-2 border-blue-500 flex-shrink-0 transition-all duration-300"
+                  style={{
+                    width:
+                      requestedBookings.length > 1
+                        ? "calc(100% - 240px)"
+                        : "100%",
+                  }}
+                >
+                  <div className="p-10">
+                    {/* Status Badge */}
+                    <div className="flex items-center justify-between mb-8">
+                      <span className="text-base font-semibold text-gray-600">
+                        Status
+                      </span>
+                      <span className="px-5 py-2 bg-yellow-100 text-yellow-700 rounded-full text-base font-semibold">
+                        {currentBooking.status}
+                      </span>
+                    </div>
+
+                    {/* Route Information */}
+                    <div className="space-y-5 mb-8">
+                      <div className="flex items-start gap-5">
+                        <div className="w-12 h-12 bg-[#00796B] rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-lg">A</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-600 font-medium mb-2">
+                            Pickup
+                          </p>
+                          <p className="text-lg font-semibold text-[#0F3D3E]">
+                            {currentBooking.pickupAddress}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-5">
+                        <div className="w-12 h-12 bg-[#0F3D3E] rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-lg">B</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-600 font-medium mb-2">
+                            Dropoff
+                          </p>
+                          <p className="text-lg font-semibold text-[#0F3D3E]">
+                            {currentBooking.dropoffAddress}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Additional Info */}
+                    <div className="bg-gray-50 rounded-xl p-5 mb-8 space-y-3">
+                      {currentBooking.requiresWheelchair && (
+                        <div className="flex items-center gap-2 text-base">
+                          <span className="text-3xl">♿</span>
+                          <span className="font-medium text-gray-700">
+                            Wheelchair accessible vehicle required
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-base">
+                        <span className="text-gray-600">Booking ID:</span>
+                        <code className="font-mono font-medium text-gray-800">
+                          {currentBooking.id.slice(0, 8)}...
+                        </code>
+                      </div>
+                      <div className="flex justify-between text-base">
+                        <span className="text-gray-600">Requested:</span>
+                        <span className="font-medium text-gray-800">
+                          {new Date(currentBooking.createdAt).toLocaleString()}
+                        </span>
+                      </div>
+                      {currentBooking.priceEstimate && (
+                        <div className="flex justify-between text-base pt-3 border-t border-gray-200">
+                          <span className="text-gray-600 text-lg">Estimated Fare:</span>
+                          <span className="text-2xl font-bold text-[#0F3D3E]">
+                            £{currentBooking.priceEstimate.amount?.toFixed(2)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => take(currentBooking.id)}
+                        className="flex-1 bg-[#00796B] text-white py-5 rounded-xl text-lg font-semibold hover:bg-[#00695C] transition-colors"
+                      >
+                        Take Ride
+                      </button>
+                      <button
+                        onClick={() => arrive(currentBooking.id)}
+                        className="px-8 py-5 bg-gray-100 text-gray-700 rounded-xl text-lg font-semibold hover:bg-gray-200 transition-colors"
+                      >
+                        Arrived
+                      </button>
+                    </div>
+
+                    {/* Open Chat Link */}
+                    <button
+                      onClick={() => {
+                        markAsRead();
+                        setActiveBookingId(currentBooking.id);
+                      }}
+                      className="w-full mt-4 text-base text-[#00796B] hover:text-[#0F3D3E] font-semibold underline relative"
+                    >
+                      Open Chat
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center animate-pulse">
+                          {unreadCount > 9 ? "9+" : unreadCount}
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Next Ride Preview */}
+                {requestedBookings.length > 1 &&
+                  currentIndex < requestedBookings.length - 1 && (
+                    <div
+                      onClick={goToNext}
+                      className="bg-white rounded-2xl shadow-md border border-gray-300 w-[100px] flex-shrink-0 overflow-hidden cursor-pointer hover:border-blue-400 hover:shadow-lg transition-all duration-300"
+                    >
+                      <div className="p-3 h-full flex flex-col justify-between">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 bg-[#00796B] rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white text-xs font-bold">
+                                A
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[10px] text-gray-600 truncate">
+                                {
+                                  requestedBookings[
+                                    currentIndex + 1
+                                  ].pickupAddress.split(",")[0]
+                                }
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 bg-[#0F3D3E] rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white text-xs font-bold">
+                                B
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[10px] text-gray-600 truncate">
+                                {
+                                  requestedBookings[
+                                    currentIndex + 1
+                                  ].dropoffAddress.split(",")[0]
+                                }
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        {requestedBookings[currentIndex + 1].priceEstimate && (
+                          <div className="mt-2 pt-2 border-t border-gray-200">
+                            <p className="text-xs font-bold text-[#0F3D3E] text-center">
+                              £
+                              {requestedBookings[
+                                currentIndex + 1
+                              ].priceEstimate.amount?.toFixed(2)}
+                            </p>
+                          </div>
+                        )}
+                        <div className="mt-2 flex justify-center">
+                          <svg
+                            className="w-4 h-4 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  )}
               </div>
             </div>
 
@@ -606,6 +724,7 @@ function DriverPageContent() {
                       key={activeBookingId}
                       bookingId={activeBookingId}
                       sender="DRIVER"
+                      onMarkAsRead={markActiveChatAsRead}
                     />
                   );
                 })()}
@@ -628,9 +747,26 @@ function DriverPageContent() {
 }
 
 export default function DriverPage() {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    async function checkAdmin() {
+      try {
+        const res = await fetch("/api/users/me");
+        if (res.ok) {
+          const data = await res.json();
+          setIsAdmin(data.isAdmin || false);
+        }
+      } catch (error) {
+        console.error("Failed to check admin status:", error);
+      }
+    }
+    checkAdmin();
+  }, []);
+
   return (
     <RoleGate requiredRole={["DRIVER"]}>
-      <AppLayout userRole="DRIVER">
+      <AppLayout userRole="DRIVER" isAdmin={isAdmin}>
         <DriverPageContent />
       </AppLayout>
     </RoleGate>

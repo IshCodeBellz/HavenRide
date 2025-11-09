@@ -23,16 +23,50 @@ enum SenderType {
   DISPATCHER
 }
 
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+  DEACTIVATED
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum SupportTicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
 model User {
-  id        String   @id
-  email     String   @unique
+  id        String      @id
+  email     String      @unique
   name      String?
   role      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isAdmin   Boolean     @default(false)
+  status    UserStatus  @default(ACTIVE)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
-  driver Driver?
-  rider  Rider?
+  driver              Driver?
+  rider               Rider?
+  dispatcher          Dispatcher?
+  supportTickets      SupportTicket[]
+  createdNotifications SystemNotification[]
+  complianceLogs      ComplianceLog[]
 }
 
 model Rider {
@@ -50,22 +84,37 @@ model Rider {
 }
 
 model Driver {
-  id                 String    @id
-  user               User      @relation(fields: [id], references: [id])
-  isOnline           Boolean   @default(false)
+  id                 String              @id
+  user               User                @relation(fields: [id], references: [id])
+  isOnline           Boolean             @default(false)
   vehicleMake        String?
   vehicleModel       String?
   vehiclePlate       String?
-  wheelchairCapable  Boolean   @default(false)
+  wheelchairCapable  Boolean             @default(false)
   lastLat            Float?
   lastLng            Float?
-  docsVerified       Boolean   @default(false)
+  docsVerified       Boolean             @default(false)
   licenseNumber      String?
   insuranceExpiry    DateTime?
-  wheelchairTraining Boolean   @default(false)
+  wheelchairTraining Boolean             @default(false)
   phone              String?
-  updatedAt          DateTime  @updatedAt
-  bookings           Booking[] @relation("DriverBookings")
+  
+  // Verification & Compliance
+  verificationStatus VerificationStatus  @default(PENDING)
+  dbsCheckDate       DateTime?
+  dbsExpiryDate      DateTime?
+  dbsCertificateUrl  String?
+  trainingCompletedDate DateTime?
+  trainingCertificateUrl String?
+  
+  // Financial
+  commissionRate     Float               @default(0.15) // 15% default
+  totalEarnings      Float               @default(0)
+  pendingPayout      Float               @default(0)
+  
+  updatedAt          DateTime            @updatedAt
+  bookings           Booking[]           @relation("DriverBookings")
+  verificationDocuments DriverDocument[]
 }
 
 model Booking {
@@ -165,4 +214,95 @@ model PaymentMethod {
   updatedAt        DateTime @updatedAt
   
   @@index([riderId])
+}
+
+// Dispatcher Model
+model Dispatcher {
+  id          String   @id
+  user        User     @relation(fields: [id], references: [id])
+  phone       String?
+  region      String?  // Geographic region assigned
+  shift       String?  // "morning", "afternoon", "evening", "night"
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Driver Verification Documents
+model DriverDocument {
+  id            String             @id @default(cuid())
+  driver        Driver             @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  driverId      String
+  
+  documentType  String             // "LICENSE", "INSURANCE", "DBS", "TRAINING", "VEHICLE_REGISTRATION"
+  documentUrl   String
+  status        VerificationStatus @default(PENDING)
+  uploadedAt    DateTime           @default(now())
+  reviewedAt    DateTime?
+  reviewedBy    String?            // Admin user ID
+  notes         String?
+  expiryDate    DateTime?
+  
+  @@index([driverId])
+  @@index([status])
+}
+
+// Support Tickets
+model SupportTicket {
+  id          String                @id @default(cuid())
+  user        User                  @relation(fields: [userId], references: [id])
+  userId      String
+  
+  subject     String
+  description String
+  priority    SupportTicketPriority @default(MEDIUM)
+  status      SupportTicketStatus   @default(OPEN)
+  category    String?               // "PAYMENT", "RIDE_ISSUE", "TECHNICAL", "ACCOUNT", "OTHER"
+  
+  bookingId   String?               // Optional reference to related booking
+  assignedTo  String?               // Admin user ID
+  
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  resolvedAt  DateTime?
+  
+  @@index([userId])
+  @@index([status])
+  @@index([priority])
+}
+
+// System Notifications (broadcast by admins)
+model SystemNotification {
+  id          String   @id @default(cuid())
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdById String
+  
+  title       String
+  message     String
+  targetRole  String?  // "RIDER", "DRIVER", "DISPATCHER", null = all
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime?
+  
+  @@index([isActive])
+  @@index([targetRole])
+}
+
+// Compliance & Audit Logs
+model ComplianceLog {
+  id          String   @id @default(cuid())
+  admin       User     @relation(fields: [adminId], references: [id])
+  adminId     String
+  
+  action      String   // "APPROVED_DRIVER", "SUSPENDED_USER", "VIEWED_GDPR_DATA", "EXPORTED_REPORTS"
+  targetType  String   // "USER", "DRIVER", "BOOKING", "DOCUMENT"
+  targetId    String
+  details     Json?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([adminId])
+  @@index([targetType])
+  @@index([createdAt])
 }

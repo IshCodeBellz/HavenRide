@@ -34,12 +34,15 @@ export default function RoleGate({ children, requiredRole }: RoleGateProps) {
         }
 
         // Small delay to let DB commit
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, 200));
 
         // Then fetch user data
         const res = await fetch("/api/users/me");
         if (!res.ok) {
-          console.error("RoleGate: Failed to fetch user data, status:", res.status);
+          console.error(
+            "RoleGate: Failed to fetch user data, status:",
+            res.status
+          );
           if (isMounted) {
             setChecking(false);
             // User doesn't exist in DB yet, let them through and retry will happen
@@ -50,10 +53,13 @@ export default function RoleGate({ children, requiredRole }: RoleGateProps) {
 
         const data = await res.json();
         const userRole = data.role;
+        const isAdmin = data.isAdmin || false;
 
         console.log(
           "RoleGate: User role is",
           userRole,
+          "isAdmin:",
+          isAdmin,
           "Required:",
           requiredRole
         );
@@ -63,6 +69,14 @@ export default function RoleGate({ children, requiredRole }: RoleGateProps) {
         if (!userRole) {
           // Still no role, but allow through - user might be newly created
           console.log("RoleGate: No role found yet, allowing through");
+          setHasRole(true);
+          setChecking(false);
+          return;
+        }
+
+        // If user is admin, allow access to admin pages
+        if (isAdmin && requiredRole?.includes("ADMIN")) {
+          console.log("RoleGate: Admin access granted");
           setHasRole(true);
           setChecking(false);
           return;

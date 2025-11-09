@@ -13,16 +13,37 @@ type Message = {
 export default function ChatWidget({
   bookingId,
   sender,
+  onMarkAsRead,
 }: {
   bookingId: string;
   sender: "RIDER" | "DRIVER" | "DISPATCHER";
+  onMarkAsRead?: () => void;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
   const [realtimeEnabled, setRealtimeEnabled] = useState(false);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>("default");
   const endRef = useRef<HTMLDivElement | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const previousMessageCountRef = useRef(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Request notification permission on mount
+  useEffect(() => {
+    if ("Notification" in window) {
+      setNotificationPermission(Notification.permission);
+      
+      if (Notification.permission === "default") {
+        Notification.requestPermission().then((permission) => {
+          setNotificationPermission(permission);
+        });
+      }
+    }
+
+    // Create audio element for notification sound
+    audioRef.current = new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZRA0PVKzn77BdGAg+ltzy0IEsBS18yfLaizsGF2e49+eXRAwNUKjl8bJfGghAm+Hzxm0gBSyAzfPaizsIGGm88+ifUhENUKnk8LJeFQdAnuH0yXQjBiyBzvPalzsIF2m98+OgVBEMUKnl7rBbFQU9muDzzH0lBSqCz/PajzsIF2q98d6dTBEMTaro7bJaFQU9nOL0zYAm");
+  }, []);
 
   // Fetch initial messages
   useEffect(() => {
@@ -34,6 +55,7 @@ export default function ChatWidget({
         if (res.ok && mounted) {
           const data = await res.json();
           setMessages(data);
+          previousMessageCountRef.current = data.length;
         }
       } catch (error) {
         console.error("Failed to load messages:", error);
@@ -46,6 +68,30 @@ export default function ChatWidget({
       mounted = false;
     };
   }, [bookingId]);
+
+  // Function to show notification for new messages
+  const showNotification = useCallback((message: Message) => {
+    // Don't notify for own messages
+    if (message.sender === sender) return;
+
+    // Play notification sound
+    if (audioRef.current) {
+      audioRef.current.play().catch(() => {
+        // Ignore autoplay restrictions
+      });
+    }
+
+    // Show browser notification
+    if (notificationPermission === "granted") {
+      const senderName = message.sender === "RIDER" ? "Rider" : message.sender === "DRIVER" ? "Driver" : "Dispatcher";
+      new Notification(`New message from ${senderName}`, {
+        body: message.text,
+        icon: "/favicon.ico",
+        tag: `message-${message.id}`,
+        requireInteraction: false,
+      });
+    }
+  }, [sender, notificationPermission]);
 
   // Set up Ably subscription OR polling fallback
   useEffect(() => {
@@ -74,6 +120,11 @@ export default function ChatWidget({
             return newMessages;
           }
 
+          // Show notification for new message from others
+          if (msg.data.sender !== sender) {
+            showNotification(msg.data);
+          }
+
           return [...prev, msg.data];
         });
       }
@@ -100,6 +151,18 @@ export default function ChatWidget({
           const res = await fetch(`/api/bookings/${bookingId}/messages`);
           if (res.ok) {
             const data = await res.json();
+            
+            // Check for new messages and show notifications
+            if (data.length > previousMessageCountRef.current) {
+              const newMessages = data.slice(previousMessageCountRef.current);
+              newMessages.forEach((msg: Message) => {
+                if (msg.sender !== sender) {
+                  showNotification(msg);
+                }
+              });
+            }
+            
+            previousMessageCountRef.current = data.length;
             setMessages(data);
           }
         } catch (error) {
@@ -124,12 +187,19 @@ export default function ChatWidget({
         console.warn("Cleanup error (ignoring):", error);
       }
     };
-  }, [bookingId]);
+  }, [bookingId, sender, showNotification]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
+
+  // Mark messages as read when component mounts or messages change
+  useEffect(() => {
+    if (messages.length > 0 && onMarkAsRead) {
+      onMarkAsRead();
+    }
+  }, [messages.length, onMarkAsRead]);
 
   const send = useCallback(async () => {
     if (!input.trim()) return;
@@ -272,6 +342,60 @@ export default function ChatWidget({
         <div ref={endRef} />
       </div>
       <div className="p-4 bg-white border-t border-gray-200">
+        {notificationPermission === "denied" && (
+          <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2">
+            <svg
+              className="w-5 h-5 text-amber-600 shrink-0 mt-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+              />
+            </svg>
+            <div className="flex-1">
+              <p className="text-xs text-amber-800">
+                Notifications are blocked. Enable them in your browser settings to get message alerts.
+              </p>
+            </div>
+          </div>
+        )}
+        {notificationPermission === "default" && (
+          <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-2">
+            <svg
+              className="w-5 h-5 text-blue-600 shrink-0 mt-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+              />
+            </svg>
+            <div className="flex-1">
+              <p className="text-xs text-blue-800 mb-2">
+                Enable notifications to get alerts when new messages arrive
+              </p>
+              <button
+                onClick={() => {
+                  Notification.requestPermission().then((permission) => {
+                    setNotificationPermission(permission);
+                  });
+                }}
+                className="text-xs bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Enable Notifications
+              </button>
+            </div>
+          </div>
+        )}
         <div className="flex gap-3">
           <input
             value={input}
@@ -305,6 +429,14 @@ export default function ChatWidget({
         {!realtimeEnabled && (
           <p className="text-xs text-gray-500 mt-2 text-center">
             Messages update every 3 seconds
+          </p>
+        )}
+        {realtimeEnabled && notificationPermission === "granted" && (
+          <p className="text-xs text-green-600 mt-2 text-center flex items-center justify-center gap-1">
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            Real-time messages & notifications enabled
           </p>
         )}
       </div>

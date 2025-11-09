@@ -6,18 +6,17 @@ export async function GET() {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ role: null, isAdmin: false });
 
-  const db = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { role: true },
-  });
+  // Use raw query to ensure we get isAdmin field
+  const result: any = await prisma.$queryRaw`
+    SELECT role, "isAdmin" FROM "User" WHERE id = ${userId}
+  `;
+  
+  const db = result[0];
 
   if (db?.role) {
-    // User is admin if their role is 'ADMIN'
-    const isAdmin = db.role === "ADMIN";
-    console.log("User role check:", { userId, role: db.role, isAdmin });
     return NextResponse.json({
       role: db.role,
-      isAdmin,
+      isAdmin: db.isAdmin || false,
     });
   }
 
@@ -25,11 +24,8 @@ export async function GET() {
     const client = await clerkClient();
     const u = await client.users.getUser(userId);
     const metaRole = (u.publicMetadata as any)?.role || null;
-    const isAdmin = metaRole === "ADMIN";
-    console.log("User role from Clerk metadata:", { userId, role: metaRole, isAdmin });
-    return NextResponse.json({ role: metaRole, isAdmin });
-  } catch (error) {
-    console.error("Error fetching user from Clerk:", error);
+    return NextResponse.json({ role: metaRole, isAdmin: false });
+  } catch {
     return NextResponse.json({ role: null, isAdmin: false });
   }
 }

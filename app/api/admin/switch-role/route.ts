@@ -9,16 +9,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Verify user is admin - check role field
-    const currentUser = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    });
+    // Verify user is admin - use raw query to check isAdmin field
+    // (Prisma client may not have isAdmin in types yet)
+    const currentUser: any = await prisma.$queryRaw`
+      SELECT role, "isAdmin" FROM "User" WHERE id = ${userId}
+    `;
 
-    if (currentUser?.role !== "ADMIN") {
+    const userData = currentUser[0];
+    
+    // Admin status is preserved via isAdmin field, allowing role switching freedom
+    if (!userData?.isAdmin && userData?.role !== "ADMIN") {
       console.error("Role switch denied:", {
         userId,
-        currentRole: currentUser?.role,
+        currentRole: userData?.role,
+        isAdmin: userData?.isAdmin,
       });
       return NextResponse.json(
         { error: "Only admins can switch roles" },
@@ -31,11 +35,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
 
-    // Update user role in database
+    // Update user role in database (preserve isAdmin status)
     console.log("Updating role for user:", {
       userId,
-      oldRole: currentUser.role,
+      oldRole: userData.role,
       newRole: role,
+      isAdmin: userData.isAdmin,
     });
 
     const user = await prisma.user.update({

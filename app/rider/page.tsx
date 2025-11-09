@@ -401,14 +401,14 @@ function RiderPageContent() {
   // Show loading screen for pending booking
   if (pendingBooking) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <div className="max-w-lg w-full">
-          <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-blue-500">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="bg-white rounded-2xl p-5 shadow-lg border-2 border-blue-500">
             {/* Header */}
-            <div className="text-center mb-6">
-              <div className="inline-block p-3 bg-yellow-100 rounded-full mb-4">
+            <div className="text-center mb-4">
+              <div className="inline-block p-2 bg-yellow-100 rounded-full mb-3">
                 <svg
-                  className="w-12 h-12 text-yellow-600 animate-pulse"
+                  className="w-8 h-8 text-yellow-600 animate-pulse"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -421,45 +421,45 @@ function RiderPageContent() {
                   />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-[#0F3D3E] mb-2">
+              <h2 className="text-xl font-bold text-[#0F3D3E] mb-1">
                 Finding Your Driver
               </h2>
-              <p className="text-gray-600">
+              <p className="text-sm text-gray-600">
                 Please wait while we match you with a nearby driver...
               </p>
             </div>
 
             {/* Booking Details */}
-            <div className="bg-blue-50 rounded-xl p-6 mb-6 space-y-4">
+            <div className="bg-blue-50 rounded-xl p-4 mb-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-gray-700">
+                <span className="text-xs font-semibold text-gray-700">
                   Status
                 </span>
-                <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
+                <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">
                   {pendingBooking.status}
                 </span>
               </div>
 
-              <div className="border-t border-blue-200 pt-4 space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-[#00796B] rounded-full flex items-center justify-center shrink-0">
-                    <span className="text-white font-bold text-sm">A</span>
+              <div className="border-t border-blue-200 pt-3 space-y-2">
+                <div className="flex items-start gap-2">
+                  <div className="w-6 h-6 bg-[#00796B] rounded-full flex items-center justify-center shrink-0">
+                    <span className="text-white font-bold text-xs">A</span>
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <p className="text-xs text-gray-600 font-medium">Pickup</p>
-                    <p className="text-sm font-semibold text-[#0F3D3E]">
+                    <p className="text-sm font-semibold text-[#0F3D3E] truncate">
                       {pendingBooking.pickupAddress}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-[#0F3D3E] rounded-full flex items-center justify-center shrink-0">
-                    <span className="text-white font-bold text-sm">B</span>
+                <div className="flex items-start gap-2">
+                  <div className="w-6 h-6 bg-[#0F3D3E] rounded-full flex items-center justify-center shrink-0">
+                    <span className="text-white font-bold text-xs">B</span>
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <p className="text-xs text-gray-600 font-medium">Dropoff</p>
-                    <p className="text-sm font-semibold text-[#0F3D3E]">
+                    <p className="text-sm font-semibold text-[#0F3D3E] truncate">
                       {pendingBooking.dropoffAddress}
                     </p>
                   </div>
@@ -467,13 +467,13 @@ function RiderPageContent() {
               </div>
 
               {pendingBooking.pinCode && (
-                <div className="border-t border-blue-200 pt-4">
-                  <div className="bg-white rounded-lg p-4 text-center">
-                    <p className="text-xs text-gray-600 mb-1">Your PIN:</p>
-                    <p className="text-3xl font-bold text-[#00796B] tracking-wider">
+                <div className="border-t border-blue-200 pt-3">
+                  <div className="bg-white rounded-lg p-3 text-center">
+                    <p className="text-xs text-gray-600">Your PIN:</p>
+                    <p className="text-2xl font-bold text-[#00796B] tracking-wider">
                       {pendingBooking.pinCode}
                     </p>
-                    <p className="text-xs text-gray-500 mt-2">
+                    <p className="text-xs text-gray-500 mt-1">
                       Give this to your driver
                     </p>
                   </div>
@@ -481,12 +481,12 @@ function RiderPageContent() {
               )}
 
               {pendingBooking.priceEstimate && (
-                <div className="border-t border-blue-200 pt-4">
+                <div className="border-t border-blue-200 pt-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">
+                    <span className="text-xs text-gray-600">
                       Estimated Fare
                     </span>
-                    <span className="text-xl font-bold text-[#0F3D3E]">
+                    <span className="text-lg font-bold text-[#0F3D3E]">
                       £{pendingBooking.priceEstimate.amount?.toFixed(2)}
                     </span>
                   </div>
@@ -499,18 +499,18 @@ function RiderPageContent() {
             </div>
 
             {/* Loading Animation */}
-            <div className="flex justify-center mb-6">
+            <div className="flex justify-center mb-4">
               <div className="flex space-x-2">
                 <div
-                  className="w-3 h-3 bg-[#00796B] rounded-full animate-bounce"
+                  className="w-2 h-2 bg-[#00796B] rounded-full animate-bounce"
                   style={{ animationDelay: "0ms" }}
                 ></div>
                 <div
-                  className="w-3 h-3 bg-[#00796B] rounded-full animate-bounce"
+                  className="w-2 h-2 bg-[#00796B] rounded-full animate-bounce"
                   style={{ animationDelay: "150ms" }}
                 ></div>
                 <div
-                  className="w-3 h-3 bg-[#00796B] rounded-full animate-bounce"
+                  className="w-2 h-2 bg-[#00796B] rounded-full animate-bounce"
                   style={{ animationDelay: "300ms" }}
                 ></div>
               </div>
@@ -519,7 +519,7 @@ function RiderPageContent() {
             {/* Cancel Button */}
             <button
               onClick={() => handleCancelBooking(pendingBooking.id)}
-              className="w-full px-6 py-3 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors font-semibold"
+              className="w-full px-4 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors font-semibold text-sm"
             >
               Cancel Ride
             </button>

@@ -63,6 +63,116 @@
 
 ---
 
+## Dispatcher Features
+
+### Automated Driver Assignment
+**Endpoint**: `/api/dispatcher/auto-assign`
+
+**POST** - Automatically assign best available driver to booking
+- **Authentication**: Required (Clerk)
+- **Authorization**: DISPATCHER role only (403 if not dispatcher)
+- **Body**: 
+  ```json
+  {
+    "bookingId": "string (required)",
+    "getSuggestions": "boolean (optional, default: false)",
+    "limit": "number (optional, default: 5, only used if getSuggestions=true)"
+  }
+  ```
+- **Assignment Mode** (`getSuggestions: false`):
+  - Finds best driver using intelligent algorithm
+  - Automatically assigns driver to booking
+  - Updates booking status to ASSIGNED
+  - Returns:
+    ```json
+    {
+      "success": true,
+      "booking": { /* updated booking object */ },
+      "assignment": {
+        "driverId": "string",
+        "driverName": "string",
+        "score": 87,
+        "distance": "2.34",
+        "reason": "Assigned based on proximity (2.3km) and rating (4.8)"
+      }
+    }
+    ```
+
+- **Suggestions Mode** (`getSuggestions: true`):
+  - Returns top N driver matches without assigning
+  - Returns:
+    ```json
+    {
+      "suggestions": [
+        {
+          "driverId": "string",
+          "driverName": "string",
+          "score": 94,
+          "distance": "1.23",
+          "rating": 4.8,
+          "wheelchairCapable": true,
+          "details": {
+            "distanceScore": 98,
+            "ratingScore": 96,
+            "wheelchairMatch": true,
+            "distance": 1.23
+          }
+        }
+        // ... up to 'limit' matches
+      ]
+    }
+    ```
+
+**Algorithm Details**:
+- **Eligibility Filtering**:
+  - Driver must be online (`isOnline = true`)
+  - Driver must have location (`lastLat` and `lastLng` not null)
+  - If booking requires wheelchair, driver must have `wheelchairCapable = true`
+  
+- **Scoring System** (0-100 scale):
+  - **Distance**: 60% weight
+    - ≤5km: 100 points
+    - 5-10km: 75-100 points (linear)
+    - 10-20km: 50-75 points (linear)
+    - >20km: 0-50 points (exponential decay)
+  - **Rating**: 30% weight
+    - 0-5 star rating converted to 0-100 scale
+    - No rating (null): 50 points (neutral)
+  - **Wheelchair Match**: 10% bonus
+    - Applied only if booking requires wheelchair AND driver is capable
+
+- **Distance Calculation**: Haversine formula for accurate great-circle distance
+
+**Error Responses**:
+- `401`: Unauthorized (no valid session)
+- `403`: Forbidden (user is not a dispatcher)
+- `400`: Bad request (missing bookingId, booking already assigned)
+- `404`: Not found (booking doesn't exist, no online drivers, no suitable driver found)
+- `500`: Internal server error
+
+**Example Usage**:
+```typescript
+// Auto-assign best driver
+const response = await fetch("/api/dispatcher/auto-assign", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ bookingId: "cm3abc123" })
+});
+
+// Get suggestions without assigning
+const response = await fetch("/api/dispatcher/auto-assign", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ 
+    bookingId: "cm3abc123",
+    getSuggestions: true,
+    limit: 3
+  })
+});
+```
+
+---
+
 ## Database Schema Updates
 
 ### Rider Model

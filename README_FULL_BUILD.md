@@ -1,6 +1,6 @@
 # HavenRide – Full Build (Unified)
 
-This bundle combines all features we've produced: auto-assign, pickup PIN, chat, driver docs gate, dispatcher masked calls, profiles, admin (roles, settings, metrics, ops), earnings, accounting webhooks, receipts, and more.
+This bundle combines all features we've produced: **intelligent auto-assign algorithm**, pickup PIN verification, real-time chat, driver documentation gate, dispatcher masked calls, rider/driver profiles, **live map tracking with Mapbox**, **CSV export reports**, **incident management schema**, admin dashboard (roles, settings, metrics, ops), earnings tracking, accounting webhooks, automated receipts, and more.
 
 ## Quick start
 
@@ -48,6 +48,9 @@ This bundle combines all features we've produced: auto-assign, pickup PIN, chat,
 
    # Payout rate (driver earnings)
    DRIVER_PAYOUT_RATE=0.75
+
+   # Mapbox (live tracking)
+   NEXT_PUBLIC_MAPBOX_TOKEN=pk_...
    ```
 
 3. **Generate & migrate Prisma**:
@@ -62,10 +65,41 @@ This bundle combines all features we've produced: auto-assign, pickup PIN, chat,
 
 ## Key routes
 
-- Rider: `/rider`, `/rider/profile`
-- Driver: `/driver`, `/driver/profile`, `/driver/earnings`, `/driver-signup` (sign up as driver)
-- Dispatcher: `/dispatcher`
+- Rider: `/rider`, `/rider/profile`, `/rider/past-rides`, `/rider/support`
+- Driver: `/driver`, `/driver/profile`, `/driver/earnings`, `/driver/past-rides`, `/driver/support`, `/driver-signup` (sign up as driver)
+- Dispatcher: `/dispatcher`, `/dispatcher/map` (live tracking), `/dispatcher/reports` (analytics & CSV export)
 - Admin: `/admin`, `/admin/settings`, `/admin/metrics`, `/admin/ops`, `/role-select` (admin only)
+
+## ✨ Key Features
+
+### For Dispatchers
+- **🗺️ Live Map Tracking**: Real-time Mapbox visualization of all online drivers and active bookings with color-coded markers
+- **🤖 Intelligent Auto-Assignment**: AI-powered driver matching using proximity (60%), ratings (30%), and wheelchair capability (10%)
+- **💬 Real-time Chat**: Direct messaging with drivers and riders via Ably integration
+- **📊 CSV Export**: Download booking reports and driver performance metrics with date filtering
+- **🚨 Incident Management**: Structured tracking of SOS alerts, accidents, delays, and operational issues (schema ready)
+- **📱 Manual Assignment**: Traditional driver selection with filtering and online status
+
+### For Riders
+- **📍 Saved Locations**: Store frequently used addresses (home, work, hospital)
+- **💳 Payment Methods**: Manage multiple credit/debit cards with default selection
+- **♿ Accessibility Preferences**: Auto-request wheelchair vehicles and assistance
+- **📞 In-ride Support**: Chat with driver and dispatcher during trips
+- **📜 Ride History**: View past rides with detailed information
+
+### For Drivers
+- **💰 Earnings Dashboard**: Track daily/weekly/monthly earnings with breakdowns
+- **📋 Past Rides**: Complete ride history with rider details and fares
+- **🗺️ Live Navigation**: Real-time location tracking during active rides
+- **💬 Chat Support**: Communicate with dispatcher and riders
+- **📄 Documentation**: Upload vehicle and license documents for verification
+
+### For Admins
+- **👥 Role Management**: Assign ADMIN/DISPATCHER roles with security controls
+- **⚙️ Dynamic Settings**: Configure base fares, per-km rates, wheelchair multipliers
+- **📈 Metrics Dashboard**: Platform statistics, revenue tracking, user counts
+- **🔧 Operations Panel**: Monitor system health, manage users and drivers
+- **📧 Email Allowlist**: Restrict admin access to approved email addresses
 
 ## Role Assignment 🔐
 

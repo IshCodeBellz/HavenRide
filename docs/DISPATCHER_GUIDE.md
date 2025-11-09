@@ -19,17 +19,25 @@ Dispatchers can view, create, and manage all bookings in the system.
   - Automatic rider creation if new user
   - Real-time availability of wheelchair-capable drivers
   
-- **Assign Drivers**: Manual driver assignment to bookings
-  - Filter online drivers
-  - Filter by wheelchair capability if required
-  - View driver details: name, vehicle, rating, status
-  - One-click assignment
+- **Assign Drivers**: Two assignment methods available
+  - **Automated Assignment** ✅: One-click intelligent driver matching
+    - Algorithm scores drivers by proximity (60%), rating (30%), wheelchair capability (10%)
+    - Haversine distance calculation for accurate proximity
+    - Filters eligible drivers (online, has location, wheelchair match if required)
+    - Returns best match with distance and score details
+    - Success message shows driver name, distance, and assignment score
+  - **Manual Assignment**: Traditional modal-based assignment
+    - Filter online drivers
+    - Filter by wheelchair capability if required
+    - View driver details: name, vehicle, rating, status
+    - One-click selection from list
 
 #### API Endpoints:
 - `GET /api/bookings` - Fetch all bookings
 - `POST /api/dispatcher/bookings/create` - Create new booking
 - `POST /api/bookings/[id]/status` - Update booking status and assign driver
 - `GET /api/dispatcher/drivers` - Fetch all drivers with online status
+- `POST /api/dispatcher/auto-assign` - Automatically assign best driver to booking ✅
 
 #### Implementation:
 ```typescript
@@ -56,34 +64,162 @@ const response = await fetch(`/api/bookings/${bookingId}/status`, {
     driverId: "driver-id"
   })
 });
+
+// Auto-assign best driver ✅
+const response = await fetch("/api/dispatcher/auto-assign", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    bookingId: "booking-id",
+    getSuggestions: false // optional: set to true to get top 5 suggestions without assigning
+  })
+});
+
+// Response includes assignment details
+{
+  success: true,
+  booking: { /* updated booking */ },
+  assignment: {
+    driverId: "driver-id",
+    driverName: "John Smith",
+    score: 87, // out of 100
+    distance: "2.34", // in km
+    reason: "Assigned based on proximity (2.3km) and rating (4.8)"
+  }
+}
 ```
 
-### 2. Live Map & Tracking
-Real-time visualization of all drivers and active rides.
+### 1a. Automated Driver Assignment Algorithm ✅ IMPLEMENTED
+Intelligent driver matching system using distance-based scoring and driver ratings.
+
+#### Algorithm Details:
+- **Haversine Distance Calculation**: Accurate proximity based on latitude/longitude coordinates
+- **Weighted Scoring System**:
+  - Distance: 60% weight (100 points for ≤5km, linear decay to 20km)
+  - Rating: 30% weight (0-5 star rating converted to 0-100 scale)
+  - Wheelchair Capability: 10% bonus if required and matched
+- **Eligibility Filtering**:
+  - Driver must be online (`isOnline = true`)
+  - Driver must have location data (`lastLat` and `lastLng` not null)
+  - If wheelchair required, driver must have `wheelchairCapable = true`
+- **Best Match Selection**: Returns driver with highest composite score
+
+#### Scoring Examples:
+```
+Driver A: 3km away, 4.5 rating, wheelchair-capable
+- Distance score: 95/100 (3km = excellent proximity)
+- Rating score: 90/100 (4.5/5 stars)
+- Wheelchair bonus: +10
+- Total: 60% × 95 + 30% × 90 + 10 = 94/100
+
+Driver B: 8km away, 5.0 rating, standard vehicle
+- Distance score: 82/100 (8km = good proximity)
+- Rating score: 100/100 (5/5 stars)
+- Wheelchair bonus: 0 (not required)
+- Total: 60% × 82 + 30% × 100 = 79/100
+
+Result: Driver A is assigned (higher score)
+```
+
+#### Files:
+- `lib/assignment/auto-assign.ts` - Core algorithm with scoring functions
+- `app/api/dispatcher/auto-assign/route.ts` - API endpoint with role verification
+
+#### Functions:
+```typescript
+// Calculate great-circle distance between two coordinates
+calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number
+
+// Score distance on 0-100 scale (closer = higher score)
+scoreDistance(distanceKm: number): number
+
+// Convert 0-5 rating to 0-100 score (null = 50 neutral)
+scoreRating(rating: number | null): number
+
+// Find single best driver match
+findBestDriver(drivers: Driver[], booking: Booking): DriverScore | null
+
+// Get top N driver matches for suggestions
+findTopDrivers(drivers: Driver[], booking: Booking, limit: number = 5): DriverScore[]
+
+// Generate human-readable assignment explanation
+getAssignmentExplanation(result: DriverScore): string
+```
+
+#### UI Integration:
+- **Purple "Auto-Assign Best Driver" button** on new request cards
+- Loading state with spinner during assignment
+- Success alert with driver name, distance, and score
+- Falls back to error message if no drivers available
+- "Manual Assignment" button available as alternative
+
+#### Testing Recommendations:
+1. Test with multiple online drivers at varying distances
+2. Test wheelchair requirement filtering
+3. Test with no online drivers (should return error)
+4. Test with drivers missing location data (should be filtered out)
+5. Test rating influence on selection (5.0 vs 3.0 rating)
+
+### 2. Live Map & Tracking ✅ IMPLEMENTED
+Real-time visualization of all drivers and active rides using Mapbox.
 
 #### Features:
-- **Driver Positions**: Live tracking of all online drivers
-- **Active Rides**: Visual display of pickup/dropoff locations
-- **Driver List**: Sidebar showing all online drivers with details
-- **Statistics**: Online drivers count, active rides, total drivers
+- **Live Driver Tracking**: Real-time positions of all online drivers with auto-refresh
+- **Driver Markers**: Blue circular markers with emoji indicators (🚐 standard, ♿ wheelchair-capable)
+- **Online Status**: Green indicator dot on active driver markers
+- **Booking Markers**: Color-coded location pins
+  - Amber: REQUESTED (awaiting assignment)
+  - Teal: ASSIGNED/ACTIVE (en route or in progress)
+- **Interactive Popups**: Click markers for detailed information
+  - Driver popups: Name, vehicle, rating, wheelchair capability
+  - Booking popups: Addresses, status, wheelchair requirement
+- **Auto-fit Bounds**: Map automatically centers and zooms to show all markers
+- **Map Legend**: Color-coded guide for driver/booking states
+- **Statistics Bar**: Online drivers count, active rides, total drivers
 
 #### Pages:
-- `/dispatcher/map` - Live map view
+- `/dispatcher/map` - Full-screen live map view (600px height)
 
-#### Future Enhancements:
-- Google Maps integration with markers
-- Route polylines for active rides
-- Driver-to-booking proximity calculations
-- Geofencing and alerts
+#### Components:
+- `DispatcherLiveMap.tsx` - Main map component with Mapbox GL JS integration
 
-### 3. Communication System
-Direct communication with drivers and riders.
+#### Configuration:
+```typescript
+// Environment variable required
+NEXT_PUBLIC_MAPBOX_TOKEN=pk.eyJ1IjoieWVtaWJlbGxvIi...
 
-#### Planned Features:
-- **Chat Widget**: Real-time messaging per booking
-- **Call Functionality**: Direct phone call integration
-- **Message History**: Per-booking communication logs
-- **Emergency Handling**: Priority communication for SOS/incidents
+// Map center (default: London)
+center: [-0.1276, 51.5074]
+zoom: 11
+```
+
+### 3. Communication System ✅ IMPLEMENTED
+Direct real-time communication with drivers and riders via chat.
+
+#### Features:
+- **Chat Widget**: Real-time messaging per booking using Ably
+- **Chat Buttons**: Available on all booking cards
+  - New requests: Icon button next to assignment controls
+  - Active rides: Full-width "Open Chat" button
+- **Chat Modal**: Fixed overlay with dedicated chat interface
+  - Modal header shows booking ID (first 8 characters)
+  - Close button to dismiss
+  - Real-time message delivery
+- **Sender Identification**: Dispatcher messages clearly marked
+- **Message History**: Full conversation history per booking
+- **Ably Integration**: Sub-second message delivery
+
+#### Components:
+- `ChatWidget.tsx` - Reusable chat component with Ably integration
+
+#### Usage:
+```typescript
+// In dispatcher console
+<ChatWidget 
+  bookingId="booking-id-here"
+  sender="DISPATCHER"
+/>
+```
 
 #### Database Schema:
 ```prisma
@@ -97,11 +233,17 @@ model Message {
 }
 ```
 
-### 4. Reports & Analytics
-Comprehensive operational reports and performance metrics.
+#### Future Enhancements:
+- **Call Functionality**: Direct phone call integration
+- **File Attachments**: Share images/documents in chat
+- **Read Receipts**: Track message read status
+- **Typing Indicators**: Show when others are typing
+
+### 4. Reports & Analytics ✅ CSV EXPORT IMPLEMENTED
+Comprehensive operational reports and performance metrics with export capabilities.
 
 #### Features:
-- **Date Range Filters**: Custom time period selection
+- **Date Range Filters**: Custom time period selection (from/to dates)
 - **Summary Statistics**:
   - Total bookings (all statuses)
   - Completed rides count
@@ -112,13 +254,24 @@ Comprehensive operational reports and performance metrics.
   - Rides completed per driver
   - Average rating per driver
   - Online/offline status
-  - Vehicle details
+  - Vehicle details (make, model, plate)
   
 - **Recent Bookings Table**:
   - Booking ID, pickup address, status, fare, timestamp
   - Sortable and filterable
   
-- **Export Functionality**: CSV export (planned)
+- **CSV Export** ✅:
+  - **Export Bookings**: Download filtered bookings as CSV
+    - Columns: ID, Pickup Address, Dropoff Address, Status, Fare, Wheelchair, Date
+    - Filename: `bookings_YYYY-MM-DD_to_YYYY-MM-DD.csv`
+    - Respects date range filter
+    - Sanitizes addresses (removes commas)
+  - **Export Driver Performance**: Download driver metrics as CSV
+    - Columns: Driver Name, Vehicle, Plate, Total Rides, Completed Rides, Rating, Status
+    - Filename: `drivers_YYYY-MM-DD.csv`
+    - Includes all drivers (online and offline)
+  - Loading states with spinner during export generation
+  - Automatic browser download via Blob/URL API
 
 #### Pages:
 - `/dispatcher/reports` - Reports and analytics dashboard
@@ -127,31 +280,111 @@ Comprehensive operational reports and performance metrics.
 - `GET /api/bookings` - Fetch all bookings for calculations
 - `GET /api/dispatcher/drivers` - Fetch driver details
 
-### 5. Alerts & Incidents
-Handle emergency situations and operational issues.
-
-#### Planned Features:
-- **Real-time Alerts**: SOS button triggers, driver/rider issues
-- **Incident Management**: Create, track, and resolve incidents
-- **Escalation**: Escalate to admin for serious issues
-- **Notification System**: Push notifications for critical events
-
-#### Future Implementation:
+#### Export Implementation:
 ```typescript
-// Incident model (to be added)
+// Export bookings
+const exportBookingsCSV = () => {
+  const csv = [
+    ["ID", "Pickup", "Dropoff", "Status", "Fare", "Wheelchair", "Date"],
+    ...filteredBookings.map(b => [
+      b.id,
+      b.pickupAddress.replace(/,/g, ' '),
+      b.dropoffAddress.replace(/,/g, ' '),
+      b.status,
+      b.finalFareAmount || 0,
+      b.requiresWheelchair ? "Yes" : "No",
+      new Date(b.createdAt).toLocaleString()
+    ])
+  ].map(row => row.join(",")).join("\n");
+  
+  // Download file
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `bookings_${dateRange.from}_to_${dateRange.to}.csv`;
+  a.click();
+};
+```
+
+### 5. Alerts & Incidents ✅ SCHEMA IMPLEMENTED
+Handle emergency situations and operational issues with structured incident tracking.
+
+#### Implemented Database Schema:
+```prisma
+enum IncidentType {
+  SOS
+  ACCIDENT
+  MECHANICAL
+  BEHAVIOR
+  DELAY
+  OTHER
+}
+
+enum IncidentPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum IncidentStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  ESCALATED
+  CLOSED
+}
+
 model Incident {
-  id          String   @id @default(cuid())
+  id          String            @id @default(cuid())
   bookingId   String?
-  type        String   // "SOS", "ACCIDENT", "MECHANICAL", "BEHAVIOR", "OTHER"
+  booking     Booking?          @relation(fields: [bookingId], references: [id])
+  type        IncidentType
+  priority    IncidentPriority
+  status      IncidentStatus    @default(OPEN)
+  title       String
   description String
-  priority    String   // "LOW", "MEDIUM", "HIGH", "CRITICAL"
-  status      String   // "OPEN", "IN_PROGRESS", "RESOLVED", "ESCALATED"
-  reportedBy  String   // userId
-  assignedTo  String?  // dispatcher/admin userId
-  createdAt   DateTime @default(now())
+  location    String?
+  reportedBy  String
+  reporter    User              @relation("ReportedIncidents", fields: [reportedBy], references: [id])
+  assignedTo  String?
+  assignee    User?             @relation("AssignedIncidents", fields: [assignedTo], references: [id])
+  resolution  String?
   resolvedAt  DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([bookingId])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
 }
 ```
+
+#### Features (Schema Ready, UI Pending):
+- **Incident Types**: SOS, Accident, Mechanical, Behavior, Delay, Other
+- **Priority Levels**: Low, Medium, High, Critical
+- **Status Tracking**: Open → In Progress → Resolved/Escalated → Closed
+- **Booking Association**: Link incidents to specific bookings
+- **Assignment**: Assign incidents to dispatchers/admins
+- **Resolution Notes**: Document how incidents were resolved
+- **Timestamps**: Track creation and resolution times
+
+#### Planned UI Features:
+- **Real-time Alerts**: SOS button triggers instant notification
+- **Incident Dashboard**: View, filter, sort all incidents
+- **Create Incident**: Form to report new incidents from bookings
+- **Update Status**: Change incident status and add notes
+- **Escalation**: One-click escalate to admin
+- **Notification System**: Push notifications for critical events
+
+#### Future API Endpoints:
+- `POST /api/dispatcher/incidents/create` - Create new incident
+- `GET /api/dispatcher/incidents` - List all incidents
+- `GET /api/dispatcher/incidents/[id]` - Get incident details
+- `PATCH /api/dispatcher/incidents/[id]/status` - Update incident status
+- `POST /api/dispatcher/incidents/[id]/escalate` - Escalate to admin
 
 ## User Interface
 
@@ -411,17 +644,20 @@ WHERE email = 'dispatcher@havenride.test';
 
 ## Future Enhancements
 
-### Phase 1 (Q1 2024)
-- [ ] Google Maps integration for live tracking
-- [ ] Chat widget for dispatcher-driver-rider communication
-- [ ] Incident management system
-- [ ] CSV export for reports
+### Phase 1 (Q1 2025) ✅ COMPLETED
+- [x] Mapbox integration for live tracking ✅
+- [x] Chat widget for dispatcher-driver-rider communication ✅
+- [x] Incident management system (schema implemented) ✅
+- [x] CSV export for reports ✅
+- [x] Automated driver assignment algorithm ✅
 
-### Phase 2 (Q2 2024)
+### Phase 2 (Q1-Q2 2025)
+- [ ] Incident management UI (create, view, resolve, escalate)
 - [ ] Advanced analytics (peak hours, demand heatmaps)
-- [ ] Automated driver assignment algorithm
+- [ ] Route optimization suggestions
 - [ ] Shift management and dispatcher scheduling
 - [ ] Performance metrics per dispatcher
+- [ ] Auto-assign with multiple suggestions mode
 
 ### Phase 3 (Q3 2024)
 - [ ] Machine learning for demand prediction
@@ -445,6 +681,7 @@ For technical support or feature requests, contact the development team.
 
 ---
 
-**Last Updated**: December 2024  
-**Version**: 1.0  
+**Last Updated**: November 9, 2025  
+**Version**: 2.0  
+**Major Updates**: Live map tracking, automated driver assignment, chat integration, CSV exports, incident schema
 **Maintainer**: HavenRide Development Team

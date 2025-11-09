@@ -191,42 +191,51 @@ export default function DriverLocationMap({
         }
       }
     }
+  }, [pickupLat, pickupLng, dropoffLat, dropoffLng, driverLat, driverLng]);
 
+  // Fit bounds to show all markers with dynamic zoom based on distance
+  useEffect(() => {
+    // Exit early if map not ready or coordinates invalid
+    if (!map.current) return;
+    
+    // Type guard: ensure coordinates are valid numbers
+    const isValidCoord = (val: any): val is number => 
+      typeof val === 'number' && !isNaN(val) && isFinite(val);
+    
+    if (!isValidCoord(pickupLat) || !isValidCoord(pickupLng)) {
+      console.log('Invalid pickup coordinates, skipping map bounds update');
+      return;
+    }
+    
     // Fit bounds to show all markers with dynamic zoom based on distance
-    if (map.current && pickupLat && pickupLng && !isNaN(pickupLat) && !isNaN(pickupLng)) {
-      const bounds = new mapboxgl.LngLatBounds();
-      let pointCount = 0;
+    const bounds = new mapboxgl.LngLatBounds();
+    let pointCount = 0;
       
-      // Validate and add pickup coordinates
-      if (pickupLat && pickupLng && !isNaN(pickupLat) && !isNaN(pickupLng)) {
-        bounds.extend([pickupLng, pickupLat]);
-        pointCount++;
-      }
-      
-      // Validate and add dropoff coordinates
-      if (dropoffLat && dropoffLng && !isNaN(dropoffLat) && !isNaN(dropoffLng)) {
-        bounds.extend([dropoffLng, dropoffLat]);
-        pointCount++;
-      }
-      
-      // Validate and add driver coordinates
-      if (currentDriverLocation && 
-          !isNaN(currentDriverLocation.lat) && 
-          !isNaN(currentDriverLocation.lng)) {
-        bounds.extend([currentDriverLocation.lng, currentDriverLocation.lat]);
-        pointCount++;
-      }
+    // Validate and add pickup coordinates (already checked above)
+    bounds.extend([pickupLng, pickupLat]);
+    pointCount++;
+    
+    // Validate and add dropoff coordinates
+    if (isValidCoord(dropoffLat) && isValidCoord(dropoffLng)) {
+      bounds.extend([dropoffLng, dropoffLat]);
+      pointCount++;
+    }
+    
+    // Validate and add driver coordinates
+    if (currentDriverLocation && 
+        isValidCoord(currentDriverLocation.lat) && 
+        isValidCoord(currentDriverLocation.lng)) {
+      bounds.extend([currentDriverLocation.lng, currentDriverLocation.lat]);
+      pointCount++;
+    }
 
-      // Only fit bounds if we have at least 2 points
-      if (pointCount >= 2) {
-        // Calculate distance between driver and pickup for dynamic zoom
-        let distance = 0;
-        if (currentDriverLocation && 
-            pickupLat && pickupLng &&
-            !isNaN(currentDriverLocation.lat) && 
-            !isNaN(currentDriverLocation.lng) &&
-            !isNaN(pickupLat) && 
-            !isNaN(pickupLng)) {
+    // Only fit bounds if we have at least 2 points
+    if (pointCount >= 2) {
+      // Calculate distance between driver and pickup for dynamic zoom
+      let distance = 0;
+      if (currentDriverLocation && 
+          isValidCoord(currentDriverLocation.lat) && 
+          isValidCoord(currentDriverLocation.lng)) {
           // Haversine formula to calculate distance in km
           const R = 6371;
           const dLat = ((pickupLat - currentDriverLocation.lat) * Math.PI) / 180;
@@ -237,54 +246,54 @@ export default function DriverLocationMap({
               Math.cos((pickupLat * Math.PI) / 180) *
               Math.sin(dLng / 2) *
               Math.sin(dLng / 2);
-          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-          distance = R * c;
-        }
-
-        // Dynamic padding and zoom based on distance
-        // Closer distance = more padding (zooms in more)
-        let padding = 100;
-        let maxZoom = 15;
-        
-        if (distance > 0) {
-          if (distance < 0.5) {
-            // Very close (< 500m)
-            padding = 150;
-            maxZoom = 17;
-          } else if (distance < 1) {
-            // Close (< 1km)
-            padding = 120;
-            maxZoom = 16;
-          } else if (distance < 3) {
-            // Medium distance (< 3km)
-            padding = 100;
-            maxZoom = 15;
-          } else if (distance < 10) {
-            // Far (< 10km)
-            padding = 80;
-            maxZoom = 13;
-          } else {
-            // Very far (> 10km)
-            padding = 60;
-            maxZoom = 12;
-          }
-        }
-
-        // Verify bounds is valid before fitting
-        const ne = bounds.getNorthEast();
-        const sw = bounds.getSouthWest();
-        if (!isNaN(ne.lng) && !isNaN(ne.lat) && !isNaN(sw.lng) && !isNaN(sw.lat)) {
-          map.current.fitBounds(bounds, {
-            padding,
-            maxZoom,
-            duration: 1000, // Smooth animation
-          });
-        }
-      } else if (pickupLat && pickupLng && !isNaN(pickupLat) && !isNaN(pickupLng)) {
-        // If only one point, center on it
-        map.current.setCenter([pickupLng, pickupLat]);
-        map.current.setZoom(14);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        distance = R * c;
       }
+
+      // Dynamic padding and zoom based on distance
+      // Closer distance = more padding (zooms in more)
+      let padding = 100;
+      let maxZoom = 15;
+      
+      if (distance > 0) {
+        if (distance < 0.5) {
+          // Very close (< 500m)
+          padding = 150;
+          maxZoom = 17;
+        } else if (distance < 1) {
+          // Close (< 1km)
+          padding = 120;
+          maxZoom = 16;
+        } else if (distance < 3) {
+          // Medium distance (< 3km)
+          padding = 100;
+          maxZoom = 15;
+        } else if (distance < 10) {
+          // Far (< 10km)
+          padding = 80;
+          maxZoom = 13;
+        } else {
+          // Very far (> 10km)
+          padding = 60;
+          maxZoom = 12;
+        }
+      }
+
+      // Verify bounds is valid before fitting
+      const ne = bounds.getNorthEast();
+      const sw = bounds.getSouthWest();
+      if (isValidCoord(ne.lng) && isValidCoord(ne.lat) && 
+          isValidCoord(sw.lng) && isValidCoord(sw.lat)) {
+        map.current.fitBounds(bounds, {
+          padding,
+          maxZoom,
+          duration: 1000, // Smooth animation
+        });
+      }
+    } else {
+      // If only one point (just pickup), center on it
+      map.current.setCenter([pickupLng, pickupLat]);
+      map.current.setZoom(14);
     }
   }, [
     pickupLat,

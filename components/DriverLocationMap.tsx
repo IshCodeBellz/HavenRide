@@ -192,7 +192,7 @@ export default function DriverLocationMap({
       }
     }
 
-    // Fit bounds to show all markers
+    // Fit bounds to show all markers with dynamic zoom based on distance
     if (map.current && pickupLat && pickupLng) {
       const bounds = new mapboxgl.LngLatBounds();
       let pointCount = 0;
@@ -212,9 +212,56 @@ export default function DriverLocationMap({
 
       // Only fit bounds if we have at least 2 points
       if (pointCount >= 2) {
+        // Calculate distance between driver and pickup for dynamic zoom
+        let distance = 0;
+        if (currentDriverLocation && pickupLat && pickupLng) {
+          // Haversine formula to calculate distance in km
+          const R = 6371;
+          const dLat = ((pickupLat - currentDriverLocation.lat) * Math.PI) / 180;
+          const dLng = ((pickupLng - currentDriverLocation.lng) * Math.PI) / 180;
+          const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos((currentDriverLocation.lat * Math.PI) / 180) *
+              Math.cos((pickupLat * Math.PI) / 180) *
+              Math.sin(dLng / 2) *
+              Math.sin(dLng / 2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          distance = R * c;
+        }
+
+        // Dynamic padding and zoom based on distance
+        // Closer distance = more padding (zooms in more)
+        let padding = 100;
+        let maxZoom = 15;
+        
+        if (distance > 0) {
+          if (distance < 0.5) {
+            // Very close (< 500m)
+            padding = 150;
+            maxZoom = 17;
+          } else if (distance < 1) {
+            // Close (< 1km)
+            padding = 120;
+            maxZoom = 16;
+          } else if (distance < 3) {
+            // Medium distance (< 3km)
+            padding = 100;
+            maxZoom = 15;
+          } else if (distance < 10) {
+            // Far (< 10km)
+            padding = 80;
+            maxZoom = 13;
+          } else {
+            // Very far (> 10km)
+            padding = 60;
+            maxZoom = 12;
+          }
+        }
+
         map.current.fitBounds(bounds, {
-          padding: 100,
-          maxZoom: 15,
+          padding,
+          maxZoom,
+          duration: 1000, // Smooth animation
         });
       } else if (pickupLat && pickupLng) {
         // If only one point, center on it

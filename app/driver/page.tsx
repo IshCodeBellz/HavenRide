@@ -23,11 +23,16 @@ function DriverPageContent() {
   const fetchingRef = useRef(false);
   const initialLoadRef = useRef(true);
 
-  const assigned = useMemo(
-    () =>
-      bookings.find((b) => b.driverId === user?.id && b.status !== "COMPLETED"),
-    [bookings, user?.id]
-  );
+  const assigned = useMemo(() => {
+    const found = bookings.find((b) => b.driverId === user?.id && b.status !== "COMPLETED");
+    console.log("Checking assigned booking:", {
+      driverId: user?.id,
+      totalBookings: bookings.length,
+      assigned: found,
+      assignedStatus: found?.status
+    });
+    return found;
+  }, [bookings, user?.id]);
 
   // Calculate requested bookings and current booking before any hooks
   const requestedBookings = useMemo(
@@ -139,12 +144,20 @@ function DriverPageContent() {
   // Memoized fetch function to prevent re-creating on every render
   const fetchBookings = useCallback(async () => {
     // Prevent concurrent fetches
-    if (fetchingRef.current) return;
+    if (fetchingRef.current) {
+      console.log("Fetch already in progress, skipping");
+      return;
+    }
 
     fetchingRef.current = true;
     try {
+      console.log("Fetching bookings...");
       const res = await fetch("/api/bookings");
       const data = await res.json();
+      console.log("Fetched bookings:", data.length, "bookings");
+      console.log("Driver ID:", user?.id);
+      const assignedBooking = data.find((b: any) => b.driverId === user?.id && b.status !== "COMPLETED");
+      console.log("Assigned booking:", assignedBooking);
       setBookings(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Failed to fetch bookings:", error);
@@ -152,7 +165,7 @@ function DriverPageContent() {
       fetchingRef.current = false;
       initialLoadRef.current = false;
     }
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -197,12 +210,30 @@ function DriverPageContent() {
   }, [user?.id, fetchBookings]);
 
   async function take(id: string) {
-    await fetch(`/api/bookings/${id}/status`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "ASSIGNED", driverId: user?.id }),
-    });
-    fetchBookings();
+    try {
+      console.log("Taking ride:", id, "Driver ID:", user?.id);
+      const res = await fetch(`/api/bookings/${id}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "ASSIGNED", driverId: user?.id }),
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        console.error("Failed to accept ride:", error);
+        alert(error.error || "Failed to accept ride");
+        return;
+      }
+      
+      const result = await res.json();
+      console.log("Ride accepted successfully:", result);
+      
+      // Fetch updated bookings
+      await fetchBookings();
+    } catch (error) {
+      console.error("Error accepting ride:", error);
+      alert("An error occurred while accepting the ride");
+    }
   }
   async function arrive(id: string) {
     await fetch(`/api/bookings/${id}/status`, {

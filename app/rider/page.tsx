@@ -547,9 +547,9 @@ function RiderPageContent() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-gray-50">
-      {/* Map Section - Fixed at top */}
-      <div className="relative h-[35vh] sm:h-[40vh] bg-gray-200">
+    <div className="h-full flex flex-col bg-gray-50 relative">
+      {/* Map Section - Full height on mobile */}
+      <div className="relative h-[calc(100vh-80px)] md:h-[40vh] bg-gray-200">
         {(pickupCoords || dropoffCoords) && (
           <BookingMap
             pickup={pickupCoords}
@@ -578,29 +578,85 @@ function RiderPageContent() {
           </div>
         )}
 
-        {/* Menu Button - Top Left */}
-        <button className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-white rounded-full p-2 sm:p-3 shadow-lg">
-          <svg
-            className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-        </button>
+        {/* Where to Search Box - Overlay on Map (Mobile) */}
+        <div className="md:hidden absolute top-4 left-4 right-4 z-10">
+          <div className="bg-white rounded-2xl p-4 shadow-2xl border border-gray-100">
+            <div className="flex items-center gap-3">
+              <svg
+                className="w-5 h-5 text-gray-400 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              <div className="flex-1">
+                <MapboxAutocomplete
+                  value={dropoff}
+                  onChange={(address, coords) => {
+                    setDropoff(address);
+                    setDropoffCoords(coords);
+                    // Auto-get current location for pickup if not set
+                    if (!pickup) {
+                      handleUseCurrentLocation();
+                    }
+                  }}
+                  placeholder="Where to?"
+                  label=""
+                  required={false}
+                />
+              </div>
+              <button
+                onClick={() => {
+                  alert("Schedule ride feature coming soon!");
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors shrink-0"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span className="hidden sm:inline">Later</span>
+              </button>
+            </div>
+            
+            {/* Wheelchair Checkbox - Mobile */}
+            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+              <input
+                type="checkbox"
+                id="wheelchair-mobile"
+                checked={wheelchair}
+                onChange={(e) => setWheelchair(e.target.checked)}
+                className="w-4 h-4 text-[#00796B] rounded border-gray-300 focus:ring-[#00796B]"
+              />
+              <label htmlFor="wheelchair-mobile" className="text-sm text-gray-700 flex items-center gap-1">
+                <span className="text-lg">♿</span>
+                <span>Wheelchair accessible</span>
+              </label>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Content Section - Scrollable */}
+      {/* Content Section - Desktop & Expanded Mobile View */}
       {!booking && (
-        <div className="flex-1 overflow-auto bg-white">
+        <div className="hidden md:block flex-1 overflow-auto bg-white">
           <div className="max-w-2xl mx-auto px-6 py-8 space-y-6">
-            {/* Where to Search Box */}
+            {/* Where to Search Box - Desktop */}
             <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-100">
               <div className="flex items-center gap-4">
                 <svg
@@ -656,7 +712,7 @@ function RiderPageContent() {
               </div>
             </div>
 
-            {/* Expanded Booking Form */}
+            {/* Expanded Booking Form - Desktop */}
             {(dropoff || pickup) && (
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
                 <div>
@@ -771,7 +827,7 @@ function RiderPageContent() {
               </div>
             )}
 
-            {/* Recent Destinations */}
+            {/* Recent Destinations - Desktop */}
             {recentDestinations.length > 0 && (
               <div className="space-y-3">
                 {recentDestinations.map((destination: any) => (
@@ -846,6 +902,67 @@ function RiderPageContent() {
                     </div>
                   </button>
                 ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Bottom Sheet - Shown when destination selected */}
+      {dropoff && dropoffCoords && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl border-t border-gray-200 z-20 animate-slide-up">
+          <div className="p-4 space-y-3">
+            {/* Handle Bar */}
+            <div className="flex justify-center">
+              <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
+            </div>
+
+            {/* Destination Info */}
+            <div className="space-y-2">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-[#0F3D3E] rounded-full flex items-center justify-center shrink-0">
+                  <span className="text-white font-bold text-sm">B</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-600 font-medium">Going to</p>
+                  <p className="text-sm font-semibold text-[#0F3D3E] wrap-break-word">
+                    {dropoff}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Estimate or Confirm Button */}
+            {!estimate && pickup && pickupCoords && (
+              <button
+                onClick={handleEstimate}
+                disabled={loading}
+                className="w-full bg-[#00796B] text-white py-4 rounded-xl font-semibold text-base hover:bg-[#00695C] transition-colors disabled:opacity-50"
+              >
+                {loading ? "Estimating..." : "See Prices"}
+              </button>
+            )}
+
+            {estimate && (
+              <div className="space-y-3">
+                <div className="bg-[#E0F2F1] rounded-xl p-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-gray-700">Estimated Fare</span>
+                    <span className="font-bold text-2xl text-[#0F3D3E]">
+                      £{estimate.amount.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    Distance: ~{estimate.distanceKm.toFixed(1)} km
+                  </div>
+                </div>
+                <button
+                  onClick={handleBook}
+                  disabled={loading}
+                  className="w-full bg-[#00796B] text-white py-4 rounded-xl font-semibold text-base hover:bg-[#00695C] transition-colors"
+                >
+                  {loading ? "Booking..." : "Confirm Booking"}
+                </button>
               </div>
             )}
           </div>

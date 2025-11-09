@@ -139,21 +139,32 @@ export default function DriverLocationMap({
     // Fit bounds to show all markers
     if (map.current && pickupLat && pickupLng) {
       const bounds = new mapboxgl.LngLatBounds();
+      let pointCount = 0;
       
       if (pickupLat && pickupLng) {
         bounds.extend([pickupLng, pickupLat]);
+        pointCount++;
       }
       if (dropoffLat && dropoffLng) {
         bounds.extend([dropoffLng, dropoffLat]);
+        pointCount++;
       }
       if (currentDriverLocation) {
         bounds.extend([currentDriverLocation.lng, currentDriverLocation.lat]);
+        pointCount++;
       }
 
-      map.current.fitBounds(bounds, {
-        padding: 100,
-        maxZoom: 15,
-      });
+      // Only fit bounds if we have at least 2 points
+      if (pointCount >= 2) {
+        map.current.fitBounds(bounds, {
+          padding: 100,
+          maxZoom: 15,
+        });
+      } else if (pickupLat && pickupLng) {
+        // If only one point, center on it
+        map.current.setCenter([pickupLng, pickupLat]);
+        map.current.setZoom(14);
+      }
     }
   }, [
     pickupLat,

@@ -378,20 +378,20 @@ function DriverPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-3 sm:p-6">
-      <div className="max-w-5xl w-full">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="max-w-4xl w-full">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 sm:mb-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#0F3D3E]">
+            <h1 className="text-xl sm:text-2xl font-bold text-[#0F3D3E]">
               Driver Console
             </h1>
-            <p className="text-sm sm:text-base text-gray-600 mt-1">
+            <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
               {requestedBookings.length} ride
               {requestedBookings.length !== 1 ? "s" : ""} available
             </p>
           </div>
-          <label className="flex items-center gap-2 sm:gap-3 bg-white px-3 sm:px-4 py-2 rounded-lg shadow-sm border border-gray-200 self-start">
+          <label className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg shadow-sm border border-gray-200 self-start">
             <span className="text-xs sm:text-sm font-medium text-gray-700">
               {online ? "Online" : "Offline"}
             </span>
@@ -406,10 +406,10 @@ function DriverPageContent() {
 
         {/* Main Card */}
         {initialLoadRef.current ? (
-          <div className="bg-white rounded-xl sm:rounded-2xl p-8 sm:p-12 shadow-lg text-center">
-            <div className="inline-block p-3 sm:p-4 bg-gray-100 rounded-full mb-4">
+          <div className="bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-lg text-center">
+            <div className="inline-block p-2 sm:p-3 bg-gray-100 rounded-full mb-3">
               <svg
-                className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 animate-spin"
+                className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 animate-spin"
                 fill="none"
                 viewBox="0 0 24 24"
               >
@@ -428,15 +428,15 @@ function DriverPageContent() {
                 />
               </svg>
             </div>
-            <p className="text-sm sm:text-base text-gray-600">
+            <p className="text-sm text-gray-600">
               Loading bookings...
             </p>
           </div>
         ) : requestedBookings.length === 0 ? (
-          <div className="bg-white rounded-xl sm:rounded-2xl p-8 sm:p-12 shadow-lg text-center">
-            <div className="inline-block p-3 sm:p-4 bg-[#E0F2F1] rounded-full mb-4">
+          <div className="bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-lg text-center">
+            <div className="inline-block p-2 sm:p-3 bg-[#E0F2F1] rounded-full mb-3">
               <svg
-                className="w-10 h-10 sm:w-12 sm:h-12 text-[#00796B]"
+                className="w-8 h-8 sm:w-10 sm:h-10 text-[#00796B]"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -449,10 +449,10 @@ function DriverPageContent() {
                 />
               </svg>
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-[#0F3D3E] mb-2">
+            <h2 className="text-lg sm:text-xl font-bold text-[#0F3D3E] mb-2">
               No Available Jobs
             </h2>
-            <p className="text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 mb-3">
               {online
                 ? "All jobs are currently assigned. New ride requests will appear here."
                 : "Go online to start receiving ride requests"}
@@ -460,7 +460,7 @@ function DriverPageContent() {
             {!online && (
               <button
                 onClick={() => toggleOnline(true)}
-                className="px-6 py-3 bg-[#00796B] text-white rounded-lg font-semibold hover:bg-[#00695C] transition-colors"
+                className="px-5 py-2.5 bg-[#00796B] text-white rounded-lg font-semibold hover:bg-[#00695C] transition-colors text-sm"
               >
                 Go Online
               </button>
@@ -470,7 +470,7 @@ function DriverPageContent() {
           <div className="relative">
             {/* Main Carousel Container with Preview */}
             <div className="relative overflow-visible">
-              <div className="flex items-center justify-center gap-3 md:gap-4">
+              <div className="flex items-center justify-center gap-2 md:gap-3">
                 {/* Previous Ride Preview (Left) */}
                 {requestedBookings.length > 1 && currentIndex > 0 && (
                   <div

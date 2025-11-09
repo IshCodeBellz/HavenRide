@@ -61,8 +61,18 @@ function MapPageContent() {
               href="/dispatcher"
               className="text-gray-400 hover:text-gray-600"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </Link>
             <h1 className="text-2xl font-bold text-[#263238]">Live Map</h1>
@@ -89,15 +99,21 @@ function MapPageContent() {
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="text-sm text-gray-600 mb-1">Online Drivers</div>
-            <div className="text-3xl font-bold text-green-700">{onlineDrivers.length}</div>
+            <div className="text-3xl font-bold text-green-700">
+              {onlineDrivers.length}
+            </div>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="text-sm text-gray-600 mb-1">Active Rides</div>
-            <div className="text-3xl font-bold text-blue-700">{activeBookings.length}</div>
+            <div className="text-3xl font-bold text-blue-700">
+              {activeBookings.length}
+            </div>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="text-sm text-gray-600 mb-1">Total Drivers</div>
-            <div className="text-3xl font-bold text-[#263238]">{drivers.length}</div>
+            <div className="text-3xl font-bold text-[#263238]">
+              {drivers.length}
+            </div>
           </div>
         </div>
 
@@ -109,10 +125,10 @@ function MapPageContent() {
               bookings={activeBookings}
               className="w-full h-full"
               onDriverClick={(driver) => {
-                console.log('Driver clicked:', driver);
+                console.log("Driver clicked:", driver);
               }}
               onBookingClick={(booking) => {
-                console.log('Booking clicked:', booking);
+                console.log("Booking clicked:", booking);
               }}
             />
           </div>
@@ -152,7 +168,8 @@ function MapPageContent() {
                     {driver.user.name || "Driver"}
                   </div>
                   <div className="text-sm text-gray-600">
-                    {driver.vehicleMake} {driver.vehicleModel} • {driver.vehiclePlate || "N/A"}
+                    {driver.vehicleMake} {driver.vehicleModel} •{" "}
+                    {driver.vehiclePlate || "N/A"}
                   </div>
                 </div>
                 <div className="flex items-center gap-3">

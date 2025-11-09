@@ -7,6 +7,7 @@
 ## 🎉 Latest Updates (November 2025)
 
 ### Recent Additions
+
 1. **Live Map Tracking** ✅ - Mapbox integration with real-time driver positions and booking markers
 2. **Automated Driver Assignment** ✅ - Intelligent algorithm with weighted scoring (proximity, rating, wheelchair)
 3. **Real-time Chat System** ✅ - Ably-powered messaging between dispatcher, drivers, and riders
@@ -14,6 +15,7 @@
 5. **Incident Management Schema** ✅ - Complete database model for tracking SOS alerts and operational issues
 
 ### Files Added/Modified
+
 - `components/DispatcherLiveMap.tsx` (NEW) - 260 lines
 - `lib/assignment/auto-assign.ts` (NEW) - 256 lines
 - `app/api/dispatcher/auto-assign/route.ts` (NEW) - 170 lines
@@ -25,13 +27,14 @@
 ## What Was Built
 
 ### 1. Enhanced Dispatcher Console (`/app/dispatcher/page.tsx`)
+
 - **Two-column layout**: New Requests vs Active Rides
 - **Real-time updates**: Ably subscription + 10s polling fallback
 - **Create Booking modal**: Form to create bookings on behalf of riders
   - Fields: Rider identifier, pickup/dropoff, wheelchair, scheduled time, notes
   - Form state management with validation
   - Loading states and error handling
-- **Driver Assignment modal**: 
+- **Driver Assignment modal**:
   - Shows booking details
   - Lists online drivers filtered by wheelchair capability
   - One-click assignment to driver
@@ -41,12 +44,14 @@
 ### 2. API Endpoints
 
 #### `/app/api/dispatcher/drivers/route.ts` (GET)
+
 - Fetches all drivers with online status
 - Includes user details (name, email)
 - Role-verified (DISPATCHER only)
 - Returns: Array of driver objects with nested user data
 
 #### `/app/api/dispatcher/bookings/create/route.ts` (POST)
+
 - Creates bookings on behalf of riders
 - Finds or creates rider by email/phone
 - Validates required fields
@@ -55,6 +60,7 @@
 - Returns: Created booking with rider details
 
 ### 3. Live Map Page (`/app/dispatcher/map/page.tsx`)
+
 - **Stats bar**: Online drivers, active rides, total drivers
 - **Map placeholder**: 500px container ready for Google Maps
 - **Online drivers list**: Real-time driver status with details
@@ -62,6 +68,7 @@
 - **Navigation**: Back to dashboard, Reports link
 
 ### 4. Reports Page (`/app/dispatcher/reports/page.tsx`)
+
 - **Date range filter**: From/To date pickers with Apply button
 - **Summary statistics**: Total, completed, canceled bookings, revenue
 - **Driver performance table**: Rides completed, rating, online status
@@ -70,6 +77,7 @@
 - **Navigation**: Back to dashboard, Live Map link
 
 ### 5. Documentation (`/docs/DISPATCHER_GUIDE.md`)
+
 - Complete 300+ line guide covering:
   - Core capabilities (5 sections)
   - API endpoints with code examples
@@ -85,6 +93,7 @@
 ## Features Implemented
 
 ### Bookings Management ✅
+
 - [x] View all bookings in real-time
 - [x] Create bookings on behalf of riders
 - [x] Manually assign drivers to bookings
@@ -93,6 +102,7 @@
 - [x] Real-time booking updates via Ably
 
 ### Live Map & Tracking ✅ FULLY IMPLEMENTED
+
 - [x] Page layout and navigation
 - [x] Driver list with online status
 - [x] Statistics dashboard
@@ -106,6 +116,7 @@
 - [ ] Route polylines (future enhancement)
 
 ### Reports & Analytics ✅ FULLY IMPLEMENTED
+
 - [x] Date range filters
 - [x] Summary statistics
 - [x] Driver performance table
@@ -117,6 +128,7 @@
 - [ ] Advanced analytics (peak hours, heatmaps) (future)
 
 ### Communication System ✅ CHAT IMPLEMENTED
+
 - [x] **Chat widget per booking (Ably-powered)**
 - [x] **Chat buttons on all booking cards**
 - [x] **Modal overlay with real-time messaging**
@@ -127,6 +139,7 @@
 - [ ] Read receipts (future)
 
 ### Alerts & Incidents ✅ SCHEMA IMPLEMENTED
+
 - [x] **Complete Incident model in database schema**
 - [x] **IncidentType enum (SOS, ACCIDENT, MECHANICAL, BEHAVIOR, DELAY, OTHER)**
 - [x] **IncidentPriority enum (LOW, MEDIUM, HIGH, CRITICAL)**
@@ -138,6 +151,7 @@
 - [ ] Escalation workflow UI (next phase)
 
 ### Automated Driver Assignment ✅ FULLY IMPLEMENTED
+
 - [x] **Intelligent matching algorithm with weighted scoring**
 - [x] **Haversine distance calculation for accuracy**
 - [x] **Scoring system: 60% proximity, 30% rating, 10% wheelchair bonus**
@@ -151,6 +165,7 @@
 ## Technical Details
 
 ### State Management
+
 - `bookings`: Array of all bookings (fetched from API)
 - `drivers`: Array of all drivers with online status
 - `showCreateBooking`: Boolean for modal visibility
@@ -160,6 +175,7 @@
 - `creating`: Boolean for loading state during creation
 
 ### Real-time Updates
+
 ```typescript
 // Ably subscription
 const channel = getChannel("dispatch");
@@ -176,13 +192,16 @@ setInterval(() => {
 ```
 
 ### API Integration
+
 - **Bookings**: `GET /api/bookings` - All bookings
 - **Drivers**: `GET /api/dispatcher/drivers` - All drivers with status
 - **Create**: `POST /api/dispatcher/bookings/create` - New booking
 - **Assign**: `POST /api/bookings/[id]/status` - Assign driver
 
 ### Field Mappings
+
 Schema uses different field names than expected:
+
 - ✅ `requiresWheelchair` (not `wheelchairRequired`)
 - ✅ `wheelchairCapable` (not `wheelchairAccessible`)
 - ✅ `driver.id` for assignment (not `driver.userId`)
@@ -192,6 +211,7 @@ Schema uses different field names than expected:
 ## Files Created/Modified
 
 ### Created Files (5)
+
 1. `/app/api/dispatcher/drivers/route.ts` - Fetch drivers endpoint
 2. `/app/api/dispatcher/bookings/create/route.ts` - Create booking endpoint
 3. `/app/dispatcher/map/page.tsx` - Live map page
@@ -199,11 +219,13 @@ Schema uses different field names than expected:
 5. `/docs/DISPATCHER_GUIDE.md` - Complete documentation
 
 ### Modified Files (1)
+
 1. `/app/dispatcher/page.tsx` - Enhanced with modals, forms, state management
 
 ## Testing Checklist
 
 ### Manual Testing
+
 - [ ] Login as DISPATCHER role
 - [ ] View bookings in dashboard
 - [ ] Create new booking with new rider email
@@ -216,6 +238,7 @@ Schema uses different field names than expected:
 - [ ] Test role protection (access as RIDER)
 
 ### Database Verification
+
 ```sql
 -- Check dispatcher exists
 SELECT * FROM "User" WHERE role = 'DISPATCHER';
@@ -236,12 +259,14 @@ SELECT * FROM "Driver" WHERE "isOnline" = true;
 ## Known Issues
 
 ### TypeScript Errors (Non-blocking)
+
 - `isAdmin` field not in Prisma schema yet (used in admin APIs)
 - `status` field not in User model (used for suspension)
 - `complianceLog` model not generated yet
 - These are from earlier admin work and don't affect dispatcher features
 
 ### Linting Warnings (Non-blocking)
+
 - `bg-gradient-to-r` should be `bg-linear-to-r` (Tailwind CSS v4 syntax)
 - `flex-shrink-0` should be `shrink-0` (shorthand)
 - Can be batch-fixed or ignored
@@ -249,6 +274,7 @@ SELECT * FROM "Driver" WHERE "isOnline" = true;
 ## Next Steps
 
 ### Immediate (Next Session)
+
 1. Test dispatcher console end-to-end
 2. Create test dispatcher account
 3. Create test drivers with online status
@@ -256,6 +282,7 @@ SELECT * FROM "Driver" WHERE "isOnline" = true;
 5. Fix any critical bugs
 
 ### Short-term (This Week)
+
 1. Implement chat widget in booking cards
 2. Add call functionality with phone numbers
 3. Implement CSV export for reports
@@ -263,6 +290,7 @@ SELECT * FROM "Driver" WHERE "isOnline" = true;
 5. Enhance error messages and validation
 
 ### Medium-term (Next Sprint)
+
 1. Integrate Google Maps in live map page
 2. Add live driver position markers
 3. Implement incident management system
@@ -272,20 +300,25 @@ SELECT * FROM "Driver" WHERE "isOnline" = true;
 ## Deployment Notes
 
 ### Environment Variables
+
 No new env vars needed. Existing setup:
+
 - `DATABASE_URL` - PostgreSQL connection
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Clerk auth
 - `CLERK_SECRET_KEY` - Clerk server
 - `NEXT_PUBLIC_ABLY_KEY` - Ably real-time
 
 ### Database Migration
+
 No schema changes needed. Using existing models:
+
 - `User` (with role field)
 - `Dispatcher` (optional, for metrics)
 - `Booking` (with requiresWheelchair, specialNotes)
 - `Driver` (with isOnline, wheelchairCapable)
 
 ### Vercel Deployment
+
 ```bash
 # Push to GitHub
 git add .
@@ -297,6 +330,7 @@ git push origin main
 ```
 
 ### Post-Deployment
+
 1. Create dispatcher user in production DB
 2. Set at least one driver to `isOnline = true`
 3. Test booking creation flow
@@ -306,6 +340,7 @@ git push origin main
 ## Success Metrics
 
 ### MVP Criteria ✅
+
 - [x] Dispatcher can view all bookings
 - [x] Dispatcher can create bookings for riders
 - [x] Dispatcher can assign drivers manually
@@ -316,12 +351,14 @@ git push origin main
 - [x] Complete documentation
 
 ### Performance Targets
+
 - Page load: < 2s
 - Booking creation: < 1s
 - Real-time update latency: < 2s
 - API response time: < 500ms
 
 ### User Experience
+
 - Clear error messages
 - Loading states for async operations
 - Confirmation before destructive actions
@@ -329,6 +366,7 @@ git push origin main
 - Intuitive navigation
 
 ## Documentation Links
+
 - [Dispatcher Guide](./docs/DISPATCHER_GUIDE.md) - Complete feature guide
 - [Admin Dashboard](./docs/ADMIN_DASHBOARD.md) - Admin features
 - [Role System](./docs/ROLE_SYSTEM_GUIDE.md) - Multi-role architecture

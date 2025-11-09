@@ -1,24 +1,25 @@
 # Dispatcher Role - Complete Guide
 
 ## Overview
+
 The Dispatcher role in HavenRide is designed for operations staff who manage bookings in real-time, coordinate drivers, and ensure smooth service delivery. Dispatchers have elevated permissions to create bookings on behalf of riders, manually assign drivers, and monitor all operational aspects of the platform.
 
 ## Core Capabilities
 
 ### 1. Bookings Management
+
 Dispatchers can view, create, and manage all bookings in the system.
 
 #### Features:
+
 - **View All Bookings**: Real-time dashboard showing:
   - New Requests (status: REQUESTED)
   - Active Rides (status: ASSIGNED, EN_ROUTE, ARRIVED, IN_PROGRESS)
   - Booking statistics and counts
-  
 - **Create Bookings**: Manual booking creation on behalf of riders
   - Fields: Rider identifier (email/phone), pickup address, dropoff address, wheelchair requirement, scheduled time, special notes
   - Automatic rider creation if new user
   - Real-time availability of wheelchair-capable drivers
-  
 - **Assign Drivers**: Two assignment methods available
   - **Automated Assignment** ✅: One-click intelligent driver matching
     - Algorithm scores drivers by proximity (60%), rating (30%), wheelchair capability (10%)
@@ -33,6 +34,7 @@ Dispatchers can view, create, and manage all bookings in the system.
     - One-click selection from list
 
 #### API Endpoints:
+
 - `GET /api/bookings` - Fetch all bookings
 - `POST /api/dispatcher/bookings/create` - Create new booking
 - `POST /api/bookings/[id]/status` - Update booking status and assign driver
@@ -40,6 +42,7 @@ Dispatchers can view, create, and manage all bookings in the system.
 - `POST /api/dispatcher/auto-assign` - Automatically assign best driver to booking ✅
 
 #### Implementation:
+
 ```typescript
 // Create booking
 const response = await fetch("/api/dispatcher/bookings/create", {
@@ -90,9 +93,11 @@ const response = await fetch("/api/dispatcher/auto-assign", {
 ```
 
 ### 1a. Automated Driver Assignment Algorithm ✅ IMPLEMENTED
+
 Intelligent driver matching system using distance-based scoring and driver ratings.
 
 #### Algorithm Details:
+
 - **Haversine Distance Calculation**: Accurate proximity based on latitude/longitude coordinates
 - **Weighted Scoring System**:
   - Distance: 60% weight (100 points for ≤5km, linear decay to 20km)
@@ -105,6 +110,7 @@ Intelligent driver matching system using distance-based scoring and driver ratin
 - **Best Match Selection**: Returns driver with highest composite score
 
 #### Scoring Examples:
+
 ```
 Driver A: 3km away, 4.5 rating, wheelchair-capable
 - Distance score: 95/100 (3km = excellent proximity)
@@ -122,10 +128,12 @@ Result: Driver A is assigned (higher score)
 ```
 
 #### Files:
+
 - `lib/assignment/auto-assign.ts` - Core algorithm with scoring functions
 - `app/api/dispatcher/auto-assign/route.ts` - API endpoint with role verification
 
 #### Functions:
+
 ```typescript
 // Calculate great-circle distance between two coordinates
 calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number
@@ -147,6 +155,7 @@ getAssignmentExplanation(result: DriverScore): string
 ```
 
 #### UI Integration:
+
 - **Purple "Auto-Assign Best Driver" button** on new request cards
 - Loading state with spinner during assignment
 - Success alert with driver name, distance, and score
@@ -154,6 +163,7 @@ getAssignmentExplanation(result: DriverScore): string
 - "Manual Assignment" button available as alternative
 
 #### Testing Recommendations:
+
 1. Test with multiple online drivers at varying distances
 2. Test wheelchair requirement filtering
 3. Test with no online drivers (should return error)
@@ -161,9 +171,11 @@ getAssignmentExplanation(result: DriverScore): string
 5. Test rating influence on selection (5.0 vs 3.0 rating)
 
 ### 2. Live Map & Tracking ✅ IMPLEMENTED
+
 Real-time visualization of all drivers and active rides using Mapbox.
 
 #### Features:
+
 - **Live Driver Tracking**: Real-time positions of all online drivers with auto-refresh
 - **Driver Markers**: Blue circular markers with emoji indicators (🚐 standard, ♿ wheelchair-capable)
 - **Online Status**: Green indicator dot on active driver markers
@@ -178,12 +190,15 @@ Real-time visualization of all drivers and active rides using Mapbox.
 - **Statistics Bar**: Online drivers count, active rides, total drivers
 
 #### Pages:
+
 - `/dispatcher/map` - Full-screen live map view (600px height)
 
 #### Components:
+
 - `DispatcherLiveMap.tsx` - Main map component with Mapbox GL JS integration
 
 #### Configuration:
+
 ```typescript
 // Environment variable required
 NEXT_PUBLIC_MAPBOX_TOKEN=pk.eyJ1IjoieWVtaWJlbGxvIi...
@@ -194,9 +209,11 @@ zoom: 11
 ```
 
 ### 3. Communication System ✅ IMPLEMENTED
+
 Direct real-time communication with drivers and riders via chat.
 
 #### Features:
+
 - **Chat Widget**: Real-time messaging per booking using Ably
 - **Chat Buttons**: Available on all booking cards
   - New requests: Icon button next to assignment controls
@@ -210,18 +227,18 @@ Direct real-time communication with drivers and riders via chat.
 - **Ably Integration**: Sub-second message delivery
 
 #### Components:
+
 - `ChatWidget.tsx` - Reusable chat component with Ably integration
 
 #### Usage:
+
 ```typescript
 // In dispatcher console
-<ChatWidget 
-  bookingId="booking-id-here"
-  sender="DISPATCHER"
-/>
+<ChatWidget bookingId="booking-id-here" sender="DISPATCHER" />
 ```
 
 #### Database Schema:
+
 ```prisma
 model Message {
   id        String     @id @default(cuid())
@@ -234,32 +251,32 @@ model Message {
 ```
 
 #### Future Enhancements:
+
 - **Call Functionality**: Direct phone call integration
 - **File Attachments**: Share images/documents in chat
 - **Read Receipts**: Track message read status
 - **Typing Indicators**: Show when others are typing
 
 ### 4. Reports & Analytics ✅ CSV EXPORT IMPLEMENTED
+
 Comprehensive operational reports and performance metrics with export capabilities.
 
 #### Features:
+
 - **Date Range Filters**: Custom time period selection (from/to dates)
 - **Summary Statistics**:
   - Total bookings (all statuses)
   - Completed rides count
   - Canceled rides count
   - Total revenue (sum of finalFareAmount)
-  
 - **Driver Performance**:
   - Rides completed per driver
   - Average rating per driver
   - Online/offline status
   - Vehicle details (make, model, plate)
-  
 - **Recent Bookings Table**:
   - Booking ID, pickup address, status, fare, timestamp
   - Sortable and filterable
-  
 - **CSV Export** ✅:
   - **Export Bookings**: Download filtered bookings as CSV
     - Columns: ID, Pickup Address, Dropoff Address, Status, Fare, Wheelchair, Date
@@ -274,33 +291,38 @@ Comprehensive operational reports and performance metrics with export capabiliti
   - Automatic browser download via Blob/URL API
 
 #### Pages:
+
 - `/dispatcher/reports` - Reports and analytics dashboard
 
 #### API Endpoints:
+
 - `GET /api/bookings` - Fetch all bookings for calculations
 - `GET /api/dispatcher/drivers` - Fetch driver details
 
 #### Export Implementation:
+
 ```typescript
 // Export bookings
 const exportBookingsCSV = () => {
   const csv = [
     ["ID", "Pickup", "Dropoff", "Status", "Fare", "Wheelchair", "Date"],
-    ...filteredBookings.map(b => [
+    ...filteredBookings.map((b) => [
       b.id,
-      b.pickupAddress.replace(/,/g, ' '),
-      b.dropoffAddress.replace(/,/g, ' '),
+      b.pickupAddress.replace(/,/g, " "),
+      b.dropoffAddress.replace(/,/g, " "),
       b.status,
       b.finalFareAmount || 0,
       b.requiresWheelchair ? "Yes" : "No",
-      new Date(b.createdAt).toLocaleString()
-    ])
-  ].map(row => row.join(",")).join("\n");
-  
+      new Date(b.createdAt).toLocaleString(),
+    ]),
+  ]
+    .map((row) => row.join(","))
+    .join("\n");
+
   // Download file
-  const blob = new Blob([csv], { type: 'text/csv' });
+  const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
   a.download = `bookings_${dateRange.from}_to_${dateRange.to}.csv`;
   a.click();
@@ -308,9 +330,11 @@ const exportBookingsCSV = () => {
 ```
 
 ### 5. Alerts & Incidents ✅ SCHEMA IMPLEMENTED
+
 Handle emergency situations and operational issues with structured incident tracking.
 
 #### Implemented Database Schema:
+
 ```prisma
 enum IncidentType {
   SOS
@@ -363,6 +387,7 @@ model Incident {
 ```
 
 #### Features (Schema Ready, UI Pending):
+
 - **Incident Types**: SOS, Accident, Mechanical, Behavior, Delay, Other
 - **Priority Levels**: Low, Medium, High, Critical
 - **Status Tracking**: Open → In Progress → Resolved/Escalated → Closed
@@ -372,6 +397,7 @@ model Incident {
 - **Timestamps**: Track creation and resolution times
 
 #### Planned UI Features:
+
 - **Real-time Alerts**: SOS button triggers instant notification
 - **Incident Dashboard**: View, filter, sort all incidents
 - **Create Incident**: Form to report new incidents from bookings
@@ -380,6 +406,7 @@ model Incident {
 - **Notification System**: Push notifications for critical events
 
 #### Future API Endpoints:
+
 - `POST /api/dispatcher/incidents/create` - Create new incident
 - `GET /api/dispatcher/incidents` - List all incidents
 - `GET /api/dispatcher/incidents/[id]` - Get incident details
@@ -389,6 +416,7 @@ model Incident {
 ## User Interface
 
 ### Main Dashboard (`/dispatcher`)
+
 - **Header**: Navigation buttons (Live Map, Reports, Create Booking)
 - **Two-Column Layout**:
   - Left: New Requests (REQUESTED status)
@@ -398,6 +426,7 @@ model Incident {
 - **Real-time Updates**: Ably subscription for instant updates
 
 ### Create Booking Modal
+
 - Form fields: Rider identifier, addresses, wheelchair checkbox, scheduled time, notes
 - Validation: Required fields (identifier, pickup, dropoff)
 - Loading state: "Creating..." button state
@@ -405,6 +434,7 @@ model Incident {
 - Error handling: Display API error messages
 
 ### Driver Assignment Modal
+
 - Booking details summary (pickup, dropoff, wheelchair requirement)
 - Online drivers list (filtered by wheelchair capability if needed)
 - Driver cards: Name, vehicle, rating, wheelchair badge
@@ -412,12 +442,14 @@ model Incident {
 - Auto-close: Modal closes after successful assignment
 
 ### Live Map Page (`/dispatcher/map`)
+
 - Stats bar: Online drivers, active rides, total drivers
 - Map placeholder: 500px height Google Maps container
 - Driver list: Online drivers with details
 - Auto-refresh: 5-second polling for real-time updates
 
 ### Reports Page (`/dispatcher/reports`)
+
 - Date range picker: From/To date inputs
 - Apply filter and Export CSV buttons
 - Statistics cards: Total, completed, canceled, revenue
@@ -427,6 +459,7 @@ model Incident {
 ## Real-time Updates
 
 ### Ably Integration
+
 ```typescript
 // Subscribe to dispatcher channel
 const channel = getChannel("dispatch");
@@ -443,6 +476,7 @@ const timer = setInterval(() => {
 ```
 
 ### Events:
+
 - `booking:created` - New booking created
 - `booking:assigned` - Driver assigned to booking
 - `booking:updated` - Booking status changed
@@ -453,7 +487,9 @@ const timer = setInterval(() => {
 ## Security & Permissions
 
 ### Role Verification
+
 All dispatcher endpoints verify the user's role:
+
 ```typescript
 const user = await prisma.user.findUnique({
   where: { id: userId },
@@ -466,12 +502,15 @@ if (!user || user.role !== "DISPATCHER") {
 ```
 
 ### Protected Routes
+
 - `RoleGate` component wraps all dispatcher pages
 - Requires `DISPATCHER` role in user record
 - Redirects unauthorized users to role-select
 
 ### Data Access
+
 Dispatchers can:
+
 - View all bookings (any rider, any driver)
 - View all drivers (online status, location, details)
 - Create bookings on behalf of riders
@@ -479,6 +518,7 @@ Dispatchers can:
 - View financial data (fares, revenue)
 
 Dispatchers cannot:
+
 - Modify platform settings (admin-only)
 - Delete users or drivers (admin-only)
 - Access sensitive payment methods
@@ -487,6 +527,7 @@ Dispatchers cannot:
 ## Database Schema
 
 ### Dispatcher Model
+
 ```prisma
 model Dispatcher {
   id              String   @id
@@ -501,6 +542,7 @@ model Dispatcher {
 ```
 
 ### Booking Model (Relevant Fields)
+
 ```prisma
 model Booking {
   id                 String        @id @default(cuid())
@@ -517,6 +559,7 @@ model Booking {
 ```
 
 ### Driver Model (Relevant Fields)
+
 ```prisma
 model Driver {
   id                String   @id
@@ -534,6 +577,7 @@ model Driver {
 ## Workflow Examples
 
 ### 1. Manual Booking Creation
+
 1. Dispatcher receives phone call from rider
 2. Click "Create Booking" button in header
 3. Fill in form:
@@ -549,6 +593,7 @@ model Driver {
 7. Dispatcher assigns wheelchair-capable driver
 
 ### 2. Driver Assignment
+
 1. New booking appears in "New Requests"
 2. Click "Assign to Driver" button
 3. Modal opens showing:
@@ -560,6 +605,7 @@ model Driver {
 7. Driver receives notification via Ably
 
 ### 3. Emergency Handling (Planned)
+
 1. SOS alert appears in dashboard
 2. Dispatcher clicks alert to view details
 3. Modal shows: Booking info, alert type, timestamp
@@ -571,37 +617,44 @@ model Driver {
 ## Testing
 
 ### Test Accounts
+
 Create test dispatcher account:
+
 ```sql
 -- Set dispatcher role
-UPDATE "User" 
-SET role = 'DISPATCHER' 
+UPDATE "User"
+SET role = 'DISPATCHER'
 WHERE email = 'dispatcher@havenride.test';
 
 -- Create dispatcher record
 INSERT INTO "Dispatcher" (id, region, shift, "ridesDispatched", "avgResponseTime", "createdAt", "updatedAt")
 SELECT id, 'CENTRAL', 'DAY', 0, NULL, NOW(), NOW()
-FROM "User" 
+FROM "User"
 WHERE email = 'dispatcher@havenride.test';
 ```
 
 ### Test Scenarios
+
 1. **Create Booking (New Rider)**:
+
    - Email: newrider@test.com
    - Verify user and rider records created
    - Verify booking appears in dashboard
 
 2. **Create Booking (Existing Rider)**:
+
    - Use existing rider email
    - Verify no duplicate user created
    - Verify booking linked to correct rider
 
 3. **Assign Driver (Wheelchair)**:
+
    - Create booking with wheelchair required
    - Verify only wheelchair-capable drivers shown
    - Assign and verify booking status updated
 
 4. **Real-time Updates**:
+
    - Open dispatcher dashboard in two tabs
    - Create booking in admin panel
    - Verify booking appears in both tabs instantly
@@ -615,28 +668,36 @@ WHERE email = 'dispatcher@havenride.test';
 ## Troubleshooting
 
 ### Issue: Drivers Not Showing in Assignment Modal
-**Solution**: 
+
+**Solution**:
+
 - Check driver `isOnline` status in database
 - Verify `/api/dispatcher/drivers` endpoint returns data
 - Check wheelchair filter if booking requires wheelchair
 - Ensure `fetchDrivers()` called on mount
 
 ### Issue: Bookings Not Updating in Real-time
+
 **Solution**:
+
 - Verify Ably API key in `.env.local`
 - Check browser console for Ably connection errors
 - Ensure `getChannel("dispatch")` returns valid channel
 - Test fallback polling (should update every 10s)
 
 ### Issue: "Forbidden" Error on Create Booking
+
 **Solution**:
+
 - Verify user has DISPATCHER role in database
 - Check Clerk authentication token is valid
 - Ensure `/api/users/me` returns correct role
 - Verify dispatcher record exists
 
 ### Issue: New Rider Creation Fails
+
 **Solution**:
+
 - Check database constraints on User/Rider models
 - Verify email format is valid
 - Check for duplicate email (should find existing)
@@ -645,6 +706,7 @@ WHERE email = 'dispatcher@havenride.test';
 ## Future Enhancements
 
 ### Phase 1 (Q1 2025) ✅ COMPLETED
+
 - [x] Mapbox integration for live tracking ✅
 - [x] Chat widget for dispatcher-driver-rider communication ✅
 - [x] Incident management system (schema implemented) ✅
@@ -652,6 +714,7 @@ WHERE email = 'dispatcher@havenride.test';
 - [x] Automated driver assignment algorithm ✅
 
 ### Phase 2 (Q1-Q2 2025)
+
 - [ ] Incident management UI (create, view, resolve, escalate)
 - [ ] Advanced analytics (peak hours, demand heatmaps)
 - [ ] Route optimization suggestions
@@ -660,6 +723,7 @@ WHERE email = 'dispatcher@havenride.test';
 - [ ] Auto-assign with multiple suggestions mode
 
 ### Phase 3 (Q3 2024)
+
 - [ ] Machine learning for demand prediction
 - [ ] Route optimization suggestions
 - [ ] Multi-language support
@@ -668,15 +732,18 @@ WHERE email = 'dispatcher@havenride.test';
 ## Support & Documentation
 
 ### Related Documentation
+
 - [Admin Dashboard Guide](./ADMIN_DASHBOARD.md)
 - [Role System Guide](./ROLE_SYSTEM_GUIDE.md)
 - [Backend API Reference](../BACKEND_API.md)
 - [Vercel Deployment](./VERCEL_DEPLOYMENT.md)
 
 ### API Reference
+
 See [Backend API Documentation](../BACKEND_API.md) for detailed endpoint specifications.
 
 ### Contact
+
 For technical support or feature requests, contact the development team.
 
 ---

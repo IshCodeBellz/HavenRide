@@ -29,21 +29,25 @@ npx prisma migrate deploy
 After deploying, you need to manually set at least one admin user.
 
 **Option A: Using Prisma Studio**
+
 ```bash
 # Connect to production database
 npx prisma studio
 ```
+
 Then find your user and set `isAdmin = true`
 
 **Option B: Using SQL**
+
 ```sql
 -- Replace with your actual email
-UPDATE "User" 
-SET "isAdmin" = true 
+UPDATE "User"
+SET "isAdmin" = true
 WHERE email = 'your-admin-email@example.com';
 ```
 
 **Option C: Using Vercel Postgres Dashboard**
+
 1. Go to Vercel → Storage → Your Database → SQL Editor
 2. Run the UPDATE query above
 
@@ -63,6 +67,7 @@ WHERE email = 'your-admin-email@example.com';
 **Problem**: Dashboard shows 0 for all stats even though data exists.
 
 **Possible Causes**:
+
 1. Database connection issues
 2. `isAdmin` field not properly set
 3. Prisma schema not synced
@@ -70,10 +75,12 @@ WHERE email = 'your-admin-email@example.com';
 **Solutions**:
 
 1. **Check Database Connection**
+
    - Verify `DATABASE_URL` environment variable is set correctly
    - Test connection using Prisma Studio: `npx prisma studio`
 
 2. **Verify Schema**
+
    ```bash
    # Check if isAdmin field exists
    npx prisma db pull
@@ -81,6 +88,7 @@ WHERE email = 'your-admin-email@example.com';
    ```
 
 3. **Check Vercel Logs**
+
    - Go to Vercel Dashboard → Deployments → Your Deployment → Functions
    - Check `/api/admin/stats` function logs
    - Look for errors like "Property 'isAdmin' does not exist"
@@ -99,16 +107,20 @@ WHERE email = 'your-admin-email@example.com';
 **Solutions**:
 
 1. **Check isAdmin in Database**
+
    ```sql
    SELECT id, email, role, "isAdmin" FROM "User" WHERE email = 'your@email.com';
    ```
+
    Should return `isAdmin: true`
 
 2. **Clear Browser Cache**
+
    - Hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
    - Or clear cookies for the site
 
 3. **Check API Response**
+
    - Open browser DevTools → Network tab
    - Navigate to `/admin`
    - Check `/api/users/me` response
@@ -126,6 +138,7 @@ WHERE email = 'your-admin-email@example.com';
 These are type cache issues. The code works at runtime.
 
 To fix in development:
+
 ```bash
 npx prisma generate
 # Then restart VS Code or TypeScript server
@@ -218,6 +231,7 @@ model User {
 ```
 
 If you see errors about missing fields, run:
+
 ```bash
 npx prisma db push
 npx prisma generate
@@ -236,6 +250,7 @@ curl https://your-app.vercel.app/api/admin/stats \
 ```
 
 Should return:
+
 ```json
 {
   "totalUsers": 10,
@@ -247,6 +262,7 @@ Should return:
 ### Vercel Function Logs
 
 Monitor admin API calls:
+
 1. Go to Vercel Dashboard
 2. Select your project
 3. Go to "Logs" or "Functions"
@@ -267,6 +283,7 @@ If issues persist after following this guide:
 5. Check browser console for JavaScript errors
 
 Common error patterns:
+
 - `P1001: Can't reach database server` → Check DATABASE_URL
 - `Property 'isAdmin' does not exist` → Run `prisma generate`
 - `Forbidden - Admin access required` → Set `isAdmin = true` in database

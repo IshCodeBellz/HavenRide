@@ -48,10 +48,7 @@ export async function POST(req: Request) {
     // Find or create rider
     let rider = await prisma.rider.findFirst({
       where: {
-        OR: [
-          { user: { email: riderIdentifier } },
-          { phone: riderIdentifier },
-        ],
+        OR: [{ user: { email: riderIdentifier } }, { phone: riderIdentifier }],
       },
       include: {
         user: true,

@@ -1,6 +1,6 @@
 /**
  * Automated Driver Assignment Algorithm
- * 
+ *
  * Intelligently assigns drivers to bookings based on multiple factors:
  * - Proximity to pickup location
  * - Online availability
@@ -147,7 +147,8 @@ export function findBestDriver(
     const ratingScore = scoreRating(driver.rating);
 
     // Bonus points for wheelchair match when required
-    const wheelchairBonus = booking.requiresWheelchair && driver.wheelchairCapable ? 10 : 0;
+    const wheelchairBonus =
+      booking.requiresWheelchair && driver.wheelchairCapable ? 10 : 0;
 
     // Weight factors:
     // Distance: 60% (most important - get driver there fast)
@@ -208,9 +209,11 @@ export function findTopDrivers(
 
     const distanceScore = scoreDistance(distance);
     const ratingScore = scoreRating(driver.rating);
-    const wheelchairBonus = booking.requiresWheelchair && driver.wheelchairCapable ? 10 : 0;
+    const wheelchairBonus =
+      booking.requiresWheelchair && driver.wheelchairCapable ? 10 : 0;
 
-    const totalScore = distanceScore * 0.6 + ratingScore * 0.3 + wheelchairBonus;
+    const totalScore =
+      distanceScore * 0.6 + ratingScore * 0.3 + wheelchairBonus;
 
     return {
       driver,

@@ -3,30 +3,37 @@
 ## Profile & Rider Features
 
 ### User Profile
+
 **Endpoint**: `/api/riders/profile`
 
 **GET** - Fetch user profile
+
 - Returns: `{ name, email, phone, imageUrl }`
 
 **PUT** - Update user profile
+
 - Body: `{ name?, phone? }`
 - Updates name in Clerk, phone in database
 
 ---
 
 ### Saved Locations
+
 **Endpoint**: `/api/riders/saved-locations`
 
 **GET** - Fetch all saved locations for logged-in rider
+
 - Returns: Array of saved locations
 
 **POST** - Create new saved location
+
 - Body: `{ label: string, address: string, latitude: number, longitude: number }`
 - Example: `{ label: "Home", address: "123 Main St", latitude: 51.5074, longitude: -0.1278 }`
 
 **Endpoint**: `/api/riders/saved-locations/[id]`
 
 **PUT** - Update a saved location
+
 - Body: `{ label?, address?, latitude?, longitude? }`
 
 **DELETE** - Remove a saved location
@@ -34,29 +41,36 @@
 ---
 
 ### Accessibility Preferences
+
 **Endpoint**: `/api/riders/preferences`
 
 **GET** - Fetch rider accessibility preferences
+
 - Returns: `{ alwaysRequestWheelchair: boolean, needsAssistance: boolean, phone: string }`
 
 **PUT** - Update preferences
+
 - Body: `{ alwaysRequestWheelchair?: boolean, needsAssistance?: boolean, phone?: string }`
 
 ---
 
 ### Payment Methods
+
 **Endpoint**: `/api/riders/payment-methods`
 
 **GET** - Fetch all payment methods for rider
+
 - Returns: Array of payment methods (sorted by default first)
 
 **POST** - Add new payment method
+
 - Body: `{ stripePaymentMethodId: string, last4: string, brand: string, expiryMonth: number, expiryYear: number, isDefault?: boolean }`
 - If `isDefault: true`, all other methods are set to non-default
 
 **Endpoint**: `/api/riders/payment-methods/[id]`
 
 **PUT** - Set payment method as default
+
 - Automatically unsets all other defaults
 
 **DELETE** - Remove payment method
@@ -66,12 +80,14 @@
 ## Dispatcher Features
 
 ### Automated Driver Assignment
+
 **Endpoint**: `/api/dispatcher/auto-assign`
 
 **POST** - Automatically assign best available driver to booking
+
 - **Authentication**: Required (Clerk)
 - **Authorization**: DISPATCHER role only (403 if not dispatcher)
-- **Body**: 
+- **Body**:
   ```json
   {
     "bookingId": "string (required)",
@@ -80,6 +96,7 @@
   }
   ```
 - **Assignment Mode** (`getSuggestions: false`):
+
   - Finds best driver using intelligent algorithm
   - Automatically assigns driver to booking
   - Updates booking status to ASSIGNED
@@ -87,7 +104,9 @@
     ```json
     {
       "success": true,
-      "booking": { /* updated booking object */ },
+      "booking": {
+        /* updated booking object */
+      },
       "assignment": {
         "driverId": "string",
         "driverName": "string",
@@ -124,17 +143,18 @@
     ```
 
 **Algorithm Details**:
+
 - **Eligibility Filtering**:
   - Driver must be online (`isOnline = true`)
   - Driver must have location (`lastLat` and `lastLng` not null)
   - If booking requires wheelchair, driver must have `wheelchairCapable = true`
-  
 - **Scoring System** (0-100 scale):
+
   - **Distance**: 60% weight
     - ≤5km: 100 points
     - 5-10km: 75-100 points (linear)
     - 10-20km: 50-75 points (linear)
-    - >20km: 0-50 points (exponential decay)
+    - > 20km: 0-50 points (exponential decay)
   - **Rating**: 30% weight
     - 0-5 star rating converted to 0-100 scale
     - No rating (null): 50 points (neutral)
@@ -144,6 +164,7 @@
 - **Distance Calculation**: Haversine formula for accurate great-circle distance
 
 **Error Responses**:
+
 - `401`: Unauthorized (no valid session)
 - `403`: Forbidden (user is not a dispatcher)
 - `400`: Bad request (missing bookingId, booking already assigned)
@@ -151,23 +172,24 @@
 - `500`: Internal server error
 
 **Example Usage**:
+
 ```typescript
 // Auto-assign best driver
 const response = await fetch("/api/dispatcher/auto-assign", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ bookingId: "cm3abc123" })
+  body: JSON.stringify({ bookingId: "cm3abc123" }),
 });
 
 // Get suggestions without assigning
 const response = await fetch("/api/dispatcher/auto-assign", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ 
+  body: JSON.stringify({
     bookingId: "cm3abc123",
     getSuggestions: true,
-    limit: 3
-  })
+    limit: 3,
+  }),
 });
 ```
 
@@ -176,12 +198,15 @@ const response = await fetch("/api/dispatcher/auto-assign", {
 ## Database Schema Updates
 
 ### Rider Model
+
 Added fields:
+
 - `alwaysRequestWheelchair: Boolean` - Auto-request wheelchair vehicles
 - `needsAssistance: Boolean` - Driver provides extra assistance
 - Relations: `savedLocations[]`, `paymentMethods[]`
 
 ### SavedLocation Model (New)
+
 - `id: String` (UUID)
 - `riderId: String` (FK to Rider)
 - `label: String` (e.g., "Home", "Work", "Hospital")
@@ -191,6 +216,7 @@ Added fields:
 - `createdAt, updatedAt: DateTime`
 
 ### PaymentMethod Model (New)
+
 - `id: String` (UUID)
 - `riderId: String` (FK to Rider)
 - `stripePaymentMethodId: String` (Unique)
@@ -204,7 +230,9 @@ Added fields:
 ---
 
 ## Migration Applied
+
 Migration: `20251108165532_add_rider_features`
+
 - Created `SavedLocation` table
 - Created `PaymentMethod` table
 - Added accessibility preference fields to `Rider` table

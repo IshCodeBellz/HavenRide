@@ -48,10 +48,7 @@ export async function POST(req: Request) {
     });
 
     if (!booking) {
-      return NextResponse.json(
-        { error: "Booking not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
 
     if (booking.status !== "REQUESTED") {
@@ -93,11 +90,7 @@ export async function POST(req: Request) {
 
     // If just getting suggestions, return top drivers
     if (getSuggestions) {
-      const suggestions = findTopDrivers(
-        drivers as any,
-        booking,
-        limit
-      );
+      const suggestions = findTopDrivers(drivers as any, booking, limit);
 
       return NextResponse.json({
         suggestions: suggestions.map((result) => ({
@@ -151,7 +144,9 @@ export async function POST(req: Request) {
         driverName: bestMatch.driver.user.name || "Driver",
         score: Math.round(bestMatch.score),
         distance: bestMatch.proximity.toFixed(2),
-        reason: `Assigned based on proximity (${bestMatch.proximity.toFixed(1)}km) and rating (${bestMatch.driver.rating?.toFixed(1) || "N/A"})`,
+        reason: `Assigned based on proximity (${bestMatch.proximity.toFixed(
+          1
+        )}km) and rating (${bestMatch.driver.rating?.toFixed(1) || "N/A"})`,
       },
     });
   } catch (error) {

@@ -133,3 +133,11 @@ main {
 .animate-slide-up {
   animation: slide-up 0.3s ease-out;
 }
+
+/* Word breaking utility */
+.wrap-break-word {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}

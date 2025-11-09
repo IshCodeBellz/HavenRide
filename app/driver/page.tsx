@@ -327,7 +327,9 @@ function DriverPageContent() {
                 />
               </svg>
             </div>
-            <p className="text-sm sm:text-base text-gray-600">Loading bookings...</p>
+            <p className="text-sm sm:text-base text-gray-600">
+              Loading bookings...
+            </p>
           </div>
         ) : requestedBookings.length === 0 ? (
           <div className="bg-white rounded-xl sm:rounded-2xl p-8 sm:p-12 shadow-lg text-center">
@@ -422,14 +424,7 @@ function DriverPageContent() {
                 )}
 
                 {/* Current Card */}
-                <div
-                  className="bg-white rounded-2xl shadow-lg border-2 border-blue-500 shrink-0 transition-all duration-300 w-full"
-                  style={
-                    requestedBookings.length > 1
-                      ? { width: "calc(100% - 240px)" }
-                      : undefined
-                  }
-                >
+                <div className="bg-white rounded-2xl shadow-lg border-2 border-blue-500 shrink-0 transition-all duration-300 w-full md:max-w-[calc(100%-240px)]">
                   <div className="p-4 sm:p-6 md:p-10">
                     {/* Status Badge */}
                     <div className="flex items-center justify-between mb-4 sm:mb-6 md:mb-8">
@@ -453,7 +448,7 @@ function DriverPageContent() {
                           <p className="text-xs sm:text-sm text-gray-600 font-medium mb-1 sm:mb-2">
                             Pickup
                           </p>
-                          <p className="text-sm sm:text-base md:text-lg font-semibold text-[#0F3D3E] wrap-break-word">
+                          <p className="text-sm sm:text-base md:text-lg font-semibold text-[#0F3D3E] wrap-break-word leading-snug">
                             {currentBooking.pickupAddress}
                           </p>
                         </div>
@@ -469,7 +464,7 @@ function DriverPageContent() {
                           <p className="text-xs sm:text-sm text-gray-600 font-medium mb-1 sm:mb-2">
                             Dropoff
                           </p>
-                          <p className="text-sm sm:text-base md:text-lg font-semibold text-[#0F3D3E] wrap-break-word">
+                          <p className="text-sm sm:text-base md:text-lg font-semibold text-[#0F3D3E] wrap-break-word leading-snug">
                             {currentBooking.dropoffAddress}
                           </p>
                         </div>

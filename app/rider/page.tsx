@@ -573,13 +573,15 @@ function RiderPageContent() {
                   d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
                 />
               </svg>
-              <p className="text-xs sm:text-sm font-medium">Map will appear here</p>
+              <p className="text-xs sm:text-sm font-medium">
+                Map will appear here
+              </p>
             </div>
           </div>
         )}
 
-        {/* Where to Search Box - Overlay on Map (Mobile) - Bottom Position */}
-        <div className="md:hidden absolute bottom-4 left-4 right-4 z-10">
+        {/* Where to Search Box - Overlay on Map (Mobile) */}
+        <div className="md:hidden absolute top-4 left-4 right-4 z-10">
           <div className="bg-white rounded-2xl p-4 shadow-2xl border border-gray-100">
             <div className="flex items-center gap-3">
               <svg
@@ -633,7 +635,7 @@ function RiderPageContent() {
                 <span className="hidden sm:inline">Later</span>
               </button>
             </div>
-            
+
             {/* Wheelchair Checkbox - Mobile */}
             <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
               <input
@@ -643,7 +645,10 @@ function RiderPageContent() {
                 onChange={(e) => setWheelchair(e.target.checked)}
                 className="w-4 h-4 text-[#00796B] rounded border-gray-300 focus:ring-[#00796B]"
               />
-              <label htmlFor="wheelchair-mobile" className="text-sm text-gray-700 flex items-center gap-1">
+              <label
+                htmlFor="wheelchair-mobile"
+                className="text-sm text-gray-700 flex items-center gap-1"
+              >
                 <span className="text-lg">♿</span>
                 <span>Wheelchair accessible</span>
               </label>
@@ -947,7 +952,9 @@ function RiderPageContent() {
               <div className="space-y-3">
                 <div className="bg-[#E0F2F1] rounded-xl p-4">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm text-gray-700">Estimated Fare</span>
+                    <span className="text-sm text-gray-700">
+                      Estimated Fare
+                    </span>
                     <span className="font-bold text-2xl text-[#0F3D3E]">
                       £{estimate.amount.toFixed(2)}
                     </span>

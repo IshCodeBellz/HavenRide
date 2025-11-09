@@ -73,6 +73,7 @@ This bundle combines all features we've produced: **intelligent auto-assign algo
 ## ✨ Key Features
 
 ### For Dispatchers
+
 - **🗺️ Live Map Tracking**: Real-time Mapbox visualization of all online drivers and active bookings with color-coded markers
 - **🤖 Intelligent Auto-Assignment**: AI-powered driver matching using proximity (60%), ratings (30%), and wheelchair capability (10%)
 - **💬 Real-time Chat**: Direct messaging with drivers and riders via Ably integration
@@ -81,6 +82,7 @@ This bundle combines all features we've produced: **intelligent auto-assign algo
 - **📱 Manual Assignment**: Traditional driver selection with filtering and online status
 
 ### For Riders
+
 - **📍 Saved Locations**: Store frequently used addresses (home, work, hospital)
 - **💳 Payment Methods**: Manage multiple credit/debit cards with default selection
 - **♿ Accessibility Preferences**: Auto-request wheelchair vehicles and assistance
@@ -88,6 +90,7 @@ This bundle combines all features we've produced: **intelligent auto-assign algo
 - **📜 Ride History**: View past rides with detailed information
 
 ### For Drivers
+
 - **💰 Earnings Dashboard**: Track daily/weekly/monthly earnings with breakdowns
 - **📋 Past Rides**: Complete ride history with rider details and fares
 - **🗺️ Live Navigation**: Real-time location tracking during active rides
@@ -95,6 +98,7 @@ This bundle combines all features we've produced: **intelligent auto-assign algo
 - **📄 Documentation**: Upload vehicle and license documents for verification
 
 ### For Admins
+
 - **👥 Role Management**: Assign ADMIN/DISPATCHER roles with security controls
 - **⚙️ Dynamic Settings**: Configure base fares, per-km rates, wheelchair multipliers
 - **📈 Metrics Dashboard**: Platform statistics, revenue tracking, user counts

@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error: any) {
     console.error("Error fetching admin stats:", error);
-    
+
     // Return default values if there's an error, so UI still works
     // This helps on Vercel where DB might have connection issues
     return NextResponse.json({

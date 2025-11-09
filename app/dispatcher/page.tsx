@@ -17,7 +17,7 @@ function DispatcherPageContent() {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [chatBookingId, setChatBookingId] = useState<string | null>(null);
   const [autoAssigning, setAutoAssigning] = useState<string | null>(null);
-  
+
   // Create booking form state
   const [createForm, setCreateForm] = useState({
     riderIdentifier: "",
@@ -99,8 +99,8 @@ function DispatcherPageContent() {
         const data = await res.json();
         alert(
           `✅ Auto-assigned to ${data.assignment.driverName}\n` +
-          `Distance: ${data.assignment.distance}km\n` +
-          `Score: ${data.assignment.score}/100`
+            `Distance: ${data.assignment.distance}km\n` +
+            `Score: ${data.assignment.score}/100`
         );
         fetchBookings();
       } else {
@@ -116,7 +116,11 @@ function DispatcherPageContent() {
   }
 
   async function handleCreateBooking() {
-    if (!createForm.riderIdentifier || !createForm.pickupAddress || !createForm.dropoffAddress) {
+    if (
+      !createForm.riderIdentifier ||
+      !createForm.pickupAddress ||
+      !createForm.dropoffAddress
+    ) {
       alert("Please fill in rider identifier, pickup, and dropoff addresses");
       return;
     }
@@ -266,16 +270,41 @@ function DispatcherPageContent() {
                         >
                           {autoAssigning === booking.id ? (
                             <>
-                              <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              <svg
+                                className="animate-spin h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                ></circle>
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
                               </svg>
                               Auto-assigning...
                             </>
                           ) : (
                             <>
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                                />
                               </svg>
                               Auto-Assign Best Driver
                             </>
@@ -286,8 +315,18 @@ function DispatcherPageContent() {
                           className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                           title="Open chat"
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                            />
                           </svg>
                         </button>
                       </div>
@@ -378,8 +417,18 @@ function DispatcherPageContent() {
                       onClick={() => setChatBookingId(booking.id)}
                       className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                        />
                       </svg>
                       Open Chat
                     </button>
@@ -448,13 +497,25 @@ function DispatcherPageContent() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-[#263238]">Create Booking</h2>
+              <h2 className="text-2xl font-bold text-[#263238]">
+                Create Booking
+              </h2>
               <button
                 onClick={() => setShowCreateBooking(false)}
                 className="text-gray-400 hover:text-gray-600"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -466,7 +527,12 @@ function DispatcherPageContent() {
                 <input
                   type="text"
                   value={createForm.riderIdentifier}
-                  onChange={(e) => setCreateForm({ ...createForm, riderIdentifier: e.target.value })}
+                  onChange={(e) =>
+                    setCreateForm({
+                      ...createForm,
+                      riderIdentifier: e.target.value,
+                    })
+                  }
                   placeholder="rider@example.com or +1234567890"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
                 />
@@ -478,7 +544,12 @@ function DispatcherPageContent() {
                 <input
                   type="text"
                   value={createForm.pickupAddress}
-                  onChange={(e) => setCreateForm({ ...createForm, pickupAddress: e.target.value })}
+                  onChange={(e) =>
+                    setCreateForm({
+                      ...createForm,
+                      pickupAddress: e.target.value,
+                    })
+                  }
                   placeholder="Enter pickup location"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
                 />
@@ -490,7 +561,12 @@ function DispatcherPageContent() {
                 <input
                   type="text"
                   value={createForm.dropoffAddress}
-                  onChange={(e) => setCreateForm({ ...createForm, dropoffAddress: e.target.value })}
+                  onChange={(e) =>
+                    setCreateForm({
+                      ...createForm,
+                      dropoffAddress: e.target.value,
+                    })
+                  }
                   placeholder="Enter dropoff location"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
                 />
@@ -498,13 +574,20 @@ function DispatcherPageContent() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="flex items-center space-x-2">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={createForm.wheelchairRequired}
-                      onChange={(e) => setCreateForm({ ...createForm, wheelchairRequired: e.target.checked })}
-                      className="rounded text-[#00796B]" 
+                      onChange={(e) =>
+                        setCreateForm({
+                          ...createForm,
+                          wheelchairRequired: e.target.checked,
+                        })
+                      }
+                      className="rounded text-[#00796B]"
                     />
-                    <span className="text-sm text-gray-700">Wheelchair Required</span>
+                    <span className="text-sm text-gray-700">
+                      Wheelchair Required
+                    </span>
                   </label>
                 </div>
                 <div>
@@ -514,7 +597,12 @@ function DispatcherPageContent() {
                   <input
                     type="datetime-local"
                     value={createForm.scheduledFor}
-                    onChange={(e) => setCreateForm({ ...createForm, scheduledFor: e.target.value })}
+                    onChange={(e) =>
+                      setCreateForm({
+                        ...createForm,
+                        scheduledFor: e.target.value,
+                      })
+                    }
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
                   />
                 </div>
@@ -526,7 +614,9 @@ function DispatcherPageContent() {
                 <textarea
                   rows={3}
                   value={createForm.notes}
-                  onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })}
+                  onChange={(e) =>
+                    setCreateForm({ ...createForm, notes: e.target.value })
+                  }
                   placeholder="Add any special instructions..."
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
                 />
@@ -557,7 +647,9 @@ function DispatcherPageContent() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-[#263238]">Assign Driver</h2>
+              <h2 className="text-xl font-bold text-[#263238]">
+                Assign Driver
+              </h2>
               <button
                 onClick={() => {
                   setShowAssignModal(false);
@@ -565,14 +657,26 @@ function DispatcherPageContent() {
                 }}
                 className="text-gray-400 hover:text-gray-600"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
             <div className="p-6">
               <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-                <div className="text-sm text-gray-600 mb-2">Booking Details</div>
+                <div className="text-sm text-gray-600 mb-2">
+                  Booking Details
+                </div>
                 <div className="text-sm">
                   <div className="font-medium text-[#263238]">
                     Pickup: {selectedBooking.pickupAddress}
@@ -587,14 +691,20 @@ function DispatcherPageContent() {
                   )}
                 </div>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Available Drivers ({drivers.filter(d => d.isOnline).length} online)
+                  Available Drivers ({drivers.filter((d) => d.isOnline).length}{" "}
+                  online)
                 </label>
                 <div className="space-y-2 max-h-[300px] overflow-y-auto">
                   {drivers
-                    .filter(d => d.isOnline && (!selectedBooking.requiresWheelchair || d.wheelchairCapable))
+                    .filter(
+                      (d) =>
+                        d.isOnline &&
+                        (!selectedBooking.requiresWheelchair ||
+                          d.wheelchairCapable)
+                    )
                     .map((driver) => (
                       <button
                         key={driver.id}
@@ -614,11 +724,15 @@ function DispatcherPageContent() {
                               {driver.vehicleMake} {driver.vehicleModel}
                             </div>
                             {driver.wheelchairCapable && (
-                              <span className="text-xs text-amber-600">♿ Wheelchair Accessible</span>
+                              <span className="text-xs text-amber-600">
+                                ♿ Wheelchair Accessible
+                              </span>
                             )}
                           </div>
                           <div className="text-right">
-                            <div className="text-sm font-medium text-green-600">Online</div>
+                            <div className="text-sm font-medium text-green-600">
+                              Online
+                            </div>
                             <div className="text-xs text-gray-500">
                               Rating: {driver.rating?.toFixed(1) || "N/A"}
                             </div>
@@ -626,7 +740,12 @@ function DispatcherPageContent() {
                         </div>
                       </button>
                     ))}
-                  {drivers.filter(d => d.isOnline && (!selectedBooking.requiresWheelchair || d.wheelchairCapable)).length === 0 && (
+                  {drivers.filter(
+                    (d) =>
+                      d.isOnline &&
+                      (!selectedBooking.requiresWheelchair ||
+                        d.wheelchairCapable)
+                  ).length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                       No available drivers matching requirements
                     </div>
@@ -661,8 +780,18 @@ function DispatcherPageContent() {
                 onClick={() => setChatBookingId(null)}
                 className="text-gray-400 hover:text-gray-600"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>

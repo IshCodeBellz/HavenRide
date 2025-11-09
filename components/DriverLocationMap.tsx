@@ -169,28 +169,29 @@ export default function DriverLocationMap({
 
     const fetchDriverLocation = async () => {
       try {
-        // In a real implementation, this would fetch from an API
-        // For now, we'll simulate movement
-        if (currentDriverLocation && pickupLat && pickupLng) {
-          // Simulate driver moving towards pickup
-          const deltaLat = (pickupLat - currentDriverLocation.lat) * 0.05;
-          const deltaLng = (pickupLng - currentDriverLocation.lng) * 0.05;
-          
-          setCurrentDriverLocation({
-            lat: currentDriverLocation.lat + deltaLat,
-            lng: currentDriverLocation.lng + deltaLng,
-          });
+        const response = await fetch(`/api/drivers/${driverId}/location`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.lastLat && data.lastLng) {
+            setCurrentDriverLocation({
+              lat: data.lastLat,
+              lng: data.lastLng,
+            });
+          }
         }
       } catch (error) {
         console.error("Error fetching driver location:", error);
       }
     };
 
-    // Update every 5 seconds
+    // Fetch immediately
+    fetchDriverLocation();
+
+    // Update every 5 seconds for real-time tracking
     const interval = setInterval(fetchDriverLocation, 5000);
     
     return () => clearInterval(interval);
-  }, [driverId, currentDriverLocation, pickupLat, pickupLng]);
+  }, [driverId]);
 
   return (
     <div className="relative w-full h-full">

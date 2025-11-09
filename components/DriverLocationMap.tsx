@@ -193,19 +193,26 @@ export default function DriverLocationMap({
     }
 
     // Fit bounds to show all markers with dynamic zoom based on distance
-    if (map.current && pickupLat && pickupLng) {
+    if (map.current && pickupLat && pickupLng && !isNaN(pickupLat) && !isNaN(pickupLng)) {
       const bounds = new mapboxgl.LngLatBounds();
       let pointCount = 0;
       
-      if (pickupLat && pickupLng) {
+      // Validate and add pickup coordinates
+      if (pickupLat && pickupLng && !isNaN(pickupLat) && !isNaN(pickupLng)) {
         bounds.extend([pickupLng, pickupLat]);
         pointCount++;
       }
-      if (dropoffLat && dropoffLng) {
+      
+      // Validate and add dropoff coordinates
+      if (dropoffLat && dropoffLng && !isNaN(dropoffLat) && !isNaN(dropoffLng)) {
         bounds.extend([dropoffLng, dropoffLat]);
         pointCount++;
       }
-      if (currentDriverLocation) {
+      
+      // Validate and add driver coordinates
+      if (currentDriverLocation && 
+          !isNaN(currentDriverLocation.lat) && 
+          !isNaN(currentDriverLocation.lng)) {
         bounds.extend([currentDriverLocation.lng, currentDriverLocation.lat]);
         pointCount++;
       }
@@ -214,7 +221,12 @@ export default function DriverLocationMap({
       if (pointCount >= 2) {
         // Calculate distance between driver and pickup for dynamic zoom
         let distance = 0;
-        if (currentDriverLocation && pickupLat && pickupLng) {
+        if (currentDriverLocation && 
+            pickupLat && pickupLng &&
+            !isNaN(currentDriverLocation.lat) && 
+            !isNaN(currentDriverLocation.lng) &&
+            !isNaN(pickupLat) && 
+            !isNaN(pickupLng)) {
           // Haversine formula to calculate distance in km
           const R = 6371;
           const dLat = ((pickupLat - currentDriverLocation.lat) * Math.PI) / 180;

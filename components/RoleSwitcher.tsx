@@ -49,22 +49,29 @@ export default function RoleSwitcher({
 
     setSwitching(true);
     try {
+      console.log("Switching to role:", role);
       const res = await fetch("/api/admin/switch-role", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role }),
       });
 
+      const data = await res.json();
+      console.log("Switch role response:", { status: res.status, data });
+
       if (res.ok) {
+        console.log("Role switch successful, redirecting to:", path);
         // Redirect to the appropriate dashboard
         router.push(path);
         router.refresh();
       } else {
-        alert("Failed to switch role");
+        const errorMsg = data.error || "Failed to switch role";
+        console.error("Role switch failed:", errorMsg, data);
+        alert(`Failed to switch role: ${errorMsg}${data.details ? ` (${data.details})` : ""}`);
       }
     } catch (error) {
       console.error("Error switching role:", error);
-      alert("Error switching role");
+      alert(`Error switching role: ${error instanceof Error ? error.message : "Unknown error"}`);
     } finally {
       setSwitching(false);
       setIsOpen(false);

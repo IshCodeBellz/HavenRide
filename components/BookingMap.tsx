@@ -64,39 +64,38 @@ export default function BookingMap({
 
     console.log('Creating/updating pickup marker at:', pickup);
 
+    // Remove existing marker if it exists
     if (pickupMarker.current) {
-      console.log('Updating existing pickup marker');
-      pickupMarker.current.setLngLat([pickup.lng, pickup.lat]);
-    } else {
-      console.log('Creating new pickup marker');
-      // Create custom marker element for pickup (A)
-      const el = document.createElement("div");
-      el.style.width = "40px";
-      el.style.height = "50px";
-      el.style.position = "relative";
-      el.style.zIndex = "1000";
-      el.innerHTML = `
-        <div style="position: relative; width: 40px; height: 50px;">
-          <svg width="40" height="50" viewBox="0 0 40 50" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
-            <path d="M20 0C12.268 0 6 6.268 6 14C6 24.5 20 48 20 48C20 48 34 24.5 34 14C34 6.268 27.732 0 20 0Z" 
-                  fill="#00796B" 
-                  stroke="white" 
-                  stroke-width="2"/>
-            <circle cx="20" cy="14" r="8" fill="white"/>
-            <text x="20" y="19" text-anchor="middle" font-size="14" font-weight="bold" fill="#00796B" font-family="Arial, sans-serif">A</text>
-          </svg>
-        </div>
-      `;
-
-      pickupMarker.current = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
-        .setLngLat([pickup.lng, pickup.lat])
-        .setPopup(
-          new mapboxgl.Popup({ offset: 25 }).setHTML("<strong>Pickup Location</strong>")
-        )
-        .addTo(map.current);
-      
-      console.log('Pickup marker added to map');
+      console.log('Removing existing pickup marker');
+      pickupMarker.current.remove();
+      pickupMarker.current = null;
     }
+
+    console.log('Creating new pickup marker');
+    // Create custom marker element for pickup (A)
+    const el = document.createElement("div");
+    el.style.width = "40px";
+    el.style.height = "50px";
+    el.style.cursor = "pointer";
+    el.innerHTML = `
+      <svg width="40" height="50" viewBox="0 0 40 50" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 0C12.268 0 6 6.268 6 14C6 24.5 20 48 20 48C20 48 34 24.5 34 14C34 6.268 27.732 0 20 0Z" 
+              fill="#00796B" 
+              stroke="white" 
+              stroke-width="2"/>
+        <circle cx="20" cy="14" r="8" fill="white"/>
+        <text x="20" y="19" text-anchor="middle" font-size="14" font-weight="bold" fill="#00796B" font-family="Arial, sans-serif">A</text>
+      </svg>
+    `;
+
+    pickupMarker.current = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+      .setLngLat([pickup.lng, pickup.lat])
+      .setPopup(
+        new mapboxgl.Popup({ offset: 25 }).setHTML("<strong>Pickup Location</strong>")
+      )
+      .addTo(map.current);
+    
+    console.log('Pickup marker added to map', pickupMarker.current);
 
     updateMapBounds();
   }, [pickup]);
@@ -105,34 +104,34 @@ export default function BookingMap({
   useEffect(() => {
     if (!map.current || !dropoff || dropoff.lat === 0) return;
 
+    // Remove existing marker if it exists
     if (dropoffMarker.current) {
-      dropoffMarker.current.setLngLat([dropoff.lng, dropoff.lat]);
-    } else {
-      // Create custom marker element for dropoff (B)
-      const el = document.createElement("div");
-      el.style.width = "40px";
-      el.style.height = "50px";
-      el.style.position = "relative";
-      el.innerHTML = `
-        <div style="position: relative; width: 40px; height: 50px;">
-          <svg width="40" height="50" viewBox="0 0 40 50" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
-            <path d="M20 0C12.268 0 6 6.268 6 14C6 24.5 20 48 20 48C20 48 34 24.5 34 14C34 6.268 27.732 0 20 0Z" 
-                  fill="#0F3D3E" 
-                  stroke="white" 
-                  stroke-width="2"/>
-            <circle cx="20" cy="14" r="8" fill="white"/>
-            <text x="20" y="19" text-anchor="middle" font-size="14" font-weight="bold" fill="#0F3D3E" font-family="Arial, sans-serif">B</text>
-          </svg>
-        </div>
-      `;
-
-      dropoffMarker.current = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
-        .setLngLat([dropoff.lng, dropoff.lat])
-        .setPopup(
-          new mapboxgl.Popup({ offset: 25 }).setHTML("<strong>Drop-off Location</strong>")
-        )
-        .addTo(map.current);
+      dropoffMarker.current.remove();
+      dropoffMarker.current = null;
     }
+
+    // Create custom marker element for dropoff (B)
+    const el = document.createElement("div");
+    el.style.width = "40px";
+    el.style.height = "50px";
+    el.style.cursor = "pointer";
+    el.innerHTML = `
+      <svg width="40" height="50" viewBox="0 0 40 50" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 0C12.268 0 6 6.268 6 14C6 24.5 20 48 20 48C20 48 34 24.5 34 14C34 6.268 27.732 0 20 0Z" 
+              fill="#0F3D3E" 
+              stroke="white" 
+              stroke-width="2"/>
+        <circle cx="20" cy="14" r="8" fill="white"/>
+        <text x="20" y="19" text-anchor="middle" font-size="14" font-weight="bold" fill="#0F3D3E" font-family="Arial, sans-serif">B</text>
+      </svg>
+    `;
+
+    dropoffMarker.current = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+      .setLngLat([dropoff.lng, dropoff.lat])
+      .setPopup(
+        new mapboxgl.Popup({ offset: 25 }).setHTML("<strong>Drop-off Location</strong>")
+      )
+      .addTo(map.current);
 
     updateMapBounds();
   }, [dropoff]);

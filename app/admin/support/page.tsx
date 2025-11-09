@@ -122,11 +122,15 @@ function SupportPageContent() {
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
             <p className="text-sm text-neutral-600 mb-2">In Progress</p>
-            <p className="text-3xl font-bold text-amber-600">{stats.inProgress}</p>
+            <p className="text-3xl font-bold text-amber-600">
+              {stats.inProgress}
+            </p>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
             <p className="text-sm text-neutral-600 mb-2">Resolved</p>
-            <p className="text-3xl font-bold text-green-600">{stats.resolved}</p>
+            <p className="text-3xl font-bold text-green-600">
+              {stats.resolved}
+            </p>
           </div>
         </div>
 
@@ -324,7 +328,10 @@ function SupportPageContent() {
                   type="text"
                   value={broadcastData.title}
                   onChange={(e) =>
-                    setBroadcastData({ ...broadcastData, title: e.target.value })
+                    setBroadcastData({
+                      ...broadcastData,
+                      title: e.target.value,
+                    })
                   }
                   placeholder="e.g., System Maintenance Notice"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
@@ -338,7 +345,10 @@ function SupportPageContent() {
                 <textarea
                   value={broadcastData.message}
                   onChange={(e) =>
-                    setBroadcastData({ ...broadcastData, message: e.target.value })
+                    setBroadcastData({
+                      ...broadcastData,
+                      message: e.target.value,
+                    })
                   }
                   placeholder="Enter your message here..."
                   rows={5}

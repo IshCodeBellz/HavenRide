@@ -42,7 +42,10 @@ export async function PATCH(
     //   data: { status },
     // });
 
-    return NextResponse.json({ success: true, message: "Status update pending migration" });
+    return NextResponse.json({
+      success: true,
+      message: "Status update pending migration",
+    });
   } catch (error) {
     console.error("Error updating user status:", error);
     return NextResponse.json(

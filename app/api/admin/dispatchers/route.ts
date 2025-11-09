@@ -16,7 +16,10 @@ export async function GET(req: NextRequest) {
     });
 
     if (!user?.isAdmin) {
-      return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Forbidden - Admin access required" },
+        { status: 403 }
+      );
     }
 
     // TODO: Once Dispatcher model is migrated, use:

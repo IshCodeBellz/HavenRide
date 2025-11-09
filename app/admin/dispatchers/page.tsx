@@ -46,13 +46,17 @@ function DispatcherManagementContent() {
   const stats = {
     total: dispatchers.length,
     active: dispatchers.filter((d) => d.status === "ACTIVE").length,
-    totalRides: dispatchers.reduce((sum, d) => sum + (d.ridesDispatched || 0), 0),
-    avgResponseTime: dispatchers.length > 0
-      ? Math.round(
-          dispatchers.reduce((sum, d) => sum + (d.avgResponseTime || 0), 0) /
-            dispatchers.length
-        )
-      : 0,
+    totalRides: dispatchers.reduce(
+      (sum, d) => sum + (d.ridesDispatched || 0),
+      0
+    ),
+    avgResponseTime:
+      dispatchers.length > 0
+        ? Math.round(
+            dispatchers.reduce((sum, d) => sum + (d.avgResponseTime || 0), 0) /
+              dispatchers.length
+          )
+        : 0,
   };
 
   const handleAssignDispatcher = (dispatcher: any) => {
@@ -68,17 +72,20 @@ function DispatcherManagementContent() {
     if (!selectedDispatcher) return;
 
     try {
-      const res = await fetch(`/api/admin/dispatchers/${selectedDispatcher.id}/assign`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(assignData),
-      });
+      const res = await fetch(
+        `/api/admin/dispatchers/${selectedDispatcher.id}/assign`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(assignData),
+        }
+      );
 
       if (res.ok) {
         alert("Dispatcher assignment updated successfully");
         setShowAssignModal(false);
         setSelectedDispatcher(null);
-        
+
         // Refresh dispatchers
         const dispatcherRes = await fetch("/api/admin/dispatchers");
         if (dispatcherRes.ok) {
@@ -125,12 +132,18 @@ function DispatcherManagementContent() {
             <p className="text-3xl font-bold text-green-600">{stats.active}</p>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-            <p className="text-sm text-neutral-600 mb-2">Total Rides Dispatched</p>
-            <p className="text-3xl font-bold text-[#00796B]">{stats.totalRides}</p>
+            <p className="text-sm text-neutral-600 mb-2">
+              Total Rides Dispatched
+            </p>
+            <p className="text-3xl font-bold text-[#00796B]">
+              {stats.totalRides}
+            </p>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
             <p className="text-sm text-neutral-600 mb-2">Avg Response Time</p>
-            <p className="text-3xl font-bold text-blue-600">{stats.avgResponseTime}s</p>
+            <p className="text-3xl font-bold text-blue-600">
+              {stats.avgResponseTime}s
+            </p>
           </div>
         </div>
 
@@ -220,7 +233,8 @@ function DispatcherManagementContent() {
                         <div className="flex items-center">
                           <div className="h-10 w-10 flex-shrink-0">
                             <div className="h-10 w-10 rounded-full bg-[#00796B] flex items-center justify-center text-white font-semibold">
-                              {dispatcher.user?.name?.charAt(0).toUpperCase() || "D"}
+                              {dispatcher.user?.name?.charAt(0).toUpperCase() ||
+                                "D"}
                             </div>
                           </div>
                           <div className="ml-4">
@@ -260,7 +274,9 @@ function DispatcherManagementContent() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {dispatcher.lastActiveAt
-                          ? new Date(dispatcher.lastActiveAt).toLocaleDateString()
+                          ? new Date(
+                              dispatcher.lastActiveAt
+                            ).toLocaleDateString()
                           : "Never"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -294,12 +310,16 @@ function DispatcherManagementContent() {
                 <p className="text-sm opacity-90 mb-1">Top Performer</p>
                 <p className="text-xl font-semibold">
                   {dispatchers.reduce((max, d) =>
-                    (d.ridesDispatched || 0) > (max.ridesDispatched || 0) ? d : max
+                    (d.ridesDispatched || 0) > (max.ridesDispatched || 0)
+                      ? d
+                      : max
                   ).user?.name || "N/A"}
                 </p>
                 <p className="text-xs opacity-75">
                   {dispatchers.reduce((max, d) =>
-                    (d.ridesDispatched || 0) > (max.ridesDispatched || 0) ? d : max
+                    (d.ridesDispatched || 0) > (max.ridesDispatched || 0)
+                      ? d
+                      : max
                   ).ridesDispatched || 0}{" "}
                   rides dispatched
                 </p>
@@ -309,27 +329,40 @@ function DispatcherManagementContent() {
                 <p className="text-xl font-semibold">
                   {dispatchers
                     .filter((d) => d.avgResponseTime && d.avgResponseTime > 0)
-                    .reduce((min, d) =>
-                      (d.avgResponseTime || Infinity) < (min.avgResponseTime || Infinity)
-                        ? d
-                        : min
-                    , { avgResponseTime: Infinity, user: { name: "N/A" } }).user?.name || "N/A"}
+                    .reduce(
+                      (min, d) =>
+                        (d.avgResponseTime || Infinity) <
+                        (min.avgResponseTime || Infinity)
+                          ? d
+                          : min,
+                      { avgResponseTime: Infinity, user: { name: "N/A" } }
+                    ).user?.name || "N/A"}
                 </p>
                 <p className="text-xs opacity-75">
                   {dispatchers
                     .filter((d) => d.avgResponseTime && d.avgResponseTime > 0)
-                    .reduce((min, d) =>
-                      (d.avgResponseTime || Infinity) < (min.avgResponseTime || Infinity)
-                        ? d
-                        : min
-                    , { avgResponseTime: Infinity }).avgResponseTime !== Infinity
-                    ? `${dispatchers
-                        .filter((d) => d.avgResponseTime && d.avgResponseTime > 0)
-                        .reduce((min, d) =>
-                          (d.avgResponseTime || Infinity) < (min.avgResponseTime || Infinity)
-                            ? d
-                            : min
-                        , { avgResponseTime: Infinity }).avgResponseTime}s avg response`
+                    .reduce(
+                      (min, d) =>
+                        (d.avgResponseTime || Infinity) <
+                        (min.avgResponseTime || Infinity)
+                          ? d
+                          : min,
+                      { avgResponseTime: Infinity }
+                    ).avgResponseTime !== Infinity
+                    ? `${
+                        dispatchers
+                          .filter(
+                            (d) => d.avgResponseTime && d.avgResponseTime > 0
+                          )
+                          .reduce(
+                            (min, d) =>
+                              (d.avgResponseTime || Infinity) <
+                              (min.avgResponseTime || Infinity)
+                                ? d
+                                : min,
+                            { avgResponseTime: Infinity }
+                          ).avgResponseTime
+                      }s avg response`
                     : "N/A"}
                 </p>
               </div>
@@ -378,9 +411,14 @@ function DispatcherManagementContent() {
 
             <div className="mb-4">
               <p className="text-sm text-neutral-600">
-                Assigning: <span className="font-semibold">{selectedDispatcher.user?.name || "Unknown"}</span>
+                Assigning:{" "}
+                <span className="font-semibold">
+                  {selectedDispatcher.user?.name || "Unknown"}
+                </span>
               </p>
-              <p className="text-xs text-neutral-500">{selectedDispatcher.user?.email}</p>
+              <p className="text-xs text-neutral-500">
+                {selectedDispatcher.user?.email}
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -418,7 +456,9 @@ function DispatcherManagementContent() {
                 >
                   <option value="">Select Shift</option>
                   <option value="Morning (6AM-2PM)">Morning (6AM-2PM)</option>
-                  <option value="Afternoon (2PM-10PM)">Afternoon (2PM-10PM)</option>
+                  <option value="Afternoon (2PM-10PM)">
+                    Afternoon (2PM-10PM)
+                  </option>
                   <option value="Night (10PM-6AM)">Night (10PM-6AM)</option>
                   <option value="Day (8AM-4PM)">Day (8AM-4PM)</option>
                   <option value="Evening (4PM-12AM)">Evening (4PM-12AM)</option>

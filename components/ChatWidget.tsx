@@ -23,7 +23,8 @@ export default function ChatWidget({
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
   const [realtimeEnabled, setRealtimeEnabled] = useState(false);
-  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>("default");
+  const [notificationPermission, setNotificationPermission] =
+    useState<NotificationPermission>("default");
   const endRef = useRef<HTMLDivElement | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const previousMessageCountRef = useRef(0);
@@ -33,7 +34,7 @@ export default function ChatWidget({
   useEffect(() => {
     if ("Notification" in window) {
       setNotificationPermission(Notification.permission);
-      
+
       if (Notification.permission === "default") {
         Notification.requestPermission().then((permission) => {
           setNotificationPermission(permission);
@@ -42,7 +43,9 @@ export default function ChatWidget({
     }
 
     // Create audio element for notification sound
-    audioRef.current = new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZRA0PVKzn77BdGAg+ltzy0IEsBS18yfLaizsGF2e49+eXRAwNUKjl8bJfGghAm+Hzxm0gBSyAzfPaizsIGGm88+ifUhENUKnk8LJeFQdAnuH0yXQjBiyBzvPalzsIF2m98+OgVBEMUKnl7rBbFQU9muDzzH0lBSqCz/PajzsIF2q98d6dTBEMTaro7bJaFQU9nOL0zYAm");
+    audioRef.current = new Audio(
+      "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZRA0PVKzn77BdGAg+ltzy0IEsBS18yfLaizsGF2e49+eXRAwNUKjl8bJfGghAm+Hzxm0gBSyAzfPaizsIGGm88+ifUhENUKnk8LJeFQdAnuH0yXQjBiyBzvPalzsIF2m98+OgVBEMUKnl7rBbFQU9muDzzH0lBSqCz/PajzsIF2q98d6dTBEMTaro7bJaFQU9nOL0zYAm"
+    );
   }, []);
 
   // Fetch initial messages
@@ -70,28 +73,36 @@ export default function ChatWidget({
   }, [bookingId]);
 
   // Function to show notification for new messages
-  const showNotification = useCallback((message: Message) => {
-    // Don't notify for own messages
-    if (message.sender === sender) return;
+  const showNotification = useCallback(
+    (message: Message) => {
+      // Don't notify for own messages
+      if (message.sender === sender) return;
 
-    // Play notification sound
-    if (audioRef.current) {
-      audioRef.current.play().catch(() => {
-        // Ignore autoplay restrictions
-      });
-    }
+      // Play notification sound
+      if (audioRef.current) {
+        audioRef.current.play().catch(() => {
+          // Ignore autoplay restrictions
+        });
+      }
 
-    // Show browser notification
-    if (notificationPermission === "granted") {
-      const senderName = message.sender === "RIDER" ? "Rider" : message.sender === "DRIVER" ? "Driver" : "Dispatcher";
-      new Notification(`New message from ${senderName}`, {
-        body: message.text,
-        icon: "/favicon.ico",
-        tag: `message-${message.id}`,
-        requireInteraction: false,
-      });
-    }
-  }, [sender, notificationPermission]);
+      // Show browser notification
+      if (notificationPermission === "granted") {
+        const senderName =
+          message.sender === "RIDER"
+            ? "Rider"
+            : message.sender === "DRIVER"
+            ? "Driver"
+            : "Dispatcher";
+        new Notification(`New message from ${senderName}`, {
+          body: message.text,
+          icon: "/favicon.ico",
+          tag: `message-${message.id}`,
+          requireInteraction: false,
+        });
+      }
+    },
+    [sender, notificationPermission]
+  );
 
   // Set up Ably subscription OR polling fallback
   useEffect(() => {
@@ -151,7 +162,7 @@ export default function ChatWidget({
           const res = await fetch(`/api/bookings/${bookingId}/messages`);
           if (res.ok) {
             const data = await res.json();
-            
+
             // Check for new messages and show notifications
             if (data.length > previousMessageCountRef.current) {
               const newMessages = data.slice(previousMessageCountRef.current);
@@ -161,7 +172,7 @@ export default function ChatWidget({
                 }
               });
             }
-            
+
             previousMessageCountRef.current = data.length;
             setMessages(data);
           }
@@ -305,15 +316,21 @@ export default function ChatWidget({
                   />
                 </svg>
               </div>
-              <p className="text-gray-600 text-sm font-medium">No messages yet</p>
-              <p className="text-gray-500 text-xs mt-1">Start the conversation!</p>
+              <p className="text-gray-600 text-sm font-medium">
+                No messages yet
+              </p>
+              <p className="text-gray-500 text-xs mt-1">
+                Start the conversation!
+              </p>
             </div>
           </div>
         ) : (
           messages.map((m) => (
             <div
               key={m.id}
-              className={`flex ${m.sender === sender ? "justify-end" : "justify-start"}`}
+              className={`flex ${
+                m.sender === sender ? "justify-end" : "justify-start"
+              }`}
             >
               <div
                 className={`max-w-[70%] rounded-2xl px-4 py-2 shadow-sm ${
@@ -323,15 +340,28 @@ export default function ChatWidget({
                 }`}
               >
                 <div className="flex items-center gap-2 mb-1">
-                  <span className={`text-xs font-semibold ${
-                    m.sender === sender ? "text-[#E0F2F1]" : "text-[#00796B]"
-                  }`}>
-                    {m.sender === "RIDER" ? "Rider" : m.sender === "DRIVER" ? "Driver" : "Dispatcher"}
+                  <span
+                    className={`text-xs font-semibold ${
+                      m.sender === sender ? "text-[#E0F2F1]" : "text-[#00796B]"
+                    }`}
+                  >
+                    {m.sender === "RIDER"
+                      ? "Rider"
+                      : m.sender === "DRIVER"
+                      ? "Driver"
+                      : "Dispatcher"}
                   </span>
-                  <span className={`text-xs ${
-                    m.sender === sender ? "text-[#E0F2F1]/70" : "text-gray-500"
-                  }`}>
-                    {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  <span
+                    className={`text-xs ${
+                      m.sender === sender
+                        ? "text-[#E0F2F1]/70"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    {new Date(m.createdAt).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </span>
                 </div>
                 <p className="text-sm break-words">{m.text}</p>
@@ -359,7 +389,8 @@ export default function ChatWidget({
             </svg>
             <div className="flex-1">
               <p className="text-xs text-amber-800">
-                Notifications are blocked. Enable them in your browser settings to get message alerts.
+                Notifications are blocked. Enable them in your browser settings
+                to get message alerts.
               </p>
             </div>
           </div>
@@ -434,7 +465,11 @@ export default function ChatWidget({
         {realtimeEnabled && notificationPermission === "granted" && (
           <p className="text-xs text-green-600 mt-2 text-center flex items-center justify-center gap-1">
             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
             </svg>
             Real-time messages & notifications enabled
           </p>

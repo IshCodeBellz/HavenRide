@@ -83,13 +83,17 @@ export async function GET(req: NextRequest) {
     const driverPayoutArray = Object.values(driverPayouts);
 
     // Recent transactions (last 10)
-    const recentTransactions = completedBookings.slice(0, 10).map((booking) => ({
-      id: booking.id,
-      description: `Ride from ${booking.pickupAddress.split(",")[0]} to ${booking.dropoffAddress.split(",")[0]}`,
-      amount: booking.finalFareAmount,
-      createdAt: booking.createdAt,
-      status: "Completed",
-    }));
+    const recentTransactions = completedBookings
+      .slice(0, 10)
+      .map((booking) => ({
+        id: booking.id,
+        description: `Ride from ${booking.pickupAddress.split(",")[0]} to ${
+          booking.dropoffAddress.split(",")[0]
+        }`,
+        amount: booking.finalFareAmount,
+        createdAt: booking.createdAt,
+        status: "Completed",
+      }));
 
     // Count unique active drivers
     const activeDrivers = new Set(
@@ -110,7 +114,10 @@ export async function GET(req: NextRequest) {
         count: activeDrivers,
       },
       pendingPayouts: {
-        total: driverPayoutArray.reduce((sum: number, p: any) => sum + p.netPayout, 0),
+        total: driverPayoutArray.reduce(
+          (sum: number, p: any) => sum + p.netPayout,
+          0
+        ),
         count: driverPayoutArray.length,
       },
       paymentMethods: {

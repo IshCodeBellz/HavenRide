@@ -103,7 +103,7 @@ export default function RideConfirmation({
         booking.pickupLat,
         booking.pickupLng
       );
-      
+
       // Assume average speed of 30 km/h in city traffic
       const etaMinutes = (distance / 30) * 60;
       setDriverETA(Math.max(1, Math.round(etaMinutes)));
@@ -116,7 +116,12 @@ export default function RideConfirmation({
     }, 6000); // Update every 6 seconds
 
     return () => clearInterval(interval);
-  }, [booking.driver?.lastLat, booking.driver?.lastLng, booking.pickupLat, booking.pickupLng]);
+  }, [
+    booking.driver?.lastLat,
+    booking.driver?.lastLng,
+    booking.pickupLat,
+    booking.pickupLng,
+  ]);
 
   const totalAmount = booking.priceEstimate?.amount || 10.8;
   const currency = booking.priceEstimate?.currency || "GBP";
@@ -146,7 +151,9 @@ export default function RideConfirmation({
               </div>
               <div>
                 <h2 className="text-2xl font-semibold text-[#0F3D3E]">
-                  {userRole === "RIDER" ? "Haven Accessible" : booking.rider?.user.name || "Rider"}
+                  {userRole === "RIDER"
+                    ? "Haven Accessible"
+                    : booking.rider?.user.name || "Rider"}
                 </h2>
                 {userRole === "RIDER" && (
                   <p className="text-gray-600">
@@ -221,26 +228,43 @@ export default function RideConfirmation({
               )}
               <button
                 onClick={() => {
-                  if (userRole === "DRIVER" && booking.pickupLat && booking.pickupLng) {
+                  if (
+                    userRole === "DRIVER" &&
+                    booking.pickupLat &&
+                    booking.pickupLng
+                  ) {
                     // Open navigation to pickup or dropoff location based on status
                     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
                     let destination;
-                    
-                    if (booking.status === "ASSIGNED" || booking.status === "EN_ROUTE") {
+
+                    if (
+                      booking.status === "ASSIGNED" ||
+                      booking.status === "EN_ROUTE"
+                    ) {
                       // Navigate to pickup location
                       destination = `${booking.pickupLat},${booking.pickupLng}`;
-                    } else if (booking.status === "ARRIVED" && booking.dropoffLat && booking.dropoffLng) {
+                    } else if (
+                      booking.status === "ARRIVED" &&
+                      booking.dropoffLat &&
+                      booking.dropoffLng
+                    ) {
                       // Navigate to dropoff location
                       destination = `${booking.dropoffLat},${booking.dropoffLng}`;
                     }
-                    
+
                     if (destination) {
                       if (isIOS) {
                         // Open Apple Maps on iOS
-                        window.open(`maps://maps.apple.com/?daddr=${destination}&dirflg=d`, '_blank');
+                        window.open(
+                          `maps://maps.apple.com/?daddr=${destination}&dirflg=d`,
+                          "_blank"
+                        );
                       } else {
                         // Open Google Maps on other platforms
-                        window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`, '_blank');
+                        window.open(
+                          `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`,
+                          "_blank"
+                        );
                       }
                     }
                   }
@@ -263,15 +287,15 @@ export default function RideConfirmation({
                     />
                   </svg>
                 )}
-                {userRole === "RIDER" 
-                  ? "Confirm Ride" 
-                  : booking.status === "ASSIGNED" 
-                    ? "Start Navigation" 
-                    : booking.status === "EN_ROUTE"
-                      ? "I've Arrived"
-                      : booking.status === "ARRIVED"
-                        ? "Start Trip"
-                        : "Continue"}
+                {userRole === "RIDER"
+                  ? "Confirm Ride"
+                  : booking.status === "ASSIGNED"
+                  ? "Start Navigation"
+                  : booking.status === "EN_ROUTE"
+                  ? "I've Arrived"
+                  : booking.status === "ARRIVED"
+                  ? "Start Trip"
+                  : "Continue"}
               </button>
             </div>
 
@@ -336,15 +360,19 @@ export default function RideConfirmation({
                     </div>
                     <div>
                       <p className="font-bold text-lg">
-                        {booking.driver.user.name || "Your driver"} is on the way
+                        {booking.driver.user.name || "Your driver"} is on the
+                        way
                       </p>
                       <p className="text-sm opacity-90">
-                        {booking.driver.vehicleMake} {booking.driver.vehicleModel}
+                        {booking.driver.vehicleMake}{" "}
+                        {booking.driver.vehicleModel}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold">{Math.round(driverETA)}</p>
+                    <p className="text-3xl font-bold">
+                      {Math.round(driverETA)}
+                    </p>
                     <p className="text-sm opacity-90">min away</p>
                   </div>
                 </div>
@@ -352,9 +380,11 @@ export default function RideConfirmation({
             )}
 
             {/* Route Information Overlay */}
-            <div className={`absolute left-4 right-4 bg-white rounded-lg shadow-lg p-4 space-y-3 z-10 ${
-              userRole === "RIDER" && booking.driver ? "bottom-4" : "top-4"
-            }`}>
+            <div
+              className={`absolute left-4 right-4 bg-white rounded-lg shadow-lg p-4 space-y-3 z-10 ${
+                userRole === "RIDER" && booking.driver ? "bottom-4" : "top-4"
+              }`}
+            >
               {/* Pickup */}
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 bg-[#00796B] rounded-full flex items-center justify-center flex-shrink-0">
@@ -412,7 +442,10 @@ export default function RideConfirmation({
                 {userRole === "RIDER" ? (
                   <>
                     <p className="text-sm text-gray-600">
-                      Driver arrives in: <span className="font-bold text-[#00796B]">{Math.round(driverETA)} mins</span>
+                      Driver arrives in:{" "}
+                      <span className="font-bold text-[#00796B]">
+                        {Math.round(driverETA)} mins
+                      </span>
                     </p>
                     <p className="text-xs text-gray-500">
                       Total trip: {Math.round(estimatedArrival)} mins
@@ -435,15 +468,15 @@ export default function RideConfirmation({
 
       {/* Chat Modal */}
       {showChat && (
-        <div 
+        <div
           className="fixed inset-0 flex items-center justify-center p-6 z-50"
-          style={{ 
-            backdropFilter: 'blur(10px)',
-            backgroundColor: 'rgba(255, 255, 255, 0.3)'
+          style={{
+            backdropFilter: "blur(10px)",
+            backgroundColor: "rgba(255, 255, 255, 0.3)",
           }}
           onClick={() => setShowChat(false)}
         >
-          <div 
+          <div
             className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >

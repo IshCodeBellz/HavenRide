@@ -16,7 +16,10 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user?.isAdmin) {
-      return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Forbidden - Admin access required" },
+        { status: 403 }
+      );
     }
 
     const body = await req.json();

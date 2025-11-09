@@ -17,17 +17,17 @@ const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ""
 );
 
-function CheckoutForm({ 
-  amount, 
-  pickup, 
-  dropoff, 
-  pickupLat, 
-  pickupLng, 
-  dropoffLat, 
-  dropoffLng, 
+function CheckoutForm({
+  amount,
+  pickup,
+  dropoff,
+  pickupLat,
+  pickupLng,
+  dropoffLat,
+  dropoffLng,
   wheelchair,
   distanceKm,
-  onSuccess 
+  onSuccess,
 }: {
   amount: string;
   pickup: string;
@@ -66,17 +66,21 @@ function CheckoutForm({
       }
 
       // Confirm the payment with Stripe
-      const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/rider`,
-        },
-        redirect: "if_required", // Don't redirect, handle it manually
-      });
+      const { error: confirmError, paymentIntent } =
+        await stripe.confirmPayment({
+          elements,
+          confirmParams: {
+            return_url: `${window.location.origin}/rider`,
+          },
+          redirect: "if_required", // Don't redirect, handle it manually
+        });
 
       if (confirmError) {
         console.error("Stripe confirmation error:", confirmError);
-        setError(confirmError.message || "Payment failed. Please check your card details and try again.");
+        setError(
+          confirmError.message ||
+            "Payment failed. Please check your card details and try again."
+        );
         setProcessing(false);
         return;
       }
@@ -122,7 +126,7 @@ function CheckoutForm({
   return (
     <form onSubmit={handleSubmit}>
       <PaymentElement />
-      
+
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 mt-4">
           <p className="text-red-700 text-sm">{error}</p>
@@ -166,7 +170,7 @@ function CheckoutForm({
       {/* Cancel Button */}
       <button
         type="button"
-        onClick={() => window.location.href = "/rider"}
+        onClick={() => (window.location.href = "/rider")}
         disabled={processing}
         className="w-full bg-red-50 text-red-600 border-2 border-red-200 py-4 rounded-xl font-semibold text-lg hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-3"
       >
@@ -225,7 +229,9 @@ function PaymentPageContent() {
         setClientSecret(clientSecret);
       } catch (e) {
         console.error("Payment initialization error:", e);
-        setError("Failed to initialize payment. Please try again or contact support.");
+        setError(
+          "Failed to initialize payment. Please try again or contact support."
+        );
       } finally {
         setLoading(false);
       }
@@ -243,9 +249,7 @@ function PaymentPageContent() {
       <div className="max-w-2xl mx-auto px-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#0F3D3E]">
-            Confirm & Pay
-          </h1>
+          <h1 className="text-3xl font-bold text-[#0F3D3E]">Confirm & Pay</h1>
           <p className="text-gray-600 mt-2">
             Review your ride details and confirm payment
           </p>
@@ -256,7 +260,7 @@ function PaymentPageContent() {
           <h2 className="text-xl font-semibold text-[#0F3D3E] mb-4">
             Trip Details
           </h2>
-          
+
           <div className="space-y-4">
             {/* Pickup */}
             <div className="flex items-start gap-3">
@@ -265,9 +269,7 @@ function PaymentPageContent() {
               </div>
               <div className="flex-1">
                 <p className="text-xs text-gray-600 font-medium">Pickup</p>
-                <p className="text-sm font-semibold text-[#0F3D3E]">
-                  {pickup}
-                </p>
+                <p className="text-sm font-semibold text-[#0F3D3E]">{pickup}</p>
               </div>
             </div>
 
@@ -305,18 +307,22 @@ function PaymentPageContent() {
           <h2 className="text-xl font-semibold text-[#0F3D3E] mb-4">
             Payment Summary
           </h2>
-          
+
           <div className="space-y-3">
             <div className="flex justify-between">
               <span className="text-gray-600">Base Fare</span>
-              <span className="font-medium">£{parseFloat(amount || "0").toFixed(2)}</span>
+              <span className="font-medium">
+                £{parseFloat(amount || "0").toFixed(2)}
+              </span>
             </div>
             <div className="flex justify-between text-sm text-gray-500">
               <span>Service Fee</span>
               <span>Included</span>
             </div>
             <div className="border-t pt-3 flex justify-between items-center">
-              <span className="text-lg font-semibold text-[#0F3D3E]">Total</span>
+              <span className="text-lg font-semibold text-[#0F3D3E]">
+                Total
+              </span>
               <span className="text-2xl font-bold text-[#00796B]">
                 £{parseFloat(amount || "0").toFixed(2)}
               </span>

@@ -4,7 +4,15 @@ import RoleGate from "@/components/RoleGate";
 import AppLayout from "@/components/AppLayout";
 import Link from "next/link";
 
-type StatusFilter = "ALL" | "REQUESTED" | "ASSIGNED" | "EN_ROUTE" | "ARRIVED" | "IN_PROGRESS" | "COMPLETED" | "CANCELED";
+type StatusFilter =
+  | "ALL"
+  | "REQUESTED"
+  | "ASSIGNED"
+  | "EN_ROUTE"
+  | "ARRIVED"
+  | "IN_PROGRESS"
+  | "COMPLETED"
+  | "CANCELED";
 
 function RidesPageContent() {
   const [rides, setRides] = useState<any[]>([]);
@@ -37,7 +45,8 @@ function RidesPageContent() {
   }, []);
 
   const filteredRides = rides.filter((ride) => {
-    const matchesStatus = statusFilter === "ALL" || ride.status === statusFilter;
+    const matchesStatus =
+      statusFilter === "ALL" || ride.status === statusFilter;
 
     let matchesDate = true;
     const rideDate = new Date(ride.createdAt);
@@ -61,7 +70,11 @@ function RidesPageContent() {
 
   const stats = {
     total: rides.length,
-    active: rides.filter((r) => ["REQUESTED", "ASSIGNED", "EN_ROUTE", "ARRIVED", "IN_PROGRESS"].includes(r.status)).length,
+    active: rides.filter((r) =>
+      ["REQUESTED", "ASSIGNED", "EN_ROUTE", "ARRIVED", "IN_PROGRESS"].includes(
+        r.status
+      )
+    ).length,
     completed: rides.filter((r) => r.status === "COMPLETED").length,
     canceled: rides.filter((r) => r.status === "CANCELED").length,
   };
@@ -78,9 +91,7 @@ function RidesPageContent() {
             >
               ← Back to Dashboard
             </Link>
-            <h1 className="text-4xl font-bold text-[#263238]">
-              Rides Monitor
-            </h1>
+            <h1 className="text-4xl font-bold text-[#263238]">Rides Monitor</h1>
             <p className="text-neutral-600 mt-2">
               Track and manage all bookings
             </p>
@@ -99,7 +110,9 @@ function RidesPageContent() {
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
             <p className="text-sm text-neutral-600 mb-2">Completed</p>
-            <p className="text-3xl font-bold text-green-600">{stats.completed}</p>
+            <p className="text-3xl font-bold text-green-600">
+              {stats.completed}
+            </p>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
             <p className="text-sm text-neutral-600 mb-2">Canceled</p>
@@ -117,7 +130,9 @@ function RidesPageContent() {
               </label>
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+                onChange={(e) =>
+                  setStatusFilter(e.target.value as StatusFilter)
+                }
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
               >
                 <option value="ALL">All Statuses</option>
@@ -241,7 +256,8 @@ function RidesPageContent() {
                               ? "bg-red-100 text-red-700"
                               : ride.status === "IN_PROGRESS"
                               ? "bg-purple-100 text-purple-700"
-                              : ride.status === "EN_ROUTE" || ride.status === "ARRIVED"
+                              : ride.status === "EN_ROUTE" ||
+                                ride.status === "ARRIVED"
                               ? "bg-blue-100 text-blue-700"
                               : "bg-amber-100 text-amber-700"
                           }`}
@@ -250,7 +266,10 @@ function RidesPageContent() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        £{ride.finalFareAmount?.toFixed(2) || ride.priceEstimate?.amount?.toFixed(2) || "N/A"}
+                        £
+                        {ride.finalFareAmount?.toFixed(2) ||
+                          ride.priceEstimate?.amount?.toFixed(2) ||
+                          "N/A"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(ride.createdAt).toLocaleString()}

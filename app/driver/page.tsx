@@ -215,7 +215,12 @@ function DriverPageContent() {
   }
 
   // Show confirmation screen if driver has accepted a ride
-  if (assigned && (assigned.status === "ASSIGNED" || assigned.status === "EN_ROUTE" || assigned.status === "ARRIVED")) {
+  if (
+    assigned &&
+    (assigned.status === "ASSIGNED" ||
+      assigned.status === "EN_ROUTE" ||
+      assigned.status === "ARRIVED")
+  ) {
     return (
       <RideConfirmation
         booking={assigned}
@@ -441,7 +446,9 @@ function DriverPageContent() {
                     <div className="space-y-5 mb-8">
                       <div className="flex items-start gap-5">
                         <div className="w-12 h-12 bg-[#00796B] rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-lg">A</span>
+                          <span className="text-white font-bold text-lg">
+                            A
+                          </span>
                         </div>
                         <div className="flex-1">
                           <p className="text-sm text-gray-600 font-medium mb-2">
@@ -455,7 +462,9 @@ function DriverPageContent() {
 
                       <div className="flex items-start gap-5">
                         <div className="w-12 h-12 bg-[#0F3D3E] rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-lg">B</span>
+                          <span className="text-white font-bold text-lg">
+                            B
+                          </span>
                         </div>
                         <div className="flex-1">
                           <p className="text-sm text-gray-600 font-medium mb-2">
@@ -492,7 +501,9 @@ function DriverPageContent() {
                       </div>
                       {currentBooking.priceEstimate && (
                         <div className="flex justify-between text-base pt-3 border-t border-gray-200">
-                          <span className="text-gray-600 text-lg">Estimated Fare:</span>
+                          <span className="text-gray-600 text-lg">
+                            Estimated Fare:
+                          </span>
                           <span className="text-2xl font-bold text-[#0F3D3E]">
                             £{currentBooking.priceEstimate.amount?.toFixed(2)}
                           </span>

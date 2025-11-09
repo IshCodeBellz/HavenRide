@@ -65,7 +65,8 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { baseFare, perKm, wheelchairMult, requirePickupPin, sendReceipts } = body;
+    const { baseFare, perKm, wheelchairMult, requirePickupPin, sendReceipts } =
+      body;
 
     // Validate settings
     if (baseFare !== undefined && (baseFare < 0 || baseFare > 100)) {
@@ -82,7 +83,10 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    if (wheelchairMult !== undefined && (wheelchairMult < 1 || wheelchairMult > 3)) {
+    if (
+      wheelchairMult !== undefined &&
+      (wheelchairMult < 1 || wheelchairMult > 3)
+    ) {
       return NextResponse.json(
         { error: "Wheelchair multiplier must be between 1 and 3" },
         { status: 400 }
@@ -92,7 +96,7 @@ export async function PATCH(req: NextRequest) {
     // TODO: Once SystemSettings model is created, save to database
     // For now, simulate success and potentially store in environment variables
     // or a JSON config file
-    
+
     const updatedSettings = {
       baseFare: baseFare ?? 6.0,
       perKm: perKm ?? 1.8,

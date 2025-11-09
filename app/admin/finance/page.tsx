@@ -19,7 +19,9 @@ function FinancePageContent() {
           setIsAdmin(userData.isAdmin || false);
         }
 
-        const financeRes = await fetch(`/api/admin/finance?timeframe=${timeframe}`);
+        const financeRes = await fetch(
+          `/api/admin/finance?timeframe=${timeframe}`
+        );
         if (financeRes.ok) {
           const financeData = await financeRes.json();
           setData(financeData);
@@ -104,7 +106,9 @@ function FinancePageContent() {
 
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm text-neutral-600">Platform Commission</p>
+                  <p className="text-sm text-neutral-600">
+                    Platform Commission
+                  </p>
                   <svg
                     className="w-6 h-6 text-[#00796B]"
                     fill="none"
@@ -188,13 +192,19 @@ function FinancePageContent() {
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-[#635BFF] rounded-lg flex items-center justify-center">
-                        <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.548 3.445 2.583 0 .98-.84 1.632-2.104 1.632-2.446 0-5.24-1.117-7.007-2.215l-.955 5.697c1.77.966 4.556 1.765 7.532 1.765 2.686 0 4.873-.681 6.431-1.997 1.632-1.376 2.467-3.359 2.467-5.868 0-3.92-2.392-5.666-6.066-7.054z"/>
+                        <svg
+                          className="w-6 h-6 text-white"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.548 3.445 2.583 0 .98-.84 1.632-2.104 1.632-2.446 0-5.24-1.117-7.007-2.215l-.955 5.697c1.77.966 4.556 1.765 7.532 1.765 2.686 0 4.873-.681 6.431-1.997 1.632-1.376 2.467-3.359 2.467-5.868 0-3.92-2.392-5.666-6.066-7.054z" />
                         </svg>
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900">Stripe</p>
-                        <p className="text-sm text-gray-500">Connected & Active</p>
+                        <p className="text-sm text-gray-500">
+                          Connected & Active
+                        </p>
                       </div>
                     </div>
                     <div className="text-right">
@@ -208,12 +218,24 @@ function FinancePageContent() {
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-[#00796B] rounded-lg flex items-center justify-center">
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        <svg
+                          className="w-6 h-6 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
                         </svg>
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-900">LA Invoicing</p>
+                        <p className="font-semibold text-gray-900">
+                          LA Invoicing
+                        </p>
                         <p className="text-sm text-gray-500">Local Authority</p>
                       </div>
                     </div>
@@ -299,7 +321,10 @@ function FinancePageContent() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {data?.driverPayouts?.length > 0 ? (
                       data.driverPayouts.map((payout: any) => (
-                        <tr key={payout.driverId} className="hover:bg-gray-50 transition-colors">
+                        <tr
+                          key={payout.driverId}
+                          className="hover:bg-gray-50 transition-colors"
+                        >
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">
                               {payout.driverName || "Unknown Driver"}
@@ -321,11 +346,13 @@ function FinancePageContent() {
                             {payout.rideCount}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                              payout.status === "PAID" 
-                                ? "bg-green-100 text-green-700"
-                                : "bg-amber-100 text-amber-700"
-                            }`}>
+                            <span
+                              className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                                payout.status === "PAID"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-amber-100 text-amber-700"
+                              }`}
+                            >
                               {payout.status || "PENDING"}
                             </span>
                           </td>
@@ -333,7 +360,10 @@ function FinancePageContent() {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                        <td
+                          colSpan={6}
+                          className="px-6 py-8 text-center text-gray-500"
+                        >
                           No payout data available
                         </td>
                       </tr>

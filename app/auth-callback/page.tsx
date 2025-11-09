@@ -49,12 +49,15 @@ export default function AuthCallbackPage() {
 
         const data = await res.json();
         const userRole = data.role;
-        console.log("User role:", userRole);
+        const isAdmin = data.isAdmin || false;
+        console.log("User role:", userRole, "isAdmin:", isAdmin);
 
         if (!isMounted) return;
 
-        // Redirect based on role with replace to prevent back button loop
-        if (userRole === "DRIVER") {
+        // Redirect based on admin status first, then role
+        if (isAdmin) {
+          router.replace("/admin");
+        } else if (userRole === "DRIVER") {
           router.replace("/driver");
         } else if (userRole === "RIDER") {
           router.replace("/rider");

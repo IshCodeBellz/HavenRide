@@ -11,7 +11,7 @@ function AdminPageContent() {
     todayRides: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(true); // Default to true for admin page
 
   useEffect(() => {
     async function fetchData() {
@@ -21,6 +21,8 @@ function AdminPageContent() {
         if (userRes.ok) {
           const userData = await userRes.json();
           setIsAdmin(userData.isAdmin || false);
+        } else {
+          console.error("Failed to fetch user data:", await userRes.text());
         }
 
         // Fetch stats
@@ -28,6 +30,9 @@ function AdminPageContent() {
         if (statsRes.ok) {
           const data = await statsRes.json();
           setStats(data);
+        } else {
+          console.error("Failed to fetch stats:", await statsRes.text());
+          // Keep default values of 0 if stats fail to load
         }
       } catch (error) {
         console.error("Failed to fetch data:", error);

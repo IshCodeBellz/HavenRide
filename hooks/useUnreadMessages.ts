@@ -7,7 +7,9 @@ export function useUnreadMessages(
   sender: "RIDER" | "DRIVER" | "DISPATCHER"
 ) {
   const [unreadCount, setUnreadCount] = useState(0);
-  const [lastReadTimestamp, setLastReadTimestamp] = useState<number>(Date.now());
+  const [lastReadTimestamp, setLastReadTimestamp] = useState<number>(
+    Date.now()
+  );
 
   // Fetch messages and count unread
   const fetchUnreadCount = useCallback(async () => {

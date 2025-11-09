@@ -23,12 +23,15 @@ The HavenRide Admin Dashboard provides comprehensive platform oversight and mana
 ## Access & Security
 
 ### Authentication
+
 - **Route**: `/admin`
 - **Protection**: `RoleGate` component requiring `["ADMIN"]` role
 - **Verification**: All API endpoints verify `isAdmin: true` in database
 
 ### Role Assignment
+
 Admin role must be set in database:
+
 ```sql
 UPDATE "User" SET "isAdmin" = true WHERE email = 'admin@havenride.com';
 ```
@@ -42,11 +45,13 @@ UPDATE "User" SET "isAdmin" = true WHERE email = 'admin@havenride.com';
 ### Features
 
 #### 1. User Listing
+
 - View all users (Riders, Drivers, Dispatchers, Admins)
 - Search by name or email
 - Filter by user type: ALL, RIDER, DRIVER
 
 #### 2. User Information Display
+
 - Name and email
 - Role badges (color-coded)
 - Account status
@@ -55,22 +60,26 @@ UPDATE "User" SET "isAdmin" = true WHERE email = 'admin@havenride.com';
 #### 3. User Actions
 
 **Edit User**
+
 - Click "Edit" button
 - Modify: Name, Email, Role
 - Changes saved to database immediately
 
 **Suspend User**
+
 - Click "Suspend" button
 - Confirmation dialog required
 - Sets user status to `SUSPENDED`
 - User cannot access platform while suspended
 
 **Activate User**
+
 - Available for suspended users
 - Restores user access
 - Sets status to `ACTIVE`
 
 **Delete User**
+
 - Click "Delete" button
 - Confirmation required
 - **Soft Delete**: If user has booking history, status set to `DEACTIVATED`
@@ -78,6 +87,7 @@ UPDATE "User" SET "isAdmin" = true WHERE email = 'admin@havenride.com';
 - **Protection**: Cannot delete your own admin account
 
 ### Statistics Dashboard
+
 - Total Users
 - Total Riders
 - Total Drivers
@@ -101,12 +111,14 @@ DELETE /api/admin/users/[id]         - Delete user
 ### Rides Monitor
 
 #### Features
+
 - Real-time ride tracking
 - Status filtering (8 statuses)
 - Date filtering (today, week, month, all)
 - Analytics dashboard
 
 #### Ride Statuses
+
 1. `REQUESTED` - New booking created
 2. `ASSIGNED` - Driver assigned
 3. `EN_ROUTE` - Driver heading to pickup
@@ -116,6 +128,7 @@ DELETE /api/admin/users/[id]         - Delete user
 7. `CANCELED` - Booking canceled
 
 #### Displayed Information
+
 - Booking ID
 - Rider name/email
 - Driver name/email
@@ -125,6 +138,7 @@ DELETE /api/admin/users/[id]         - Delete user
 - Creation date
 
 #### Statistics
+
 - Total Rides
 - Active Rides
 - Completed Rides
@@ -135,6 +149,7 @@ DELETE /api/admin/users/[id]         - Delete user
 **Location**: `/app/admin/settings`
 
 #### Fare Settings
+
 Configure platform pricing:
 
 ```typescript
@@ -146,6 +161,7 @@ Configure platform pricing:
 ```
 
 **Example Calculation**:
+
 ```
 Standard ride (10km): £6.00 + (£1.80 × 10km) = £24.00
 Wheelchair ride (10km): £24.00 × 1.15 = £27.60
@@ -154,14 +170,17 @@ Wheelchair ride (10km): £24.00 × 1.15 = £27.60
 #### Feature Flags
 
 **Require Pickup PIN Verification**
+
 - Riders must enter PIN before pickup
 - Enhances security and identity verification
 
 **Send Receipt Emails Automatically**
+
 - Automatically email receipts after ride completion
 - Includes fare breakdown and payment details
 
 #### Saving Settings
+
 - Changes saved to database via API
 - Audit log created for all settings changes
 - Validation applied to all numeric values
@@ -183,18 +202,21 @@ PATCH /api/admin/settings           - Update settings
 ### Features
 
 #### Revenue Dashboard
+
 - **Total Revenue**: Sum of all completed ride fares
 - **Platform Commission**: Default 15% of revenue
 - **Driver Earnings**: Revenue minus commission
 - **Pending Payouts**: Outstanding payments to drivers
 
 #### Timeframe Filtering
+
 - Week: Last 7 days
 - Month: Last 30 days
 - Year: Last 365 days
 - All: All-time data
 
 #### Payment Methods Tracking
+
 - Stripe transactions count
 - LA Invoicing transactions count
 - Visual breakdown
@@ -202,6 +224,7 @@ PATCH /api/admin/settings           - Update settings
 #### Driver Payouts Table
 
 Displays for each driver:
+
 - Driver name and email
 - Total earnings from rides
 - Platform commission (15%)
@@ -210,6 +233,7 @@ Displays for each driver:
 - Payment status
 
 #### Recent Transactions
+
 - Last 5 completed transactions
 - Booking ID
 - Rider and driver names
@@ -247,6 +271,7 @@ GET /api/admin/finance?timeframe=week   - Financial data with optional timeframe
 ### Driver Verification Management
 
 #### Information Tracked
+
 - **License Number**: Driver's license ID
 - **Insurance Expiry**: Insurance policy expiration date
 - **DBS Check**: Date of last Disclosure and Barring Service check
@@ -255,6 +280,7 @@ GET /api/admin/finance?timeframe=week   - Financial data with optional timeframe
 - **Verification Status**: PENDING, APPROVED, REJECTED, EXPIRED
 
 #### Visual Indicators
+
 - ⚠️ **Red Highlight**: Insurance expiring within 30 days
 - 🟢 **Green Badge**: Verified drivers
 - 🟡 **Yellow Badge**: Pending verification
@@ -269,13 +295,16 @@ GET /api/admin/finance?timeframe=week   - Financial data with optional timeframe
 5. Driver can start accepting rides
 
 #### Statistics
+
 - Total Drivers
 - Verified Drivers
 - Pending Review
 - Expiring Soon (insurance within 30 days)
 
 #### GDPR Compliance
+
 Information box displays:
+
 - Data protection compliance notice
 - User privacy rights
 - Data access and deletion procedures
@@ -296,6 +325,7 @@ POST /api/admin/compliance/drivers/[id]/approve  - Approve driver verification
 ### Support Ticket Management
 
 #### Ticket Information
+
 - Ticket ID
 - User (name/email)
 - Subject
@@ -305,7 +335,9 @@ POST /api/admin/compliance/drivers/[id]/approve  - Approve driver verification
 - Creation date
 
 #### Filtering
+
 Filter tickets by status:
+
 - All Tickets
 - Open
 - In Progress
@@ -313,6 +345,7 @@ Filter tickets by status:
 - Closed
 
 #### Statistics
+
 - Total Tickets
 - Open Tickets (red)
 - In Progress (amber)
@@ -321,26 +354,31 @@ Filter tickets by status:
 ### System Notifications Broadcasting
 
 #### Broadcast Feature
+
 Send system-wide notifications to users:
 
 **Target Audiences**:
+
 - All Users
 - Riders Only
 - Drivers Only
 - Dispatchers Only
 
 **Broadcast Fields**:
+
 - Title (required)
 - Message (required)
 - Target Role (required)
 
 **Use Cases**:
+
 - Platform maintenance announcements
 - Policy updates
 - Emergency notifications
 - Feature launches
 
 #### How to Broadcast
+
 1. Click "Broadcast Notification" button
 2. Enter notification title
 3. Write message content
@@ -364,7 +402,9 @@ POST /api/admin/support/broadcast      - Send system notification
 ### Features
 
 #### Dispatcher Overview
+
 View all dispatchers with:
+
 - Profile information (name, email)
 - Assigned region
 - Assigned shift
@@ -376,12 +416,14 @@ View all dispatchers with:
 #### Performance Metrics
 
 **Statistics Dashboard**:
+
 - Total Dispatchers
 - Active Dispatchers
 - Total Rides Dispatched
 - Average Response Time (seconds)
 
 **Performance Overview**:
+
 - Top Performer (most rides dispatched)
 - Fastest Response (lowest avg response time)
 - Total Coverage (active vs total)
@@ -389,6 +431,7 @@ View all dispatchers with:
 #### Region Assignment
 
 Assign dispatchers to London areas:
+
 - North London
 - South London
 - East London
@@ -399,6 +442,7 @@ Assign dispatchers to London areas:
 #### Shift Assignment
 
 Assign work shifts:
+
 - Morning (6AM-2PM)
 - Afternoon (2PM-10PM)
 - Night (10PM-6AM)
@@ -429,10 +473,12 @@ POST /api/admin/dispatchers/[id]/assign  - Assign region/shift
 ### Authentication
 
 All admin API endpoints require:
+
 1. Valid Clerk session (`userId` from `auth()`)
 2. User with `isAdmin: true` in database
 
 **Response for unauthorized requests**:
+
 ```json
 {
   "error": "Unauthorized",
@@ -441,6 +487,7 @@ All admin API endpoints require:
 ```
 
 **Response for non-admin users**:
+
 ```json
 {
   "error": "Forbidden - Admin access required",
@@ -451,9 +498,11 @@ All admin API endpoints require:
 ### User Management APIs
 
 #### GET /api/admin/users
+
 Fetch all users with rider/driver relations.
 
 **Response**:
+
 ```json
 {
   "users": [
@@ -472,9 +521,11 @@ Fetch all users with rider/driver relations.
 ```
 
 #### PATCH /api/admin/users/[id]
+
 Edit user details.
 
 **Request Body**:
+
 ```json
 {
   "name": "Updated Name",
@@ -485,6 +536,7 @@ Edit user details.
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -493,16 +545,19 @@ Edit user details.
 ```
 
 #### PUT /api/admin/users/[id]
+
 Suspend or activate user.
 
 **Request Body**:
+
 ```json
 {
-  "action": "suspend"  // or "activate"
+  "action": "suspend" // or "activate"
 }
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -512,13 +567,16 @@ Suspend or activate user.
 ```
 
 **Validation**:
+
 - Cannot suspend your own account
 - Action must be "suspend" or "activate"
 
 #### DELETE /api/admin/users/[id]
+
 Delete user (soft or hard delete).
 
 **Response (Soft Delete)**:
+
 ```json
 {
   "success": true,
@@ -527,6 +585,7 @@ Delete user (soft or hard delete).
 ```
 
 **Response (Hard Delete)**:
+
 ```json
 {
   "success": true,
@@ -535,6 +594,7 @@ Delete user (soft or hard delete).
 ```
 
 **Protection**:
+
 - Cannot delete your own account
 - Soft deletes users with booking history
 - Hard deletes users without bookings
@@ -542,9 +602,11 @@ Delete user (soft or hard delete).
 ### Settings APIs
 
 #### GET /api/admin/settings
+
 Fetch current platform settings.
 
 **Response**:
+
 ```json
 {
   "settings": {
@@ -558,9 +620,11 @@ Fetch current platform settings.
 ```
 
 #### PATCH /api/admin/settings
+
 Update platform settings.
 
 **Request Body**:
+
 ```json
 {
   "baseFare": 7.0,
@@ -572,11 +636,13 @@ Update platform settings.
 ```
 
 **Validation**:
+
 - `baseFare`: 0-100
 - `perKm`: 0-50
 - `wheelchairMult`: 1-3
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -590,12 +656,15 @@ Update platform settings.
 ### Finance APIs
 
 #### GET /api/admin/finance
+
 Fetch financial data with optional timeframe.
 
 **Query Parameters**:
+
 - `timeframe`: "week", "month", "year", or "all" (optional)
 
 **Response**:
+
 ```json
 {
   "totalRevenue": 15000.00,
@@ -625,9 +694,11 @@ Fetch financial data with optional timeframe.
 ### Compliance APIs
 
 #### GET /api/admin/compliance
+
 Fetch all drivers with verification details.
 
 **Response**:
+
 ```json
 {
   "drivers": [
@@ -649,9 +720,11 @@ Fetch all drivers with verification details.
 ```
 
 #### POST /api/admin/compliance/drivers/[id]/approve
+
 Approve driver verification.
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -662,9 +735,11 @@ Approve driver verification.
 ### Support APIs
 
 #### GET /api/admin/support
+
 Fetch all support tickets.
 
 **Response**:
+
 ```json
 {
   "tickets": [
@@ -686,18 +761,21 @@ Fetch all support tickets.
 ```
 
 #### POST /api/admin/support/broadcast
+
 Send system-wide notification.
 
 **Request Body**:
+
 ```json
 {
   "title": "System Maintenance",
   "message": "Platform will be down for maintenance on Nov 15th from 2-4 AM.",
-  "targetRole": "ALL"  // or "RIDER", "DRIVER", "DISPATCHER"
+  "targetRole": "ALL" // or "RIDER", "DRIVER", "DISPATCHER"
 }
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -708,9 +786,11 @@ Send system-wide notification.
 ### Dispatcher APIs
 
 #### GET /api/admin/dispatchers
+
 Fetch all dispatchers with performance metrics.
 
 **Response**:
+
 ```json
 {
   "dispatchers": [
@@ -732,9 +812,11 @@ Fetch all dispatchers with performance metrics.
 ```
 
 #### POST /api/admin/dispatchers/[id]/assign
+
 Assign region and/or shift to dispatcher.
 
 **Request Body**:
+
 ```json
 {
   "region": "North London",
@@ -745,6 +827,7 @@ Assign region and/or shift to dispatcher.
 **Validation**: At least region or shift must be provided.
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -762,6 +845,7 @@ Assign region and/or shift to dispatcher.
 ## Database Schema
 
 ### User Model
+
 ```prisma
 model User {
   id        String      @id
@@ -790,6 +874,7 @@ enum UserStatus {
 ```
 
 ### Driver Model (Compliance)
+
 ```prisma
 model Driver {
   id                     String    @id
@@ -804,7 +889,7 @@ model Driver {
   commissionRate         Float     @default(0.15)
   totalEarnings          Float     @default(0)
   pendingPayout          Float     @default(0)
-  
+
   bookings               Booking[] @relation("DriverBookings")
   verificationDocuments  DriverDocument[]
 }
@@ -818,6 +903,7 @@ enum VerificationStatus {
 ```
 
 ### Dispatcher Model
+
 ```prisma
 model Dispatcher {
   id               String    @id
@@ -834,6 +920,7 @@ model Dispatcher {
 ```
 
 ### Support Ticket Model
+
 ```prisma
 model SupportTicket {
   id          String                @id @default(cuid())
@@ -864,6 +951,7 @@ enum SupportTicketPriority {
 ```
 
 ### System Notification Model
+
 ```prisma
 model SystemNotification {
   id         String   @id @default(cuid())
@@ -879,6 +967,7 @@ model SystemNotification {
 ```
 
 ### Compliance Log Model
+
 ```prisma
 model ComplianceLog {
   id        String   @id @default(cuid())
@@ -895,26 +984,31 @@ model ComplianceLog {
 ## Security Best Practices
 
 ### 1. Admin Access Control
+
 - Always verify `isAdmin: true` before allowing operations
 - Use RoleGate component on all admin routes
 - Check authentication in every API endpoint
 
 ### 2. Input Validation
+
 - Validate all user inputs before database operations
 - Apply range checks on numeric values
 - Sanitize text inputs to prevent injection
 
 ### 3. Audit Logging
+
 - Log all critical admin actions
 - Track settings changes in ComplianceLog
 - Include timestamp and admin user ID
 
 ### 4. User Protection
+
 - Prevent admins from deleting/suspending themselves
 - Soft delete users with booking history
 - Require confirmations for destructive actions
 
 ### 5. Data Privacy
+
 - GDPR compliance for user data
 - Secure handling of sensitive information
 - Proper data retention policies
@@ -924,28 +1018,34 @@ model ComplianceLog {
 ## Troubleshooting
 
 ### TypeScript Errors for `isAdmin`
+
 **Issue**: VS Code shows errors for `isAdmin` field not existing.
 
 **Cause**: TypeScript server hasn't picked up new Prisma types.
 
 **Solution**:
+
 1. Run `npx prisma generate`
 2. Restart VS Code or run "TypeScript: Restart TS Server"
 3. Verify `isAdmin` exists in `node_modules/.prisma/client/index.d.ts`
 
 ### Database Schema Drift
+
 **Issue**: Prisma types don't match database.
 
 **Solution**:
+
 ```bash
 npx prisma db push          # Sync schema to database
 npx prisma generate         # Regenerate Prisma client
 ```
 
 ### Missing Admin Access
+
 **Issue**: User can't access admin dashboard.
 
 **Solution**:
+
 ```sql
 -- Check current status
 SELECT id, email, "isAdmin" FROM "User" WHERE email = 'your@email.com';
@@ -955,6 +1055,7 @@ UPDATE "User" SET "isAdmin" = true WHERE email = 'your@email.com';
 ```
 
 ### Settings Not Persisting
+
 **Issue**: Settings changes don't save.
 
 **Cause**: SystemSettings model may not be migrated yet.
@@ -968,6 +1069,7 @@ UPDATE "User" SET "isAdmin" = true WHERE email = 'your@email.com';
 ## Future Enhancements
 
 ### Planned Features
+
 - [ ] Individual user detail pages
 - [ ] Support ticket response system
 - [ ] Dispatcher activity logs
@@ -984,6 +1086,7 @@ UPDATE "User" SET "isAdmin" = true WHERE email = 'your@email.com';
 ## Support
 
 For technical issues or questions:
+
 - **Email**: support@havenride.com
 - **Documentation**: `/docs`
 - **Issue Tracker**: GitHub repository

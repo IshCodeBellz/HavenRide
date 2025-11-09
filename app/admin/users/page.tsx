@@ -105,7 +105,12 @@ function UsersPageContent() {
   };
 
   const handleDeleteUser = async (userId: string, userName: string) => {
-    if (!confirm(`Are you sure you want to delete ${userName}? This action may be irreversible.`)) return;
+    if (
+      !confirm(
+        `Are you sure you want to delete ${userName}? This action may be irreversible.`
+      )
+    )
+      return;
 
     try {
       const res = await fetch(`/api/admin/users/${userId}`, {
@@ -312,7 +317,9 @@ function UsersPageContent() {
                             Suspend
                           </button>
                           <button
-                            onClick={() => handleDeleteUser(user.id, user.name || user.email)}
+                            onClick={() =>
+                              handleDeleteUser(user.id, user.name || user.email)
+                            }
                             className="text-red-600 hover:text-red-700"
                           >
                             Delete

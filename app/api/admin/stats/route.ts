@@ -45,11 +45,16 @@ export async function GET(req: NextRequest) {
       activeDrivers,
       todayRides,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching admin stats:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch stats" },
-      { status: 500 }
-    );
+    
+    // Return default values if there's an error, so UI still works
+    // This helps on Vercel where DB might have connection issues
+    return NextResponse.json({
+      totalUsers: 0,
+      activeDrivers: 0,
+      todayRides: 0,
+      error: error.message || "Failed to fetch stats",
+    });
   }
 }

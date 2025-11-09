@@ -4,7 +4,12 @@ import RoleGate from "@/components/RoleGate";
 import AppLayout from "@/components/AppLayout";
 import Link from "next/link";
 
-type VerificationFilter = "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "EXPIRED";
+type VerificationFilter =
+  | "ALL"
+  | "PENDING"
+  | "APPROVED"
+  | "REJECTED"
+  | "EXPIRED";
 
 function CompliancePageContent() {
   const [drivers, setDrivers] = useState<any[]>([]);
@@ -45,10 +50,13 @@ function CompliancePageContent() {
 
   const handleApproveDriver = async (driverId: string) => {
     try {
-      const res = await fetch(`/api/admin/compliance/drivers/${driverId}/approve`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
+      const res = await fetch(
+        `/api/admin/compliance/drivers/${driverId}/approve`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
       if (res.ok) {
         alert("Driver approved successfully");
@@ -118,7 +126,9 @@ function CompliancePageContent() {
                 />
               </svg>
             </div>
-            <p className="text-3xl font-bold text-[#263238]">{stats.totalDrivers}</p>
+            <p className="text-3xl font-bold text-[#263238]">
+              {stats.totalDrivers}
+            </p>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
@@ -138,7 +148,9 @@ function CompliancePageContent() {
                 />
               </svg>
             </div>
-            <p className="text-3xl font-bold text-green-600">{stats.verified}</p>
+            <p className="text-3xl font-bold text-green-600">
+              {stats.verified}
+            </p>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
@@ -178,7 +190,9 @@ function CompliancePageContent() {
                 />
               </svg>
             </div>
-            <p className="text-3xl font-bold text-red-600">{stats.expiringSoon}</p>
+            <p className="text-3xl font-bold text-red-600">
+              {stats.expiringSoon}
+            </p>
           </div>
         </div>
 
@@ -270,7 +284,9 @@ function CompliancePageContent() {
                                 : "text-gray-900"
                             }`}
                           >
-                            {new Date(driver.insuranceExpiry).toLocaleDateString()}
+                            {new Date(
+                              driver.insuranceExpiry
+                            ).toLocaleDateString()}
                           </span>
                         ) : (
                           "N/A"
@@ -350,10 +366,10 @@ function CompliancePageContent() {
                 GDPR Compliance
               </h3>
               <p className="text-sm text-blue-800">
-                All driver verification data is stored securely and in compliance
-                with GDPR regulations. Access to sensitive information is logged
-                and audited. Drivers have the right to request data access or
-                deletion at any time.
+                All driver verification data is stored securely and in
+                compliance with GDPR regulations. Access to sensitive
+                information is logged and audited. Drivers have the right to
+                request data access or deletion at any time.
               </p>
             </div>
           </div>

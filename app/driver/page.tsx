@@ -24,12 +24,14 @@ function DriverPageContent() {
   const initialLoadRef = useRef(true);
 
   const assigned = useMemo(() => {
-    const found = bookings.find((b) => b.driverId === user?.id && b.status !== "COMPLETED");
+    const found = bookings.find(
+      (b) => b.driverId === user?.id && b.status !== "COMPLETED"
+    );
     console.log("Checking assigned booking:", {
       driverId: user?.id,
       totalBookings: bookings.length,
       assigned: found,
-      assignedStatus: found?.status
+      assignedStatus: found?.status,
     });
     return found;
   }, [bookings, user?.id]);
@@ -73,6 +75,14 @@ function DriverPageContent() {
     setOnline(next);
   }
 
+  // Automatically go online when driver logs in
+  useEffect(() => {
+    if (user?.id && !online) {
+      console.log("Auto-setting driver online on login");
+      toggleOnline(true);
+    }
+  }, [user?.id]); // Only run when user logs in
+
   // Track driver's real location when online OR when they have an active ride
   useEffect(() => {
     let timer: any;
@@ -80,10 +90,13 @@ function DriverPageContent() {
 
     // Track location if driver is online OR has an active ride
     const shouldTrackLocation = online || (assigned && user?.id);
-    
+
     if (shouldTrackLocation && user?.id) {
-      console.log("Starting location tracking:", { online, hasActiveRide: !!assigned });
-      
+      console.log("Starting location tracking:", {
+        online,
+        hasActiveRide: !!assigned,
+      });
+
       // Function to update location
       const updateLocation = (position: GeolocationPosition) => {
         const { latitude, longitude } = position.coords;
@@ -96,28 +109,25 @@ function DriverPageContent() {
             lat: latitude,
             lng: longitude,
           }),
-        }).catch(error => console.error("Failed to update location:", error));
+        }).catch((error) => console.error("Failed to update location:", error));
       };
 
       // Try to get real geolocation
       if (navigator.geolocation) {
         // Get initial position
-        navigator.geolocation.getCurrentPosition(
-          updateLocation,
-          (error) => {
-            console.error("Geolocation error:", error);
-            // Fallback to simulated location if geolocation fails
-            fetch("/api/drivers/update-location", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                driverId: user.id,
-                lat: 51.5074,
-                lng: -0.1278,
-              }),
-            });
-          }
-        );
+        navigator.geolocation.getCurrentPosition(updateLocation, (error) => {
+          console.error("Geolocation error:", error);
+          // Fallback to simulated location if geolocation fails
+          fetch("/api/drivers/update-location", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              driverId: user.id,
+              lat: 51.5074,
+              lng: -0.1278,
+            }),
+          });
+        });
 
         // Watch position for continuous updates
         watchId = navigator.geolocation.watchPosition(
@@ -164,7 +174,9 @@ function DriverPageContent() {
       const data = await res.json();
       console.log("Fetched bookings:", data.length, "bookings");
       console.log("Driver ID:", user?.id);
-      const assignedBooking = data.find((b: any) => b.driverId === user?.id && b.status !== "COMPLETED");
+      const assignedBooking = data.find(
+        (b: any) => b.driverId === user?.id && b.status !== "COMPLETED"
+      );
       console.log("Assigned booking:", assignedBooking);
       setBookings(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -225,17 +237,17 @@ function DriverPageContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "ASSIGNED", driverId: user?.id }),
       });
-      
+
       if (!res.ok) {
         const error = await res.json();
         console.error("Failed to accept ride:", error);
         alert(error.error || "Failed to accept ride");
         return;
       }
-      
+
       const result = await res.json();
       console.log("Ride accepted successfully:", result);
-      
+
       // Fetch updated bookings
       await fetchBookings();
     } catch (error) {

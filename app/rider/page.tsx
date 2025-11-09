@@ -125,6 +125,7 @@ function RiderPageContent() {
   );
   const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
   const [findingAnotherDriver, setFindingAnotherDriver] = useState(false);
+  const [editingPickup, setEditingPickup] = useState(false);
 
   // Track unread messages for the active chat
   const { markAsRead } = useUnreadMessages(activeBookingId || "", "RIDER");
@@ -186,32 +187,34 @@ function RiderPageContent() {
       const res = await fetch("/api/bookings");
       const data = await res.json();
       const myBookings = data.filter((b: any) => b.riderId === user?.id);
-      
+
       // Check if any booking went from ASSIGNED/EN_ROUTE/ARRIVED back to REQUESTED (driver cancelled)
       const previousBookings = previousBookingsRef.current;
       myBookings.forEach((newBooking: any) => {
-        const oldBooking = previousBookings.find((b: any) => b.id === newBooking.id);
-        
+        const oldBooking = previousBookings.find(
+          (b: any) => b.id === newBooking.id
+        );
+
         console.log("Checking booking:", {
           bookingId: newBooking.id,
           oldStatus: oldBooking?.status,
           newStatus: newBooking.status,
           oldDriverId: oldBooking?.driverId,
-          newDriverId: newBooking.driverId
+          newDriverId: newBooking.driverId,
         });
-        
+
         if (
           oldBooking &&
-          (oldBooking.status === "ASSIGNED" || 
-           oldBooking.status === "EN_ROUTE" || 
-           oldBooking.status === "ARRIVED") &&
+          (oldBooking.status === "ASSIGNED" ||
+            oldBooking.status === "EN_ROUTE" ||
+            oldBooking.status === "ARRIVED") &&
           newBooking.status === "REQUESTED" &&
           !newBooking.driverId
         ) {
           // Driver cancelled! Show the "finding another driver" screen
           console.log("🚨 Driver cancelled ride:", newBooking.id);
           setFindingAnotherDriver(true);
-          
+
           // After 5 seconds, hide the screen and return to normal "finding driver" view
           setTimeout(() => {
             console.log("Hiding finding another driver screen");
@@ -219,7 +222,7 @@ function RiderPageContent() {
           }, 5000);
         }
       });
-      
+
       // Update the ref for next comparison
       previousBookingsRef.current = myBookings;
       setBookings(myBookings);
@@ -469,7 +472,8 @@ function RiderPageContent() {
                 Finding Another Driver
               </h2>
               <p className="text-sm text-gray-600">
-                Your previous driver cancelled. We're matching you with another nearby driver...
+                Your previous driver cancelled. We're matching you with another
+                nearby driver...
               </p>
             </div>
 
@@ -669,34 +673,8 @@ function RiderPageContent() {
         booking={activeBooking}
         userRole="RIDER"
         onConfirm={async () => {
-          // Show confirmation dialog with pickup location
-          const confirmed = confirm(
-            `Please confirm your pickup location:\n\n📍 ${activeBooking.pickupAddress}\n\nIs this correct?`
-          );
-          
-          if (confirmed) {
-            try {
-              // Update booking to indicate rider confirmed pickup location
-              const response = await fetch(`/api/bookings/${activeBooking.id}/status`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                  status: activeBooking.status, // Keep current status
-                  riderConfirmed: true // Add confirmation flag
-                }),
-              });
-
-              if (response.ok) {
-                alert("✓ Pickup location confirmed! Your driver is on the way.");
-                fetchBookings(); // Refresh to get updated booking
-              } else {
-                alert("Failed to confirm pickup location. Please try again.");
-              }
-            } catch (error) {
-              console.error("Error confirming pickup:", error);
-              alert("Failed to confirm pickup location. Please try again.");
-            }
-          }
+          // Handle ride confirmation
+          alert("Ride confirmed! Driver is on the way.");
         }}
         onCancel={async () => {
           await handleCancelBooking(activeBooking.id);
@@ -1081,6 +1059,58 @@ function RiderPageContent() {
               <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
             </div>
 
+            {/* Pickup Location Confirmation */}
+            <div className="space-y-2 pb-3 border-b border-gray-200">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-[#00796B] rounded-full flex items-center justify-center shrink-0 mt-1">
+                  <span className="text-white font-bold text-sm">A</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-600 font-medium mb-1">Pick up</p>
+                  {!pickup || !pickupCoords ? (
+                    <button
+                      onClick={handleUseCurrentLocation}
+                      disabled={loadingLocation}
+                      className="flex items-center gap-2 text-sm text-[#00796B] hover:text-[#0F3D3E] font-medium disabled:opacity-50"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                      {loadingLocation ? "Getting location..." : "Use my location"}
+                    </button>
+                  ) : (
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-[#0F3D3E] wrap-break-word">
+                        {pickup}
+                      </p>
+                      <button
+                        onClick={() => setEditingPickup(true)}
+                        className="text-xs text-[#00796B] hover:text-[#0F3D3E] font-medium"
+                      >
+                        Edit location
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* Destination Info */}
             <div className="space-y-2">
               <div className="flex items-start gap-3">
@@ -1153,6 +1183,86 @@ function RiderPageContent() {
                   onOpenChat={setActiveBookingId}
                 />
               ))}
+          </div>
+        </div>
+      )}
+
+      {/* Edit Pickup Modal */}
+      {editingPickup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-[#0F3D3E]">
+                Edit Pickup Location
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Adjust your pickup location if needed (e.g., door number)
+              </p>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Pickup Address
+                </label>
+                <MapboxAutocomplete
+                  value={pickup}
+                  onChange={(address, coords) => {
+                    setPickup(address);
+                    setPickupCoords(coords);
+                  }}
+                  placeholder="Enter pickup location"
+                  label=""
+                  required
+                />
+              </div>
+              <button
+                onClick={handleUseCurrentLocation}
+                disabled={loadingLocation}
+                className="w-full flex items-center justify-center gap-2 text-sm text-[#00796B] hover:text-[#0F3D3E] font-medium disabled:opacity-50 py-2 border border-[#00796B] rounded-lg hover:bg-[#E0F2F1] transition-colors"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+                {loadingLocation ? "Getting location..." : "Use my current location"}
+              </button>
+            </div>
+            <div className="p-6 pt-0 flex gap-3">
+              <button
+                onClick={() => setEditingPickup(false)}
+                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (pickup && pickupCoords) {
+                    setEditingPickup(false);
+                    // Clear estimate to force re-estimation with new pickup
+                    setEstimate(null);
+                  }
+                }}
+                disabled={!pickup || !pickupCoords}
+                className="flex-1 px-4 py-3 bg-[#00796B] text-white rounded-lg font-semibold hover:bg-[#00695C] transition-colors disabled:opacity-50"
+              >
+                Confirm
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -367,17 +367,17 @@ function DriverPageContent() {
           <div className="relative">
             {/* Main Carousel Container with Preview */}
             <div className="relative overflow-visible">
-              <div className="flex items-center justify-center gap-4">
+              <div className="flex items-center justify-center gap-3 md:gap-4">
                 {/* Previous Ride Preview (Left) */}
                 {requestedBookings.length > 1 && currentIndex > 0 && (
                   <div
                     onClick={goToPrevious}
-                    className="bg-white rounded-2xl shadow-md border border-gray-300 w-[100px] flex-shrink-0 overflow-hidden cursor-pointer hover:border-blue-400 hover:shadow-lg transition-all duration-300"
+                    className="hidden md:block bg-white rounded-2xl shadow-md border border-gray-300 w-[100px] shrink-0 overflow-hidden cursor-pointer hover:border-blue-400 hover:shadow-lg transition-all duration-300"
                   >
                     <div className="p-3 h-full flex flex-col justify-between">
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-[#00796B] rounded-full flex items-center justify-center flex-shrink-0">
+                          <div className="w-6 h-6 bg-[#00796B] rounded-full flex items-center justify-center shrink-0">
                             <span className="text-white text-xs font-bold">
                               A
                             </span>
@@ -393,7 +393,7 @@ function DriverPageContent() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-[#0F3D3E] rounded-full flex items-center justify-center flex-shrink-0">
+                          <div className="w-6 h-6 bg-[#0F3D3E] rounded-full flex items-center justify-center shrink-0">
                             <span className="text-white text-xs font-bold">
                               B
                             </span>
@@ -423,54 +423,53 @@ function DriverPageContent() {
 
                 {/* Current Card */}
                 <div
-                  className="bg-white rounded-2xl shadow-lg border-2 border-blue-500 flex-shrink-0 transition-all duration-300"
-                  style={{
-                    width:
-                      requestedBookings.length > 1
-                        ? "calc(100% - 240px)"
-                        : "100%",
-                  }}
+                  className="bg-white rounded-2xl shadow-lg border-2 border-blue-500 shrink-0 transition-all duration-300 w-full"
+                  style={
+                    requestedBookings.length > 1
+                      ? { width: "calc(100% - 240px)" }
+                      : undefined
+                  }
                 >
-                  <div className="p-10">
+                  <div className="p-4 sm:p-6 md:p-10">
                     {/* Status Badge */}
-                    <div className="flex items-center justify-between mb-8">
-                      <span className="text-base font-semibold text-gray-600">
+                    <div className="flex items-center justify-between mb-4 sm:mb-6 md:mb-8">
+                      <span className="text-xs sm:text-sm md:text-base font-semibold text-gray-600">
                         Status
                       </span>
-                      <span className="px-5 py-2 bg-yellow-100 text-yellow-700 rounded-full text-base font-semibold">
+                      <span className="px-3 py-1 sm:px-4 sm:py-1.5 md:px-5 md:py-2 bg-yellow-100 text-yellow-700 rounded-full text-xs sm:text-sm md:text-base font-semibold">
                         {currentBooking.status}
                       </span>
                     </div>
 
                     {/* Route Information */}
-                    <div className="space-y-5 mb-8">
-                      <div className="flex items-start gap-5">
-                        <div className="w-12 h-12 bg-[#00796B] rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-lg">
+                    <div className="space-y-3 sm:space-y-4 md:space-y-5 mb-4 sm:mb-6 md:mb-8">
+                      <div className="flex items-start gap-3 sm:gap-4 md:gap-5">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-[#00796B] rounded-full flex items-center justify-center shrink-0">
+                          <span className="text-white font-bold text-sm sm:text-base md:text-lg">
                             A
                           </span>
                         </div>
-                        <div className="flex-1">
-                          <p className="text-sm text-gray-600 font-medium mb-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs sm:text-sm text-gray-600 font-medium mb-1 sm:mb-2">
                             Pickup
                           </p>
-                          <p className="text-lg font-semibold text-[#0F3D3E]">
+                          <p className="text-sm sm:text-base md:text-lg font-semibold text-[#0F3D3E] wrap-break-word">
                             {currentBooking.pickupAddress}
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-5">
-                        <div className="w-12 h-12 bg-[#0F3D3E] rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-lg">
+                      <div className="flex items-start gap-3 sm:gap-4 md:gap-5">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-[#0F3D3E] rounded-full flex items-center justify-center shrink-0">
+                          <span className="text-white font-bold text-sm sm:text-base md:text-lg">
                             B
                           </span>
                         </div>
-                        <div className="flex-1">
-                          <p className="text-sm text-gray-600 font-medium mb-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs sm:text-sm text-gray-600 font-medium mb-1 sm:mb-2">
                             Dropoff
                           </p>
-                          <p className="text-lg font-semibold text-[#0F3D3E]">
+                          <p className="text-sm sm:text-base md:text-lg font-semibold text-[#0F3D3E] wrap-break-word">
                             {currentBooking.dropoffAddress}
                           </p>
                         </div>
@@ -478,33 +477,33 @@ function DriverPageContent() {
                     </div>
 
                     {/* Additional Info */}
-                    <div className="bg-gray-50 rounded-xl p-5 mb-8 space-y-3">
+                    <div className="bg-gray-50 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 mb-4 sm:mb-6 md:mb-8 space-y-2 sm:space-y-3">
                       {currentBooking.requiresWheelchair && (
-                        <div className="flex items-center gap-2 text-base">
-                          <span className="text-3xl">♿</span>
+                        <div className="flex items-center gap-2 text-xs sm:text-sm md:text-base">
+                          <span className="text-2xl sm:text-3xl">♿</span>
                           <span className="font-medium text-gray-700">
                             Wheelchair accessible vehicle required
                           </span>
                         </div>
                       )}
-                      <div className="flex justify-between text-base">
+                      <div className="flex justify-between text-xs sm:text-sm md:text-base">
                         <span className="text-gray-600">Booking ID:</span>
                         <code className="font-mono font-medium text-gray-800">
                           {currentBooking.id.slice(0, 8)}...
                         </code>
                       </div>
-                      <div className="flex justify-between text-base">
+                      <div className="flex justify-between text-xs sm:text-sm md:text-base">
                         <span className="text-gray-600">Requested:</span>
-                        <span className="font-medium text-gray-800">
+                        <span className="font-medium text-gray-800 text-xs sm:text-sm">
                           {new Date(currentBooking.createdAt).toLocaleString()}
                         </span>
                       </div>
                       {currentBooking.priceEstimate && (
-                        <div className="flex justify-between text-base pt-3 border-t border-gray-200">
-                          <span className="text-gray-600 text-lg">
+                        <div className="flex justify-between text-xs sm:text-sm md:text-base pt-2 sm:pt-3 border-t border-gray-200">
+                          <span className="text-gray-600 text-sm sm:text-base md:text-lg">
                             Estimated Fare:
                           </span>
-                          <span className="text-2xl font-bold text-[#0F3D3E]">
+                          <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0F3D3E]">
                             £{currentBooking.priceEstimate.amount?.toFixed(2)}
                           </span>
                         </div>
@@ -512,16 +511,16 @@ function DriverPageContent() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-4">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                       <button
                         onClick={() => take(currentBooking.id)}
-                        className="flex-1 bg-[#00796B] text-white py-5 rounded-xl text-lg font-semibold hover:bg-[#00695C] transition-colors"
+                        className="flex-1 bg-[#00796B] text-white py-3 sm:py-4 md:py-5 rounded-lg sm:rounded-xl text-sm sm:text-base md:text-lg font-semibold hover:bg-[#00695C] transition-colors"
                       >
                         Take Ride
                       </button>
                       <button
                         onClick={() => arrive(currentBooking.id)}
-                        className="px-8 py-5 bg-gray-100 text-gray-700 rounded-xl text-lg font-semibold hover:bg-gray-200 transition-colors"
+                        className="sm:px-6 md:px-8 py-3 sm:py-4 md:py-5 bg-gray-100 text-gray-700 rounded-lg sm:rounded-xl text-sm sm:text-base md:text-lg font-semibold hover:bg-gray-200 transition-colors"
                       >
                         Arrived
                       </button>
@@ -533,11 +532,11 @@ function DriverPageContent() {
                         markAsRead();
                         setActiveBookingId(currentBooking.id);
                       }}
-                      className="w-full mt-4 text-base text-[#00796B] hover:text-[#0F3D3E] font-semibold underline relative"
+                      className="w-full mt-3 sm:mt-4 text-sm sm:text-base text-[#00796B] hover:text-[#0F3D3E] font-semibold underline relative"
                     >
                       Open Chat
                       {unreadCount > 0 && (
-                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center animate-pulse">
+                        <span className="absolute -top-1 sm:-top-2 -right-1 sm:-right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center animate-pulse">
                           {unreadCount > 9 ? "9+" : unreadCount}
                         </span>
                       )}
@@ -550,12 +549,12 @@ function DriverPageContent() {
                   currentIndex < requestedBookings.length - 1 && (
                     <div
                       onClick={goToNext}
-                      className="bg-white rounded-2xl shadow-md border border-gray-300 w-[100px] flex-shrink-0 overflow-hidden cursor-pointer hover:border-blue-400 hover:shadow-lg transition-all duration-300"
+                      className="hidden md:block bg-white rounded-2xl shadow-md border border-gray-300 w-[100px] shrink-0 overflow-hidden cursor-pointer hover:border-blue-400 hover:shadow-lg transition-all duration-300"
                     >
                       <div className="p-3 h-full flex flex-col justify-between">
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-[#00796B] rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-6 h-6 bg-[#00796B] rounded-full flex items-center justify-center shrink-0">
                               <span className="text-white text-xs font-bold">
                                 A
                               </span>
@@ -571,7 +570,7 @@ function DriverPageContent() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-[#0F3D3E] rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-6 h-6 bg-[#0F3D3E] rounded-full flex items-center justify-center shrink-0">
                               <span className="text-white text-xs font-bold">
                                 B
                               </span>

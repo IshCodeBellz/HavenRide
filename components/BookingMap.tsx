@@ -50,23 +50,28 @@ export default function BookingMap({
     if (pickupMarker.current) {
       pickupMarker.current.setLngLat([pickup.lng, pickup.lat]);
     } else {
+      // Create custom marker element for pickup (A)
       const el = document.createElement("div");
-      el.className = "w-12 h-12";
+      el.style.width = "40px";
+      el.style.height = "50px";
+      el.style.position = "relative";
       el.innerHTML = `
-        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M24 2C15.716 2 9 8.716 9 17C9 28.5 24 46 24 46C24 46 39 28.5 39 17C39 8.716 32.284 2 24 2Z" 
-                fill="#00796B" 
-                stroke="white" 
-                stroke-width="2"/>
-          <circle cx="24" cy="17" r="6" fill="white"/>
-          <text x="24" y="21" text-anchor="middle" font-size="12" font-weight="bold" fill="#00796B">A</text>
-        </svg>
+        <div style="position: relative; width: 40px; height: 50px;">
+          <svg width="40" height="50" viewBox="0 0 40 50" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+            <path d="M20 0C12.268 0 6 6.268 6 14C6 24.5 20 48 20 48C20 48 34 24.5 34 14C34 6.268 27.732 0 20 0Z" 
+                  fill="#00796B" 
+                  stroke="white" 
+                  stroke-width="2"/>
+            <circle cx="20" cy="14" r="8" fill="white"/>
+            <text x="20" y="19" text-anchor="middle" font-size="14" font-weight="bold" fill="#00796B" font-family="Arial, sans-serif">A</text>
+          </svg>
+        </div>
       `;
 
       pickupMarker.current = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
         .setLngLat([pickup.lng, pickup.lat])
         .setPopup(
-          new mapboxgl.Popup().setHTML("<strong>Pickup Location</strong>")
+          new mapboxgl.Popup({ offset: 25 }).setHTML("<strong>Pickup Location</strong>")
         )
         .addTo(map.current);
     }
@@ -81,23 +86,28 @@ export default function BookingMap({
     if (dropoffMarker.current) {
       dropoffMarker.current.setLngLat([dropoff.lng, dropoff.lat]);
     } else {
+      // Create custom marker element for dropoff (B)
       const el = document.createElement("div");
-      el.className = "w-12 h-12";
+      el.style.width = "40px";
+      el.style.height = "50px";
+      el.style.position = "relative";
       el.innerHTML = `
-        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M24 2C15.716 2 9 8.716 9 17C9 28.5 24 46 24 46C24 46 39 28.5 39 17C39 8.716 32.284 2 24 2Z" 
-                fill="#0F3D3E" 
-                stroke="white" 
-                stroke-width="2"/>
-          <circle cx="24" cy="17" r="6" fill="white"/>
-          <text x="24" y="21" text-anchor="middle" font-size="12" font-weight="bold" fill="#0F3D3E">B</text>
-        </svg>
+        <div style="position: relative; width: 40px; height: 50px;">
+          <svg width="40" height="50" viewBox="0 0 40 50" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+            <path d="M20 0C12.268 0 6 6.268 6 14C6 24.5 20 48 20 48C20 48 34 24.5 34 14C34 6.268 27.732 0 20 0Z" 
+                  fill="#0F3D3E" 
+                  stroke="white" 
+                  stroke-width="2"/>
+            <circle cx="20" cy="14" r="8" fill="white"/>
+            <text x="20" y="19" text-anchor="middle" font-size="14" font-weight="bold" fill="#0F3D3E" font-family="Arial, sans-serif">B</text>
+          </svg>
+        </div>
       `;
 
       dropoffMarker.current = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
         .setLngLat([dropoff.lng, dropoff.lat])
         .setPopup(
-          new mapboxgl.Popup().setHTML("<strong>Drop-off Location</strong>")
+          new mapboxgl.Popup({ offset: 25 }).setHTML("<strong>Drop-off Location</strong>")
         )
         .addTo(map.current);
     }

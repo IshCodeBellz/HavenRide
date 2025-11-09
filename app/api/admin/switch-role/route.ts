@@ -16,7 +16,10 @@ export async function POST(req: NextRequest) {
     });
 
     if (currentUser?.role !== "ADMIN") {
-      console.error("Role switch denied:", { userId, currentRole: currentUser?.role });
+      console.error("Role switch denied:", {
+        userId,
+        currentRole: currentUser?.role,
+      });
       return NextResponse.json(
         { error: "Only admins can switch roles" },
         { status: 403 }
@@ -29,8 +32,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Update user role in database
-    console.log("Updating role for user:", { userId, oldRole: currentUser.role, newRole: role });
-    
+    console.log("Updating role for user:", {
+      userId,
+      oldRole: currentUser.role,
+      newRole: role,
+    });
+
     const user = await prisma.user.update({
       where: { id: userId },
       data: { role },
@@ -71,7 +78,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, role });
   } catch (error) {
     console.error("Error switching role:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       { error: "Failed to switch role", details: errorMessage },
       { status: 500 }

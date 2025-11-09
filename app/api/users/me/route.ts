@@ -8,13 +8,16 @@ export async function GET() {
 
   const db = await prisma.user.findUnique({
     where: { id: userId },
-    select: { role: true, isAdmin: true },
+    select: { role: true },
   });
 
   if (db?.role) {
+    // User is admin if their role is 'ADMIN'
+    const isAdmin = db.role === "ADMIN";
+    console.log("User role check:", { userId, role: db.role, isAdmin });
     return NextResponse.json({
       role: db.role,
-      isAdmin: db.isAdmin || false,
+      isAdmin,
     });
   }
 
@@ -22,8 +25,11 @@ export async function GET() {
     const client = await clerkClient();
     const u = await client.users.getUser(userId);
     const metaRole = (u.publicMetadata as any)?.role || null;
-    return NextResponse.json({ role: metaRole, isAdmin: false });
-  } catch {
+    const isAdmin = metaRole === "ADMIN";
+    console.log("User role from Clerk metadata:", { userId, role: metaRole, isAdmin });
+    return NextResponse.json({ role: metaRole, isAdmin });
+  } catch (error) {
+    console.error("Error fetching user from Clerk:", error);
     return NextResponse.json({ role: null, isAdmin: false });
   }
 }

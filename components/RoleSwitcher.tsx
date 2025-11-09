@@ -67,11 +67,19 @@ export default function RoleSwitcher({
       } else {
         const errorMsg = data.error || "Failed to switch role";
         console.error("Role switch failed:", errorMsg, data);
-        alert(`Failed to switch role: ${errorMsg}${data.details ? ` (${data.details})` : ""}`);
+        alert(
+          `Failed to switch role: ${errorMsg}${
+            data.details ? ` (${data.details})` : ""
+          }`
+        );
       }
     } catch (error) {
       console.error("Error switching role:", error);
-      alert(`Error switching role: ${error instanceof Error ? error.message : "Unknown error"}`);
+      alert(
+        `Error switching role: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     } finally {
       setSwitching(false);
       setIsOpen(false);

@@ -578,8 +578,8 @@ function RiderPageContent() {
           </div>
         )}
 
-        {/* Where to Search Box - Overlay on Map (Mobile) */}
-        <div className="md:hidden absolute top-4 left-4 right-4 z-10">
+        {/* Where to Search Box - Overlay on Map (Mobile) - Bottom Position */}
+        <div className="md:hidden absolute bottom-4 left-4 right-4 z-10">
           <div className="bg-white rounded-2xl p-4 shadow-2xl border border-gray-100">
             <div className="flex items-center gap-3">
               <svg

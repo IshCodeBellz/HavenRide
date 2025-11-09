@@ -45,13 +45,13 @@ function AdminPageContent() {
 
   return (
     <AppLayout userRole="ADMIN" isAdmin={isAdmin}>
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-[#263238] mb-2">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#263238] mb-2">
             Admin Dashboard
           </h1>
-          <p className="text-neutral-600">
+          <p className="text-sm sm:text-base text-neutral-600">
             Manage users, drivers, and system settings
           </p>
         </div>
@@ -65,11 +65,13 @@ function AdminPageContent() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-neutral-700">Total Users</h3>
-                <div className="w-12 h-12 bg-[#E0F2F1] rounded-lg flex items-center justify-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <h3 className="text-sm sm:text-base font-semibold text-neutral-700">
+                  Total Users
+                </h3>
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#E0F2F1] rounded-lg flex items-center justify-center">
                   <svg
                     className="w-6 h-6 text-[#00796B]"
                     fill="none"
@@ -85,20 +87,20 @@ function AdminPageContent() {
                   </svg>
                 </div>
               </div>
-              <p className="text-4xl font-bold text-[#263238]">
+              <p className="text-3xl sm:text-4xl font-bold text-[#263238]">
                 {stats.totalUsers}
               </p>
-              <p className="text-sm text-neutral-500 mt-2">
+              <p className="text-xs sm:text-sm text-neutral-500 mt-1 sm:mt-2">
                 Registered accounts
               </p>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-neutral-700">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <h3 className="text-sm sm:text-base font-semibold text-neutral-700">
                   Active Drivers
                 </h3>
-                <div className="w-12 h-12 bg-[#E0F2F1] rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#E0F2F1] rounded-lg flex items-center justify-center">
                   <svg
                     className="w-6 h-6 text-[#00796B]"
                     fill="none"
@@ -114,18 +116,20 @@ function AdminPageContent() {
                   </svg>
                 </div>
               </div>
-              <p className="text-4xl font-bold text-[#263238]">
+              <p className="text-3xl sm:text-4xl font-bold text-[#263238]">
                 {stats.activeDrivers}
               </p>
-              <p className="text-sm text-neutral-500 mt-2">Currently online</p>
+              <p className="text-xs sm:text-sm text-neutral-500 mt-1 sm:mt-2">
+                Currently online
+              </p>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-neutral-700">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <h3 className="text-sm sm:text-base font-semibold text-neutral-700">
                   Today's Rides
                 </h3>
-                <div className="w-12 h-12 bg-[#E0F2F1] rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#E0F2F1] rounded-lg flex items-center justify-center">
                   <svg
                     className="w-6 h-6 text-[#00796B]"
                     fill="none"
@@ -141,10 +145,10 @@ function AdminPageContent() {
                   </svg>
                 </div>
               </div>
-              <p className="text-4xl font-bold text-[#263238]">
+              <p className="text-3xl sm:text-4xl font-bold text-[#263238]">
                 {stats.todayRides}
               </p>
-              <p className="text-sm text-neutral-500 mt-2">
+              <p className="text-xs sm:text-sm text-neutral-500 mt-1 sm:mt-2">
                 Completed bookings
               </p>
             </div>
@@ -152,14 +156,14 @@ function AdminPageContent() {
         )}
 
         {/* Management Sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* User Management */}
           <Link href="/admin/users">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-[#E0F2F1] rounded-xl flex items-center justify-center group-hover:bg-[#00796B] transition-colors">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-4 sm:p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
+              <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#E0F2F1] rounded-xl flex items-center justify-center group-hover:bg-[#00796B] transition-colors shrink-0">
                   <svg
-                    className="w-6 h-6 text-[#00796B] group-hover:text-white transition-colors"
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-[#00796B] group-hover:text-white transition-colors"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -172,16 +176,16 @@ function AdminPageContent() {
                     />
                   </svg>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-[#263238]">
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-lg font-semibold text-[#263238]">
                     User Management
                   </h3>
-                  <p className="text-sm text-neutral-500">
+                  <p className="text-xs sm:text-sm text-neutral-500 truncate">
                     Manage riders, drivers, dispatchers
                   </p>
                 </div>
               </div>
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="text-neutral-600">View all users</span>
                 <svg
                   className="w-5 h-5 text-neutral-400 group-hover:text-[#00796B] group-hover:translate-x-1 transition-all"
@@ -202,11 +206,11 @@ function AdminPageContent() {
 
           {/* Rides Monitor */}
           <Link href="/admin/rides">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-[#E0F2F1] rounded-xl flex items-center justify-center group-hover:bg-[#00796B] transition-colors">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
+              <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#E0F2F1] rounded-xl flex items-center justify-center group-hover:bg-[#00796B] transition-colors shrink-0">
                   <svg
-                    className="w-6 h-6 text-[#00796B] group-hover:text-white transition-colors"
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-[#00796B] group-hover:text-white transition-colors"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -219,16 +223,16 @@ function AdminPageContent() {
                     />
                   </svg>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-[#263238]">
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-lg font-semibold text-[#263238]">
                     Rides Monitor
                   </h3>
-                  <p className="text-sm text-neutral-500">
+                  <p className="text-xs sm:text-sm text-neutral-500 truncate">
                     Track all bookings & analytics
                   </p>
                 </div>
               </div>
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="text-neutral-600">View all rides</span>
                 <svg
                   className="w-5 h-5 text-neutral-400 group-hover:text-[#00796B] group-hover:translate-x-1 transition-all"
@@ -249,8 +253,8 @@ function AdminPageContent() {
 
           {/* Finance & Billing */}
           <Link href="/admin/finance">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
-              <div className="flex items-center gap-4 mb-4">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
+              <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
                 <div className="w-12 h-12 bg-[#E0F2F1] rounded-xl flex items-center justify-center group-hover:bg-[#00796B] transition-colors">
                   <svg
                     className="w-6 h-6 text-[#00796B] group-hover:text-white transition-colors"
@@ -296,8 +300,8 @@ function AdminPageContent() {
 
           {/* Compliance */}
           <Link href="/admin/compliance">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
-              <div className="flex items-center gap-4 mb-4">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
+              <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
                 <div className="w-12 h-12 bg-[#E0F2F1] rounded-xl flex items-center justify-center group-hover:bg-[#00796B] transition-colors">
                   <svg
                     className="w-6 h-6 text-[#00796B] group-hover:text-white transition-colors"
@@ -343,8 +347,8 @@ function AdminPageContent() {
 
           {/* Support Center */}
           <Link href="/admin/support">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
-              <div className="flex items-center gap-4 mb-4">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
+              <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
                 <div className="w-12 h-12 bg-[#E0F2F1] rounded-xl flex items-center justify-center group-hover:bg-[#00796B] transition-colors">
                   <svg
                     className="w-6 h-6 text-[#00796B] group-hover:text-white transition-colors"
@@ -390,8 +394,8 @@ function AdminPageContent() {
 
           {/* Dispatcher Management */}
           <Link href="/admin/dispatchers">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
-              <div className="flex items-center gap-4 mb-4">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
+              <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
                 <div className="w-12 h-12 bg-[#E0F2F1] rounded-xl flex items-center justify-center group-hover:bg-[#00796B] transition-colors">
                   <svg
                     className="w-6 h-6 text-[#00796B] group-hover:text-white transition-colors"

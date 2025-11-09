@@ -159,35 +159,37 @@ function DispatcherPageContent() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-bold text-[#263238] mb-2">
-            Dispatcher Console
-          </h1>
-          <p className="text-neutral-600">
-            Assign rides and monitor operations in real-time
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <Link
-            href="/dispatcher/map"
-            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Live Map
-          </Link>
-          <Link
-            href="/dispatcher/reports"
-            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Reports
-          </Link>
-          <button
-            onClick={() => setShowCreateBooking(true)}
-            className="px-4 py-2 bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors font-medium"
-          >
-            + Create Booking
-          </button>
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#263238] mb-1 sm:mb-2">
+              Dispatcher Console
+            </h1>
+            <p className="text-sm sm:text-base text-neutral-600">
+              Assign rides and monitor operations in real-time
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 sm:gap-3">
+            <Link
+              href="/dispatcher/map"
+              className="px-3 py-2 sm:px-4 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Live Map
+            </Link>
+            <Link
+              href="/dispatcher/reports"
+              className="px-3 py-2 sm:px-4 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Reports
+            </Link>
+            <button
+              onClick={() => setShowCreateBooking(true)}
+              className="px-3 py-2 sm:px-4 text-sm bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors font-medium"
+            >
+              + Create
+            </button>
+          </div>
         </div>
       </div>
 
@@ -199,18 +201,18 @@ function DispatcherPageContent() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* New Requests */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-[#263238]">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-[#263238]">
                 New Requests
               </h2>
-              <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
+              <span className="px-2 py-1 sm:px-3 bg-amber-100 text-amber-700 rounded-full text-xs sm:text-sm font-medium">
                 {requested.length}
               </span>
             </div>
-            <div className="space-y-3 max-h-[500px] overflow-y-auto">
+            <div className="space-y-3 max-h-[400px] sm:max-h-[500px] overflow-y-auto">
               {requested.length === 0 ? (
                 <div className="text-center py-8">
                   <svg
@@ -232,20 +234,20 @@ function DispatcherPageContent() {
                 requested.map((booking) => (
                   <div
                     key={booking.id}
-                    className="border border-gray-200 rounded-lg p-4 hover:border-[#00796B] hover:bg-[#E0F2F1]/20 transition-all"
+                    className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:border-[#00796B] hover:bg-[#E0F2F1]/20 transition-all"
                   >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <div className="text-sm font-semibold text-[#263238] mb-2">
+                    <div className="flex items-start justify-between mb-2 sm:mb-3 gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs sm:text-sm font-semibold text-[#263238] mb-1 sm:mb-2 break-words">
                           📍 {booking.pickupAddress}
                         </div>
-                        <div className="text-sm text-neutral-600 mb-2">
+                        <div className="text-xs sm:text-sm text-neutral-600 mb-1 sm:mb-2 break-words">
                           🎯 {booking.dropoffAddress}
                         </div>
                       </div>
                       {booking.requiresWheelchair && (
-                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
-                          ♿ Wheelchair
+                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium shrink-0">
+                          ♿
                         </span>
                       )}
                     </div>

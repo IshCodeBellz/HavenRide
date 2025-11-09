@@ -68,22 +68,72 @@ function DriverPageContent() {
     setOnline(next);
   }
 
+  // Track driver's real location
   useEffect(() => {
     let timer: any;
-    if (online) {
-      timer = setInterval(async () => {
-        await fetch("/api/drivers/update-location", {
+    let watchId: number;
+
+    if (online && user?.id) {
+      // Function to update location
+      const updateLocation = (position: GeolocationPosition) => {
+        const { latitude, longitude } = position.coords;
+        fetch("/api/drivers/update-location", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            driverId: user?.id,
-            lat: 51.5 + Math.random() / 100,
-            lng: -0.1 + Math.random() / 100,
+            driverId: user.id,
+            lat: latitude,
+            lng: longitude,
           }),
-        });
-      }, 8000);
+        }).catch(error => console.error("Failed to update location:", error));
+      };
+
+      // Try to get real geolocation
+      if (navigator.geolocation) {
+        // Get initial position
+        navigator.geolocation.getCurrentPosition(
+          updateLocation,
+          (error) => {
+            console.error("Geolocation error:", error);
+            // Fallback to simulated location if geolocation fails
+            fetch("/api/drivers/update-location", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                driverId: user.id,
+                lat: 51.5074,
+                lng: -0.1278,
+              }),
+            });
+          }
+        );
+
+        // Watch position for continuous updates
+        watchId = navigator.geolocation.watchPosition(
+          updateLocation,
+          (error) => console.error("Watch position error:", error),
+          { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+        );
+      } else {
+        // Fallback for browsers without geolocation
+        timer = setInterval(async () => {
+          await fetch("/api/drivers/update-location", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              driverId: user.id,
+              lat: 51.5074,
+              lng: -0.1278,
+            }),
+          });
+        }, 8000);
+      }
     }
-    return () => timer && clearInterval(timer);
+
+    return () => {
+      if (timer) clearInterval(timer);
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+    };
   }, [online, user?.id]);
 
   // Memoized fetch function to prevent re-creating on every render

@@ -215,6 +215,37 @@ export default function RideConfirmation({
             </div>
           )}
 
+          {/* Driver Distance Overlay - for Drivers */}
+          {userRole === "DRIVER" && currentDriverLocation && booking.pickupLat && booking.pickupLng && (
+            <div className="absolute top-4 left-4 right-4 bg-gradient-to-r from-[#00796B] to-[#0F3D3E] text-white rounded-lg shadow-lg p-3 z-10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-[#00796B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm">Pickup Location</p>
+                    <p className="text-xs opacity-90">{booking.pickupAddress.split(",")[0]}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold">
+                    {calculateDistance(
+                      currentDriverLocation.lat,
+                      currentDriverLocation.lng,
+                      booking.pickupLat,
+                      booking.pickupLng
+                    ).toFixed(1)}
+                  </p>
+                  <p className="text-xs opacity-90">km away</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Route Information - Minimal on mobile */}
           <div className="absolute bottom-20 left-4 right-4 bg-white rounded-lg shadow-lg p-3 space-y-2 z-10">
             <div className="flex items-start gap-2">
@@ -705,6 +736,37 @@ export default function RideConfirmation({
                       {Math.round(driverETA)}
                     </p>
                     <p className="text-sm opacity-90">min away</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Driver Distance Overlay - for Drivers */}
+            {userRole === "DRIVER" && currentDriverLocation && booking.pickupLat && booking.pickupLng && (
+              <div className="absolute top-4 left-4 right-4 bg-gradient-to-r from-[#00796B] to-[#0F3D3E] text-white rounded-lg shadow-lg p-4 z-10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                      <svg className="w-7 h-7 text-[#00796B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-bold text-lg">Pickup Location</p>
+                      <p className="text-sm opacity-90">{booking.pickupAddress.split(",")[0]}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">
+                      {calculateDistance(
+                        currentDriverLocation.lat,
+                        currentDriverLocation.lng,
+                        booking.pickupLat,
+                        booking.pickupLng
+                      ).toFixed(1)}
+                    </p>
+                    <p className="text-sm opacity-90">km away</p>
                   </div>
                 </div>
               </div>

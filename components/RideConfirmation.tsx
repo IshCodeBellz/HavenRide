@@ -68,6 +68,14 @@ export default function RideConfirmation({
   );
   const [showChat, setShowChat] = useState(false);
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false); // For mobile drawer
+  const [currentDriverLocation, setCurrentDriverLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(
+    booking.driver?.lastLat && booking.driver?.lastLng
+      ? { lat: booking.driver.lastLat, lng: booking.driver.lastLng }
+      : null
+  );
   const { unreadCount, markAsRead } = useUnreadMessages(booking.id, userRole);
 
   // Calculate distance between two coordinates (Haversine formula)
@@ -90,39 +98,65 @@ export default function RideConfirmation({
     return R * c; // Distance in km
   };
 
+  // Fetch real-time driver location and recalculate ETA
   useEffect(() => {
-    // Calculate ETA if driver location is available
-    if (
-      booking.driver?.lastLat &&
-      booking.driver?.lastLng &&
-      booking.pickupLat &&
-      booking.pickupLng
-    ) {
-      const distance = calculateDistance(
-        booking.driver.lastLat,
-        booking.driver.lastLng,
-        booking.pickupLat,
-        booking.pickupLng
-      );
-
-      // Assume average speed of 30 km/h in city traffic
-      const etaMinutes = (distance / 30) * 60;
-      setDriverETA(Math.max(1, Math.round(etaMinutes)));
+    if (!booking.driverId || !booking.pickupLat || !booking.pickupLng) {
+      console.log("Missing data for driver location:", {
+        driverId: booking.driverId,
+        pickupLat: booking.pickupLat,
+        pickupLng: booking.pickupLng,
+      });
+      return;
     }
 
-    // Update ETA periodically
-    const interval = setInterval(() => {
-      setDriverETA((prev) => Math.max(1, prev - 0.2));
-      setEstimatedArrival((prev) => Math.max(1, prev - 0.1));
-    }, 6000); // Update every 6 seconds
+    const fetchDriverLocation = async () => {
+      try {
+        const response = await fetch(`/api/drivers/${booking.driverId}/location`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Driver location fetched:", data);
+          
+          if (data.lastLat && data.lastLng) {
+            setCurrentDriverLocation({
+              lat: data.lastLat,
+              lng: data.lastLng,
+            });
+
+            // Recalculate ETA with real driver location
+            const distance = calculateDistance(
+              data.lastLat,
+              data.lastLng,
+              booking.pickupLat,
+              booking.pickupLng
+            );
+
+            // Assume average speed of 30 km/h in city traffic
+            const etaMinutes = (distance / 30) * 60;
+            const calculatedETA = Math.max(1, Math.round(etaMinutes));
+            console.log("Calculated ETA:", {
+              distance: distance.toFixed(2) + " km",
+              eta: calculatedETA + " min",
+            });
+            setDriverETA(calculatedETA);
+          } else {
+            console.log("Driver location not available yet");
+          }
+        } else {
+          console.error("Failed to fetch driver location:", response.status);
+        }
+      } catch (error) {
+        console.error("Error fetching driver location:", error);
+      }
+    };
+
+    // Fetch immediately
+    fetchDriverLocation();
+
+    // Update every 5 seconds for real-time ETA
+    const interval = setInterval(fetchDriverLocation, 5000);
 
     return () => clearInterval(interval);
-  }, [
-    booking.driver?.lastLat,
-    booking.driver?.lastLng,
-    booking.pickupLat,
-    booking.pickupLng,
-  ]);
+  }, [booking.driverId, booking.pickupLat, booking.pickupLng]);
 
   const totalAmount = booking.priceEstimate?.amount || 10.8;
   const currency = booking.priceEstimate?.currency || "GBP";

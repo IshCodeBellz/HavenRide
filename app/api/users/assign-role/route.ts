@@ -33,20 +33,34 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Get user email from Clerk
+    const client = await clerkClient();
+    const clerkUser = await client.users.getUser(userId);
+    const email = clerkUser.emailAddresses[0]?.emailAddress;
+
+    if (!email) {
+      return NextResponse.json(
+        { error: "User email not found" },
+        { status: 400 }
+      );
+    }
+
     // Update or create user in database
     const user = await prisma.user.upsert({
       where: { id: userId },
       update: { role },
       create: {
         id: userId,
-        email: "", // Will be set by trigger or separate call
+        email: email,
+        name: clerkUser.firstName
+          ? `${clerkUser.firstName} ${clerkUser.lastName || ""}`.trim()
+          : email,
         role,
       },
     });
 
     // Update Clerk metadata
     try {
-      const client = await clerkClient();
       await client.users.updateUser(userId, {
         publicMetadata: { role },
       });

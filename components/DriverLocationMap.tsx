@@ -27,6 +27,7 @@ export default function DriverLocationMap({
   const driverMarker = useRef<mapboxgl.Marker | null>(null);
   const pickupMarker = useRef<mapboxgl.Marker | null>(null);
   const dropoffMarker = useRef<mapboxgl.Marker | null>(null);
+  const routeLayerAdded = useRef(false);
   
   const [currentDriverLocation, setCurrentDriverLocation] = useState<{
     lat: number;
@@ -53,6 +54,42 @@ export default function DriverLocationMap({
     // Add navigation controls
     map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
 
+    // Wait for map to load before adding route layer
+    map.current.on('load', () => {
+      if (!map.current) return;
+      
+      // Add source for the route line
+      map.current.addSource('route', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'LineString',
+            coordinates: []
+          }
+        }
+      });
+
+      // Add layer for the route line
+      map.current.addLayer({
+        id: 'route',
+        type: 'line',
+        source: 'route',
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': '#00BCD4', // Teal/Cyan color
+          'line-width': 4,
+          'line-dasharray': [2, 2] // Dashed line
+        }
+      });
+
+      routeLayerAdded.current = true;
+    });
+
     return () => {
       if (map.current) {
         map.current.remove();
@@ -65,7 +102,7 @@ export default function DriverLocationMap({
   useEffect(() => {
     if (!map.current) return;
 
-    // Add/update pickup marker
+    // Add/update pickup marker (pin/drop icon)
     if (pickupLat && pickupLng) {
       if (pickupMarker.current) {
         pickupMarker.current.setLngLat([pickupLng, pickupLat]);
@@ -74,8 +111,9 @@ export default function DriverLocationMap({
         el.className = "pickup-marker";
         el.style.width = "40px";
         el.style.height = "40px";
-        el.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300796B"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="5" fill="white"/></svg>')`;
+        el.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300796B"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>')`;
         el.style.backgroundSize = "contain";
+        el.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.3))";
 
         pickupMarker.current = new mapboxgl.Marker(el)
           .setLngLat([pickupLng, pickupLat])
@@ -111,7 +149,7 @@ export default function DriverLocationMap({
       }
     }
 
-    // Add/update driver marker
+    // Add/update driver marker (teal car)
     if (currentDriverLocation) {
       if (driverMarker.current) {
         driverMarker.current.setLngLat([
@@ -123,7 +161,7 @@ export default function DriverLocationMap({
         el.className = "driver-marker";
         el.style.width = "50px";
         el.style.height = "50px";
-        el.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FF5722"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>')`;
+        el.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300BCD4"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>')`;
         el.style.backgroundSize = "contain";
         el.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.3))";
 
@@ -133,6 +171,24 @@ export default function DriverLocationMap({
             new mapboxgl.Popup({ offset: 25 }).setHTML("<strong>Driver</strong>")
           )
           .addTo(map.current);
+      }
+      
+      // Update route line from driver to pickup
+      if (pickupLat && pickupLng && map.current && routeLayerAdded.current) {
+        const routeSource = map.current.getSource('route') as mapboxgl.GeoJSONSource;
+        if (routeSource) {
+          routeSource.setData({
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: [
+                [currentDriverLocation.lng, currentDriverLocation.lat],
+                [pickupLng, pickupLat]
+              ]
+            }
+          });
+        }
       }
     }
 

@@ -52,87 +52,91 @@ enum SupportTicketPriority {
 }
 
 model User {
-  id        String      @id
-  email     String      @unique
+  id        String     @id
+  email     String     @unique
   name      String?
   role      String?
-  isAdmin   Boolean     @default(false)
-  status    UserStatus  @default(ACTIVE)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  isAdmin   Boolean    @default(false)
+  status    UserStatus @default(ACTIVE)
+  imageUrl  String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
-  driver              Driver?
-  rider               Rider?
-  dispatcher          Dispatcher?
-  supportTickets      SupportTicket[]
+  driver               Driver?
+  rider                Rider?
+  dispatcher           Dispatcher?
+  supportTickets       SupportTicket[]
   createdNotifications SystemNotification[]
-  complianceLogs      ComplianceLog[]
-  reportedIncidents   Incident[]          @relation("IncidentReporter")
-  assignedIncidents   Incident[]          @relation("IncidentAssignee")
+  complianceLogs       ComplianceLog[]
+  reportedIncidents    Incident[]           @relation("IncidentReporter")
+  assignedIncidents    Incident[]           @relation("IncidentAssignee")
 }
 
 model Rider {
-  id    String    @id
-  user  User      @relation(fields: [id], references: [id])
+  id    String  @id
+  user  User    @relation(fields: [id], references: [id])
   phone String?
-  
+  stripeCustomerId String? // Stripe customer ID for payment methods
+
   // Accessibility preferences
   alwaysRequestWheelchair Boolean @default(false)
   needsAssistance         Boolean @default(false)
-  
-  bookings         Booking[]        @relation("RiderBookings")
-  savedLocations   SavedLocation[]
-  paymentMethods   PaymentMethod[]
+
+  bookings          Booking[]          @relation("RiderBookings")
+  savedLocations    SavedLocation[]
+  paymentMethods    PaymentMethod[]
+  emergencyContacts EmergencyContact[]
+  ratings           RideRating[]
 }
 
 model Driver {
-  id                 String              @id
-  user               User                @relation(fields: [id], references: [id])
-  isOnline           Boolean             @default(false)
+  id                 String    @id
+  user               User      @relation(fields: [id], references: [id])
+  isOnline           Boolean   @default(false)
   vehicleMake        String?
   vehicleModel       String?
   vehiclePlate       String?
-  wheelchairCapable  Boolean             @default(false)
+  wheelchairCapable  Boolean   @default(false)
   lastLat            Float?
   lastLng            Float?
-  docsVerified       Boolean             @default(false)
+  docsVerified       Boolean   @default(false)
   licenseNumber      String?
   insuranceExpiry    DateTime?
-  wheelchairTraining Boolean             @default(false)
+  wheelchairTraining Boolean   @default(false)
   phone              String?
-  
+
   // Verification & Compliance
-  verificationStatus VerificationStatus  @default(PENDING)
-  dbsCheckDate       DateTime?
-  dbsExpiryDate      DateTime?
-  dbsCertificateUrl  String?
-  trainingCompletedDate DateTime?
+  verificationStatus     VerificationStatus @default(PENDING)
+  dbsCheckDate           DateTime?
+  dbsExpiryDate          DateTime?
+  dbsCertificateUrl      String?
+  trainingCompletedDate  DateTime?
   trainingCertificateUrl String?
-  
+
   // Financial
-  commissionRate     Float               @default(0.15) // 15% default
-  totalEarnings      Float               @default(0)
-  pendingPayout      Float               @default(0)
-  
-  updatedAt          DateTime            @updatedAt
-  bookings           Booking[]           @relation("DriverBookings")
+  commissionRate Float @default(0.15) // 15% default
+  totalEarnings  Float @default(0)
+  pendingPayout  Float @default(0)
+
+  updatedAt             DateTime         @updatedAt
+  bookings              Booking[]        @relation("DriverBookings")
   verificationDocuments DriverDocument[]
 }
 
 model Booking {
-  id                String        @id @default(cuid())
-  rider             Rider         @relation("RiderBookings", fields: [riderId], references: [id])
-  riderId           String
-  driver            Driver?       @relation("DriverBookings", fields: [driverId], references: [id])
-  driverId          String?
+  id       String  @id @default(cuid())
+  rider    Rider   @relation("RiderBookings", fields: [riderId], references: [id])
+  riderId  String
+  driver   Driver? @relation("DriverBookings", fields: [driverId], references: [id])
+  driverId String?
 
-  pickupAddress     String
-  dropoffAddress    String
-  pickupLat         Float?
-  pickupLng         Float?
-  dropoffLat        Float?
-  dropoffLng        Float?
-  pickupTime        DateTime
+  pickupAddress  String
+  dropoffAddress String
+  pickupLat      Float?
+  pickupLng      Float?
+  dropoffLat     Float?
+  dropoffLng     Float?
+  pickupTime     DateTime
 
   requiresWheelchair Boolean       @default(false)
   specialNotes       String?
@@ -142,28 +146,29 @@ model Booking {
   estimatedDistance  Float?
   estimatedDuration  Float?
 
-  riderPhone         String?
-  driverPhone        String?
+  riderPhone  String?
+  driverPhone String?
 
-  finalFareAmount    Float?
-  finalFareCurrency  String?       @default("GBP")
+  finalFareAmount   Float?
+  finalFareCurrency String? @default("GBP")
 
-  pinCode            Int
-  pickupVerified     Boolean       @default(false)
-  riderConfirmed     Boolean       @default(false)  // Rider confirmed pickup location
-  
+  pinCode        Int
+  pickupVerified Boolean @default(false)
+
   // Ride documentation (filled by driver at completion)
-  rideQuality        String?       // "excellent" | "good" | "fair" | "poor"
-  clientComfort      String?       // "very_comfortable" | "comfortable" | "neutral" | "uncomfortable"
-  accessibilityNotes String?       // Any accessibility-specific notes
-  issuesReported     String?       // Any issues during the ride
-  documentedAt       DateTime?     // When the ride was documented
-  
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
+  rideQuality        String? // "excellent" | "good" | "fair" | "poor"
+  clientComfort      String? // "very_comfortable" | "comfortable" | "neutral" | "uncomfortable"
+  accessibilityNotes String? // Any accessibility-specific notes
+  issuesReported     String? // Any issues during the ride
+  documentedAt       DateTime? // When the ride was documented
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   messages           Message[]
   incidents          Incident[]
+  ratings            RideRating[]
+  voucherRedemptions VoucherRedemption[]
 }
 
 model Message {
@@ -181,95 +186,95 @@ model Settings {
   perKm            Float    @default(1.8)
   wheelchairMult   Float    @default(1.15)
   provider         String   @default("fallback")
-  requirePickupPin  Boolean  @default(true)
-  sendReceipts      Boolean  @default(true)
-  updatedAt         DateTime @updatedAt
+  requirePickupPin Boolean  @default(true)
+  sendReceipts     Boolean  @default(true)
+  updatedAt        DateTime @updatedAt
 }
 
 model SavedLocation {
-  id        String   @id @default(cuid())
-  rider     Rider    @relation(fields: [riderId], references: [id], onDelete: Cascade)
-  riderId   String
-  
-  label     String   // "Home", "Work", "Hospital", etc.
+  id      String @id @default(cuid())
+  rider   Rider  @relation(fields: [riderId], references: [id], onDelete: Cascade)
+  riderId String
+
+  label     String // "Home", "Work", "Hospital", etc.
   address   String
   latitude  Float
   longitude Float
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([riderId])
 }
 
 model PaymentMethod {
-  id               String   @id @default(cuid())
-  rider            Rider    @relation(fields: [riderId], references: [id], onDelete: Cascade)
-  riderId          String
-  
-  stripePaymentMethodId String @unique
-  last4            String   // Last 4 digits of card
-  brand            String   // "visa", "mastercard", etc.
-  expiryMonth      Int
-  expiryYear       Int
-  isDefault        Boolean  @default(false)
-  
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
+  id      String @id @default(cuid())
+  rider   Rider  @relation(fields: [riderId], references: [id], onDelete: Cascade)
+  riderId String
+
+  stripePaymentMethodId String  @unique
+  last4                 String // Last 4 digits of card
+  brand                 String // "visa", "mastercard", etc.
+  expiryMonth           Int
+  expiryYear            Int
+  isDefault             Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([riderId])
 }
 
 // Dispatcher Model
 model Dispatcher {
-  id          String   @id
-  user        User     @relation(fields: [id], references: [id])
-  phone       String?
-  region      String?  // Geographic region assigned
-  shift       String?  // "morning", "afternoon", "evening", "night"
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id
+  user      User     @relation(fields: [id], references: [id])
+  phone     String?
+  region    String? // Geographic region assigned
+  shift     String? // "morning", "afternoon", "evening", "night"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Driver Verification Documents
 model DriverDocument {
-  id            String             @id @default(cuid())
-  driver        Driver             @relation(fields: [driverId], references: [id], onDelete: Cascade)
-  driverId      String
-  
-  documentType  String             // "LICENSE", "INSURANCE", "DBS", "TRAINING", "VEHICLE_REGISTRATION"
-  documentUrl   String
-  status        VerificationStatus @default(PENDING)
-  uploadedAt    DateTime           @default(now())
-  reviewedAt    DateTime?
-  reviewedBy    String?            // Admin user ID
-  notes         String?
-  expiryDate    DateTime?
-  
+  id       String @id @default(cuid())
+  driver   Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  driverId String
+
+  documentType String // "LICENSE", "INSURANCE", "DBS", "TRAINING", "VEHICLE_REGISTRATION"
+  documentUrl  String
+  status       VerificationStatus @default(PENDING)
+  uploadedAt   DateTime           @default(now())
+  reviewedAt   DateTime?
+  reviewedBy   String? // Admin user ID
+  notes        String?
+  expiryDate   DateTime?
+
   @@index([driverId])
   @@index([status])
 }
 
 // Support Tickets
 model SupportTicket {
-  id          String                @id @default(cuid())
-  user        User                  @relation(fields: [userId], references: [id])
-  userId      String
-  
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
   subject     String
   description String
   priority    SupportTicketPriority @default(MEDIUM)
   status      SupportTicketStatus   @default(OPEN)
-  category    String?               // "PAYMENT", "RIDE_ISSUE", "TECHNICAL", "ACCOUNT", "OTHER"
-  
-  bookingId   String?               // Optional reference to related booking
-  assignedTo  String?               // Admin user ID
-  
-  createdAt   DateTime              @default(now())
-  updatedAt   DateTime              @updatedAt
-  resolvedAt  DateTime?
-  
+  category    String? // "PAYMENT", "RIDE_ISSUE", "TECHNICAL", "ACCOUNT", "OTHER"
+
+  bookingId  String? // Optional reference to related booking
+  assignedTo String? // Admin user ID
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  resolvedAt DateTime?
+
   @@index([userId])
   @@index([status])
   @@index([priority])
@@ -277,35 +282,35 @@ model SupportTicket {
 
 // System Notifications (broadcast by admins)
 model SystemNotification {
-  id          String   @id @default(cuid())
-  createdBy   User     @relation(fields: [createdById], references: [id])
+  id          String @id @default(cuid())
+  createdBy   User   @relation(fields: [createdById], references: [id])
   createdById String
-  
-  title       String
-  message     String
-  targetRole  String?  // "RIDER", "DRIVER", "DISPATCHER", null = all
-  isActive    Boolean  @default(true)
-  
-  createdAt   DateTime @default(now())
-  expiresAt   DateTime?
-  
+
+  title      String
+  message    String
+  targetRole String? // "RIDER", "DRIVER", "DISPATCHER", null = all
+  isActive   Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+
   @@index([isActive])
   @@index([targetRole])
 }
 
 // Compliance & Audit Logs
 model ComplianceLog {
-  id          String   @id @default(cuid())
-  admin       User     @relation(fields: [adminId], references: [id])
-  adminId     String
-  
-  action      String   // "APPROVED_DRIVER", "SUSPENDED_USER", "VIEWED_GDPR_DATA", "EXPORTED_REPORTS"
-  targetType  String   // "USER", "DRIVER", "BOOKING", "DOCUMENT"
-  targetId    String
-  details     Json?
-  
-  createdAt   DateTime @default(now())
-  
+  id      String @id @default(cuid())
+  admin   User   @relation(fields: [adminId], references: [id])
+  adminId String
+
+  action     String // "APPROVED_DRIVER", "SUSPENDED_USER", "VIEWED_GDPR_DATA", "EXPORTED_REPORTS"
+  targetType String // "USER", "DRIVER", "BOOKING", "DOCUMENT"
+  targetId   String
+  details    Json?
+
+  createdAt DateTime @default(now())
+
   @@index([adminId])
   @@index([targetType])
   @@index([createdAt])
@@ -336,32 +341,151 @@ enum IncidentStatus {
 }
 
 model Incident {
-  id          String            @id @default(cuid())
-  booking     Booking?          @relation(fields: [bookingId], references: [id])
-  bookingId   String?
-  
-  type        IncidentType
-  priority    IncidentPriority  @default(MEDIUM)
-  status      IncidentStatus    @default(OPEN)
-  
+  id        String   @id @default(cuid())
+  booking   Booking? @relation(fields: [bookingId], references: [id])
+  bookingId String?
+
+  type     IncidentType
+  priority IncidentPriority @default(MEDIUM)
+  status   IncidentStatus   @default(OPEN)
+
   title       String
   description String
   location    String?
-  
-  reportedBy  User              @relation("IncidentReporter", fields: [reporterId], references: [id])
-  reporterId  String
-  
-  assignedTo  User?             @relation("IncidentAssignee", fields: [assigneeId], references: [id])
-  assigneeId  String?
-  
-  resolution  String?
-  resolvedAt  DateTime?
-  
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  
+
+  reportedBy User   @relation("IncidentReporter", fields: [reporterId], references: [id])
+  reporterId String
+
+  assignedTo User?   @relation("IncidentAssignee", fields: [assigneeId], references: [id])
+  assigneeId String?
+
+  resolution String?
+  resolvedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([bookingId])
   @@index([status])
   @@index([priority])
   @@index([createdAt])
+}
+
+// Emergency Contacts
+model EmergencyContact {
+  id      String @id @default(cuid())
+  rider   Rider  @relation(fields: [riderId], references: [id], onDelete: Cascade)
+  riderId String
+
+  name         String
+  phone        String
+  relationship String? // "family", "friend", "carer", "medical", "other"
+  isPrimary    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([riderId])
+}
+
+// Ride Ratings (from riders)
+model RideRating {
+  id        String  @id @default(cuid())
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId String
+  rider     Rider   @relation(fields: [riderId], references: [id])
+  riderId   String
+
+  // Ratings (1-5 stars)
+  driverRating Int // 1-5 stars
+  rideRating   Int // 1-5 stars (overall experience)
+
+  // Optional feedback
+  driverComment String?
+  rideComment   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([bookingId]) // One rating per booking
+  @@index([riderId])
+  @@index([bookingId])
+}
+
+// Voucher Codes (for LA funding)
+model VoucherCode {
+  id          String  @id @default(cuid())
+  code        String  @unique // e.g., "LA2024-ABC123"
+  description String? // "Local Authority Funding - Borough X"
+
+  // Value
+  amount      Float? // Fixed amount discount
+  percentage  Float? // Percentage discount (0-100)
+  maxDiscount Float? // Maximum discount if percentage
+
+  // Validity
+  validFrom  DateTime
+  validUntil DateTime
+  isActive   Boolean  @default(true)
+
+  // Usage limits
+  maxUses     Int? // Maximum number of times it can be used
+  currentUses Int  @default(0)
+
+  // Restrictions
+  riderId       String? // If null, available to all riders
+  minFareAmount Float? // Minimum fare to use voucher
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  redemptions VoucherRedemption[]
+
+  @@index([code])
+  @@index([isActive])
+  @@index([validUntil])
+}
+
+// Voucher Redemptions
+model VoucherRedemption {
+  id        String      @id @default(cuid())
+  voucher   VoucherCode @relation(fields: [voucherId], references: [id])
+  voucherId String
+  booking   Booking     @relation(fields: [bookingId], references: [id])
+  bookingId String
+
+  discountAmount Float // Actual discount applied
+  redeemedAt     DateTime @default(now())
+
+  @@index([voucherId])
+  @@index([bookingId])
+}
+
+// Issue Reports (from riders)
+model IssueReport {
+  id      String @id @default(cuid())
+  riderId String // Rider who reported
+
+  // Issue details
+  type        String // "LOST_ITEM", "RIDE_ISSUE", "PAYMENT_ISSUE", "SAFETY", "OTHER"
+  subject     String
+  description String
+
+  // Related booking (if applicable)
+  bookingId String?
+
+  // Status
+  status   String @default("OPEN") // "OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"
+  priority String @default("MEDIUM") // "LOW", "MEDIUM", "HIGH", "URGENT"
+
+  // Resolution
+  resolvedAt DateTime?
+  resolution String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([riderId])
+  @@index([bookingId])
+  @@index([status])
 }

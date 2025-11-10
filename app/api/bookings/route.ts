@@ -5,36 +5,41 @@ import { publish } from '@/lib/realtime/publish';
 function generatePin() { const min = 1000, max = 999999; return Math.floor(Math.random()*(max-min+1))+min; }
 
 export async function GET() {
-  const list = await prisma.booking.findMany({ 
-    orderBy: { createdAt: 'desc' },
-    include: {
-      driver: {
-        include: {
-          user: {
-            select: {
-              name: true
+  try {
+    const list = await prisma.booking.findMany({ 
+      orderBy: { createdAt: 'desc' },
+      include: {
+        driver: {
+          include: {
+            user: {
+              select: {
+                name: true
+              }
             }
           }
-        }
-      },
-      rider: {
-        include: {
-          user: {
-            select: {
-              name: true
+        },
+        rider: {
+          include: {
+            user: {
+              select: {
+                name: true
+              }
             }
           }
         }
       }
-    }
-  });
-  return NextResponse.json(list);
+    });
+    return NextResponse.json(list || []);
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
+    return NextResponse.json([], { status: 500 });
+  }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { riderId, pickupAddress, dropoffAddress, pickupTime, pickupLat, pickupLng, dropoffLat, dropoffLng, requiresWheelchair, specialNotes, priceEstimate, paymentIntentId, riderPhone } = body;
+    const { riderId, pickupAddress, dropoffAddress, pickupTime, pickupLat, pickupLng, dropoffLat, dropoffLng, requiresWheelchair, specialNotes, priceEstimate, paymentIntentId, riderPhone, voucherCode, voucherDiscount } = body;
 
     if (!riderId || !pickupAddress || !dropoffAddress || !pickupTime) return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     if (!paymentIntentId) return NextResponse.json({ error: 'paymentIntentId required' }, { status: 400 });
@@ -54,6 +59,32 @@ export async function POST(request: NextRequest) {
         pinCode: generatePin(), riderPhone: finalRiderPhone || null
       }
     });
+
+    // Handle voucher redemption if provided
+    if (voucherCode && voucherDiscount && voucherDiscount > 0) {
+      const voucher = await prisma.voucherCode.findUnique({
+        where: { code: voucherCode.toUpperCase().trim() },
+      });
+
+      if (voucher) {
+        // Create voucher redemption record
+        await prisma.voucherRedemption.create({
+          data: {
+            voucherId: voucher.id,
+            bookingId: booking.id,
+            discountAmount: voucherDiscount,
+          },
+        });
+
+        // Update voucher usage count
+        await prisma.voucherCode.update({
+          where: { id: voucher.id },
+          data: {
+            currentUses: voucher.currentUses + 1,
+          },
+        });
+      }
+    }
 
     await publish('dispatch', 'booking_created', { id: booking.id });
     await publish(`booking:${booking.id}`, 'status', { status: booking.status });

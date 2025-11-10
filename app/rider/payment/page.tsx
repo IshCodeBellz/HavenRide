@@ -27,6 +27,11 @@ function CheckoutForm({
   dropoffLng,
   wheelchair,
   distanceKm,
+  voucherCode,
+  voucherDiscount,
+  selectedPaymentMethodId,
+  savedPaymentMethods,
+  clientSecret,
   onSuccess,
 }: {
   amount: string;
@@ -38,6 +43,11 @@ function CheckoutForm({
   dropoffLng: string;
   wheelchair: boolean;
   distanceKm: string;
+  voucherCode: string | null;
+  voucherDiscount: number;
+  selectedPaymentMethodId: string | null;
+  savedPaymentMethods: SavedPaymentMethod[];
+  clientSecret: string;
   onSuccess: () => void;
 }) {
   const stripe = useStripe();
@@ -49,7 +59,8 @@ function CheckoutForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!stripe || !elements || !user) {
+    if (!stripe || !user) {
+      setError("Payment system not ready. Please wait a moment and try again.");
       return;
     }
 
@@ -57,32 +68,117 @@ function CheckoutForm({
     setError("");
 
     try {
-      // Submit the payment element
-      const { error: submitError } = await elements.submit();
-      if (submitError) {
-        setError(submitError.message || "Payment failed");
-        setProcessing(false);
-        return;
-      }
+      let paymentIntent;
 
-      // Confirm the payment with Stripe
-      const { error: confirmError, paymentIntent } =
-        await stripe.confirmPayment({
-          elements,
-          confirmParams: {
-            return_url: `${window.location.origin}/rider`,
-          },
-          redirect: "if_required", // Don't redirect, handle it manually
-        });
-
-      if (confirmError) {
-        console.error("Stripe confirmation error:", confirmError);
-        setError(
-          confirmError.message ||
-            "Payment failed. Please check your card details and try again."
+      // If using a saved payment method
+      if (selectedPaymentMethodId && selectedPaymentMethodId !== "new") {
+        const savedMethod = savedPaymentMethods.find(
+          (m) => m.id === selectedPaymentMethodId
         );
-        setProcessing(false);
-        return;
+        
+        if (!savedMethod) {
+          setError("Selected payment method not found");
+          setProcessing(false);
+          return;
+        }
+
+        // Get the rider's Stripe customer ID to ensure payment method is attached
+        const riderRes = await fetch("/api/riders/stripe-customer");
+        let customerId: string | undefined;
+        if (riderRes.ok) {
+          const riderData = await riderRes.json();
+          customerId = riderData.stripeCustomerId;
+        }
+
+        // If we don't have a customer ID, the payment intent creation should have created one
+        // But let's make sure the payment method is attached before confirming
+        if (customerId) {
+          try {
+            // Attach the payment method to the customer (idempotent - won't fail if already attached)
+            const attachRes = await fetch("/api/payments/attach-payment-method", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                paymentMethodId: savedMethod.stripePaymentMethodId,
+                customerId: customerId,
+              }),
+            });
+
+            if (!attachRes.ok) {
+              const attachError = await attachRes.json().catch(() => ({}));
+              console.error("Failed to attach payment method:", attachError);
+              // Continue anyway - might already be attached
+            }
+          } catch (attachError) {
+            console.warn("Could not attach payment method:", attachError);
+            // Continue anyway - might already be attached
+          }
+        } else {
+          // If no customer ID, we need to get it from the payment intent
+          // The payment intent should have a customer since we always create one now
+          console.warn("No customer ID found, but payment intent should have one");
+        }
+
+        // Confirm payment with saved payment method
+        // The payment intent already has the customer, so the payment method should work
+        const { error: confirmError, paymentIntent: intent } =
+          await stripe.confirmPayment({
+            clientSecret: clientSecret,
+            confirmParams: {
+              payment_method: savedMethod.stripePaymentMethodId,
+              return_url: `${window.location.origin}/rider`,
+            },
+            redirect: "if_required",
+          });
+
+        if (confirmError) {
+          setError(confirmError.message || "Payment failed");
+          setProcessing(false);
+          return;
+        }
+
+        paymentIntent = intent;
+      } else {
+        // Using new payment method from PaymentElement
+        if (!elements) {
+          setError("Payment form not loaded. Please wait a moment and try again.");
+          setProcessing(false);
+          return;
+        }
+
+        // Check if PaymentElement is mounted
+        const paymentElement = elements.getElement('payment');
+        if (!paymentElement) {
+          setError("Payment form is not ready. Please wait a moment and try again.");
+          setProcessing(false);
+          return;
+        }
+
+        // Submit the payment element
+        const { error: submitError } = await elements.submit();
+        if (submitError) {
+          setError(submitError.message || "Payment failed");
+          setProcessing(false);
+          return;
+        }
+
+        // Confirm the payment with Stripe
+        const { error: confirmError, paymentIntent: intent } =
+          await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+              return_url: `${window.location.origin}/rider`,
+            },
+            redirect: "if_required", // Don't redirect, handle it manually
+          });
+
+        if (confirmError) {
+          setError(confirmError.message || "Payment failed");
+          setProcessing(false);
+          return;
+        }
+
+        paymentIntent = intent;
       }
 
       // Payment successful, now create the booking
@@ -105,6 +201,8 @@ function CheckoutForm({
               distanceKm: parseFloat(distanceKm || "0"),
             },
             paymentIntentId: paymentIntent.id,
+            voucherCode: voucherCode || null,
+            voucherDiscount: voucherDiscount || 0,
           }),
         });
 
@@ -125,7 +223,9 @@ function CheckoutForm({
 
   return (
     <form onSubmit={handleSubmit}>
-      <PaymentElement />
+      {selectedPaymentMethodId === "new" || selectedPaymentMethodId === null ? (
+        <PaymentElement />
+      ) : null}
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 mt-4">
@@ -180,6 +280,16 @@ function CheckoutForm({
   );
 }
 
+interface SavedPaymentMethod {
+  id: string;
+  last4: string;
+  brand: string;
+  expiryMonth: number;
+  expiryYear: number;
+  isDefault: boolean;
+  stripePaymentMethodId: string;
+}
+
 function PaymentPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -187,6 +297,14 @@ function PaymentPageContent() {
   const [clientSecret, setClientSecret] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [voucherCode, setVoucherCode] = useState("");
+  const [voucherDiscount, setVoucherDiscount] = useState(0);
+  const [validatingVoucher, setValidatingVoucher] = useState(false);
+  const [voucherError, setVoucherError] = useState("");
+  const [voucherApplied, setVoucherApplied] = useState(false);
+  const [savedPaymentMethods, setSavedPaymentMethods] = useState<SavedPaymentMethod[]>([]);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("new");
+  const [loadingPaymentMethods, setLoadingPaymentMethods] = useState(true);
 
   // Get booking details from URL params
   const pickup = searchParams.get("pickup") || "";
@@ -198,6 +316,29 @@ function PaymentPageContent() {
   const amount = searchParams.get("amount") || "";
   const distanceKm = searchParams.get("distanceKm") || "";
   const wheelchair = searchParams.get("wheelchair") === "true";
+
+  // Fetch saved payment methods
+  useEffect(() => {
+    async function fetchPaymentMethods() {
+      try {
+        const res = await fetch("/api/riders/payment-methods");
+        if (res.ok) {
+          const methods = await res.json();
+          setSavedPaymentMethods(methods);
+          // Set default payment method if available
+          const defaultMethod = methods.find((m: SavedPaymentMethod) => m.isDefault);
+          if (defaultMethod) {
+            setSelectedPaymentMethod(defaultMethod.id);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching payment methods:", error);
+      } finally {
+        setLoadingPaymentMethods(false);
+      }
+    }
+    fetchPaymentMethods();
+  }, []);
 
   // Create payment intent on mount
   useEffect(() => {
@@ -219,9 +360,9 @@ function PaymentPageContent() {
         });
 
         if (!paymentRes.ok) {
-          const errorData = await paymentRes.text();
+          const errorData = await paymentRes.json().catch(() => ({ error: "Unknown error" }));
           console.error("Payment intent creation failed:", errorData);
-          throw new Error("Failed to create payment intent");
+          throw new Error(errorData.details || errorData.error || "Failed to create payment intent");
         }
 
         const { clientSecret } = await paymentRes.json();
@@ -229,8 +370,9 @@ function PaymentPageContent() {
         setClientSecret(clientSecret);
       } catch (e) {
         console.error("Payment initialization error:", e);
+        const errorMessage = e instanceof Error ? e.message : "Unknown error";
         setError(
-          "Failed to initialize payment. Please try again or contact support."
+          `Failed to initialize payment: ${errorMessage}. Please try again or contact support.`
         );
       } finally {
         setLoading(false);
@@ -243,6 +385,48 @@ function PaymentPageContent() {
   const handlePaymentSuccess = () => {
     router.push("/rider");
   };
+
+  async function handleValidateVoucher() {
+    if (!voucherCode.trim()) {
+      setVoucherError("Please enter a voucher code");
+      return;
+    }
+
+    try {
+      setValidatingVoucher(true);
+      setVoucherError("");
+      
+      const res = await fetch("/api/vouchers/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: voucherCode.trim(),
+          fareAmount: parseFloat(amount || "0"),
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setVoucherDiscount(data.discountAmount);
+        setVoucherApplied(true);
+        setVoucherError("");
+      } else {
+        const errorData = await res.json();
+        setVoucherError(errorData.error || "Invalid voucher code");
+        setVoucherDiscount(0);
+        setVoucherApplied(false);
+      }
+    } catch (error) {
+      console.error("Error validating voucher:", error);
+      setVoucherError("Failed to validate voucher code");
+      setVoucherDiscount(0);
+      setVoucherApplied(false);
+    } finally {
+      setValidatingVoucher(false);
+    }
+  }
+
+  const finalAmount = Math.max(0, parseFloat(amount || "0") - voucherDiscount);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -336,6 +520,86 @@ function PaymentPageContent() {
             Payment Method
           </h2>
 
+          {/* Payment Method Selection */}
+          {!loadingPaymentMethods && savedPaymentMethods.length > 0 && (
+            <div className="mb-4 space-y-2">
+              {savedPaymentMethods.map((method) => (
+                <label
+                  key={method.id}
+                  className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                    selectedPaymentMethod === method.id
+                      ? "border-[#00796B] bg-[#E0F2F1]"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value={method.id}
+                    checked={selectedPaymentMethod === method.id}
+                    onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+                    className="w-4 h-4 text-[#00796B] border-gray-300 focus:ring-[#00796B]"
+                  />
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="w-10 h-10 bg-blue-100 rounded flex items-center justify-center">
+                      <span className="text-blue-600 font-bold text-xs uppercase">
+                        {method.brand}
+                      </span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium">
+                        {method.brand} ending in {method.last4}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Expires {method.expiryMonth}/{method.expiryYear}
+                        {method.isDefault && (
+                          <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                            Default
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </label>
+              ))}
+              
+              <label
+                className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                  selectedPaymentMethod === "new"
+                    ? "border-[#00796B] bg-[#E0F2F1]"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="new"
+                  checked={selectedPaymentMethod === "new"}
+                  onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+                  className="w-4 h-4 text-[#00796B] border-gray-300 focus:ring-[#00796B]"
+                />
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+                    <svg
+                      className="w-5 h-5 text-gray-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                  </div>
+                  <p className="font-medium">Add new card</p>
+                </div>
+              </label>
+            </div>
+          )}
+
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <svg
@@ -383,7 +647,7 @@ function PaymentPageContent() {
               }}
             >
               <CheckoutForm
-                amount={amount}
+                amount={finalAmount.toString()}
                 pickup={pickup}
                 dropoff={dropoff}
                 pickupLat={pickupLat}
@@ -392,6 +656,11 @@ function PaymentPageContent() {
                 dropoffLng={dropoffLng}
                 wheelchair={wheelchair}
                 distanceKm={distanceKm}
+                voucherCode={voucherApplied ? voucherCode : null}
+                voucherDiscount={voucherDiscount}
+                selectedPaymentMethodId={selectedPaymentMethod === "new" ? null : selectedPaymentMethod}
+                savedPaymentMethods={savedPaymentMethods}
+                clientSecret={clientSecret}
                 onSuccess={handlePaymentSuccess}
               />
             </Elements>

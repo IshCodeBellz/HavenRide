@@ -10,6 +10,7 @@ import RideDocumentationForm, {
 } from "@/components/RideDocumentationForm";
 import RideConfirmation from "@/components/RideConfirmation";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import BookingMap from "@/components/BookingMap";
 
 function DriverPageContent() {
   const { user } = useUser();
@@ -19,13 +20,25 @@ function DriverPageContent() {
   const [documentingBookingId, setDocumentingBookingId] = useState<
     string | null
   >(null);
+  const [driverLocation, setDriverLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+
+  // Debug: Log when documentingBookingId changes
+  useEffect(() => {
+    console.log("documentingBookingId changed to:", documentingBookingId);
+  }, [documentingBookingId]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const fetchingRef = useRef(false);
   const initialLoadRef = useRef(true);
 
   const assigned = useMemo(() => {
     const found = bookings.find(
-      (b) => b.driverId === user?.id && b.status !== "COMPLETED"
+      (b) => 
+        b.driverId === user?.id && 
+        b.status !== "COMPLETED" && 
+        b.status !== "CANCELED"
     );
     console.log("Checking assigned booking:", {
       driverId: user?.id,
@@ -101,6 +114,7 @@ function DriverPageContent() {
       const updateLocation = (position: GeolocationPosition) => {
         const { latitude, longitude } = position.coords;
         console.log("Updating driver location:", { latitude, longitude });
+        setDriverLocation({ lat: latitude, lng: longitude });
         fetch("/api/drivers/update-location", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -132,11 +146,15 @@ function DriverPageContent() {
         // Watch position for continuous updates
         watchId = navigator.geolocation.watchPosition(
           updateLocation,
-          (error) => console.error("Watch position error:", error),
+          (error) => {
+            // Handle watch position errors silently - user might have denied permission
+            console.warn("Location tracking stopped:", error.message || "Permission denied");
+          },
           { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
         );
       } else {
         // Fallback for browsers without geolocation
+        setDriverLocation({ lat: 51.5074, lng: -0.1278 });
         timer = setInterval(async () => {
           await fetch("/api/drivers/update-location", {
             method: "POST",
@@ -239,7 +257,7 @@ function DriverPageContent() {
       });
 
       if (!res.ok) {
-        const error = await res.json();
+        const error = await res.json().catch(() => ({ error: "Unknown error" }));
         console.error("Failed to accept ride:", error);
         alert(error.error || "Failed to accept ride");
         return;
@@ -248,11 +266,14 @@ function DriverPageContent() {
       const result = await res.json();
       console.log("Ride accepted successfully:", result);
 
-      // Fetch updated bookings
-      await fetchBookings();
+      // Fetch updated bookings with a small delay to ensure database is updated
+      setTimeout(() => {
+        fetchBookings();
+      }, 500);
     } catch (error) {
       console.error("Error accepting ride:", error);
-      alert("An error occurred while accepting the ride");
+      const errorMessage = error instanceof Error ? error.message : "An error occurred while accepting the ride";
+      alert(errorMessage);
     }
   }
   async function arrive(id: string) {
@@ -278,16 +299,10 @@ function DriverPageContent() {
     fetchBookings();
   }
   async function complete(id: string) {
-    const input = prompt("Final fare (£)? Leave empty to keep estimate.");
-    if (input && !isNaN(Number(input))) {
-      await fetch(`/api/bookings/${id}/fare`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: Number(input), currency: "GBP" }),
-      });
-    }
-    // Show documentation form instead of completing immediately
+    // Show documentation form - no fare prompt needed
+    console.log("complete() called with ID:", id);
     setDocumentingBookingId(id);
+    console.log("documentingBookingId set to:", id);
   }
 
   async function handleDocumentationSubmit(data: RideDocumentation) {
@@ -304,13 +319,16 @@ function DriverPageContent() {
       );
 
       if (!res.ok) {
-        throw new Error("Failed to document ride");
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to document ride");
       }
 
+      // Successfully completed
       setDocumentingBookingId(null);
       await fetchBookings();
     } catch (error) {
       console.error("Failed to document ride:", error);
+      alert(error instanceof Error ? error.message : "Failed to complete ride. Please try again.");
       throw error;
     }
   }
@@ -320,48 +338,93 @@ function DriverPageContent() {
     assigned &&
     (assigned.status === "ASSIGNED" ||
       assigned.status === "EN_ROUTE" ||
-      assigned.status === "ARRIVED")
+      assigned.status === "ARRIVED" ||
+      assigned.status === "IN_PROGRESS")
   ) {
     return (
-      <RideConfirmation
-        booking={assigned}
-        userRole="DRIVER"
-        onConfirm={async () => {
-          // Update status based on current status
-          if (assigned.status === "ASSIGNED") {
-            // Mark as en route (navigation started)
+      <>
+        <RideConfirmation
+          booking={assigned}
+          userRole="DRIVER"
+          onConfirm={async () => {
+            // Use the booking prop directly to avoid stale state issues
+            const currentBooking = assigned;
+            if (!currentBooking) {
+              console.error("No assigned booking found");
+              return;
+            }
+
+            console.log("onConfirm called with status:", currentBooking.status);
+
+            // Update status based on current status
+            if (currentBooking.status === "ASSIGNED") {
+              // Mark as en route (navigation started)
+              await fetch(`/api/bookings/${currentBooking.id}/status`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: "EN_ROUTE" }),
+              });
+            } else if (currentBooking.status === "EN_ROUTE") {
+              // Mark as arrived at pickup (no navigation)
+              await fetch(`/api/bookings/${currentBooking.id}/status`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: "ARRIVED" }),
+              });
+            } else if (currentBooking.status === "ARRIVED") {
+              // Verify PIN and start trip
+              const pin = prompt("Enter pickup PIN provided by rider");
+              if (!pin) return;
+              
+              const res = await fetch(`/api/bookings/${currentBooking.id}/verify-pin`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ pin }),
+              });
+              
+              if (!res.ok) {
+                const error = await res.json().catch(() => ({}));
+                alert(error.error === "invalid_pin" ? "Invalid PIN. Please try again." : "Failed to verify PIN");
+                return;
+              }
+              
+              // PIN verified, status changed to IN_PROGRESS
+              // Navigation will be handled by RideConfirmation component
+              // when driver clicks "Navigate to Dropoff" button
+            } else if (currentBooking.status === "IN_PROGRESS") {
+              // Complete the ride - opens documentation form
+              console.log("Completing ride with ID:", currentBooking.id);
+              complete(currentBooking.id);
+              return; // Don't fetch bookings yet, wait for form submission
+            }
+            fetchBookings();
+          }}
+          onCancel={async () => {
+            if (
+              !confirm(
+                "Are you sure you want to cancel this ride? The rider will need to find another driver."
+              )
+            ) {
+              return;
+            }
+            // Cancel the booking - set status to CANCELED
             await fetch(`/api/bookings/${assigned.id}/status`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ status: "EN_ROUTE" }),
+              body: JSON.stringify({ status: "CANCELED", driverId: null }),
             });
-          } else if (assigned.status === "EN_ROUTE") {
-            // Mark as arrived at pickup
-            await fetch(`/api/bookings/${assigned.id}/status`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ status: "ARRIVED" }),
-            });
-          }
-          fetchBookings();
-        }}
-        onCancel={async () => {
-          if (
-            !confirm(
-              "Are you sure you want to cancel this ride? The rider will need to find another driver."
-            )
-          ) {
-            return;
-          }
-          // Unassign driver and set back to REQUESTED
-          await fetch(`/api/bookings/${assigned.id}/status`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: "REQUESTED", driverId: null }),
-          });
-          fetchBookings();
-        }}
-      />
+            fetchBookings();
+          }}
+        />
+        {/* Ride Documentation Modal - Must be rendered here to appear above RideConfirmation */}
+        {documentingBookingId && (
+          <RideDocumentationForm
+            bookingId={documentingBookingId}
+            onSubmit={handleDocumentationSubmit}
+            onCancel={() => setDocumentingBookingId(null)}
+          />
+        )}
+      </>
     );
   }
 
@@ -378,65 +441,22 @@ function DriverPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-2 sm:p-4">
-      <div className="max-w-4xl w-full">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 sm:mb-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-[#0F3D3E]">
-              Driver Console
-            </h1>
-            <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
-              {requestedBookings.length} ride
-              {requestedBookings.length !== 1 ? "s" : ""} available
-            </p>
-          </div>
-          <label className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg shadow-sm border border-gray-200 self-start">
-            <span className="text-xs sm:text-sm font-medium text-gray-700">
-              {online ? "Online" : "Offline"}
-            </span>
-            <input
-              type="checkbox"
-              checked={online}
-              onChange={(e) => toggleOnline(e.target.checked)}
-              className="w-10 h-5 sm:w-12 sm:h-6 appearance-none bg-gray-300 rounded-full relative cursor-pointer transition-colors checked:bg-[#00796B] before:content-[''] before:absolute before:w-4 before:h-4 sm:before:w-5 sm:before:h-5 before:rounded-full before:bg-white before:top-0.5 before:left-0.5 before:transition-transform checked:before:translate-x-5 sm:checked:before:translate-x-6"
-            />
-          </label>
-        </div>
-
-        {/* Main Card */}
-        {initialLoadRef.current ? (
-          <div className="bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-lg text-center">
-            <div className="inline-block p-2 sm:p-3 bg-gray-100 rounded-full mb-3">
+    <div className="h-full flex flex-col bg-gray-50 relative">
+      {/* Map Section - Full height */}
+      <div className="relative flex-1 h-[calc(100vh-80px)] bg-gray-200">
+        {/* Show map with driver location */}
+        {driverLocation ? (
+          <BookingMap
+            pickup={null}
+            dropoff={null}
+            driverLocation={driverLocation}
+            className="w-full h-full"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gray-100">
+            <div className="text-center text-gray-500">
               <svg
-                className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 animate-spin"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-            </div>
-            <p className="text-sm text-gray-600">
-              Loading bookings...
-            </p>
-          </div>
-        ) : requestedBookings.length === 0 ? (
-          <div className="bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-lg text-center">
-            <div className="inline-block p-2 sm:p-3 bg-[#E0F2F1] rounded-full mb-3">
-              <svg
-                className="w-8 h-8 sm:w-10 sm:h-10 text-[#00796B]"
+                className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 text-gray-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -445,29 +465,94 @@ function DriverPageContent() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
                 />
               </svg>
+              <p className="text-xs sm:text-sm font-medium">
+                Map will appear here
+              </p>
             </div>
-            <h2 className="text-lg sm:text-xl font-bold text-[#0F3D3E] mb-2">
-              No Available Jobs
-            </h2>
-            <p className="text-sm text-gray-600 mb-3">
-              {online
-                ? "All jobs are currently assigned. New ride requests will appear here."
-                : "Go online to start receiving ride requests"}
-            </p>
-            {!online && (
-              <button
-                onClick={() => toggleOnline(true)}
-                className="px-5 py-2.5 bg-[#00796B] text-white rounded-lg font-semibold hover:bg-[#00695C] transition-colors text-sm"
-              >
-                Go Online
-              </button>
-            )}
           </div>
-        ) : (
-          <div className="relative">
+        )}
+
+        {/* Online Toggle - Top Left */}
+        <div className="absolute top-4 left-4 z-10">
+          <label className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200">
+            <span className="text-sm font-medium text-gray-700">
+              {online ? "Online" : "Offline"}
+            </span>
+            <input
+              type="checkbox"
+              checked={online}
+              onChange={(e) => toggleOnline(e.target.checked)}
+              className="w-11 h-6 appearance-none bg-gray-300 rounded-full relative cursor-pointer transition-colors checked:bg-[#00796B] before:content-[''] before:absolute before:w-5 before:h-5 before:rounded-full before:bg-white before:top-0.5 before:left-0.5 before:transition-transform checked:before:translate-x-5"
+            />
+          </label>
+        </div>
+
+        {/* Job Availability - Bottom (moved up to avoid SOS button) */}
+        <div className="absolute bottom-24 left-4 right-4 z-10">
+          {initialLoadRef.current ? (
+            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg text-center">
+              <div className="inline-block p-2 sm:p-3 bg-gray-100 rounded-full mb-3">
+                <svg
+                  className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 animate-spin"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+              </div>
+              <p className="text-sm text-gray-600">Loading bookings...</p>
+            </div>
+          ) : requestedBookings.length === 0 ? (
+            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg text-center max-w-md mx-auto">
+              <div className="inline-block p-2 sm:p-3 bg-[#E0F2F1] rounded-full mb-3">
+                <svg
+                  className="w-8 h-8 sm:w-10 sm:h-10 text-[#00796B]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-lg sm:text-xl font-bold text-[#0F3D3E] mb-2">
+                No Available Jobs
+              </h2>
+              <p className="text-sm text-gray-600 mb-3">
+                {online
+                  ? "All jobs are currently assigned. New ride requests will appear here."
+                  : "Go online to start receiving ride requests"}
+              </p>
+              {!online && (
+                <button
+                  onClick={() => toggleOnline(true)}
+                  className="px-5 py-2.5 bg-[#00796B] text-white rounded-lg font-semibold hover:bg-[#00695C] transition-colors text-sm"
+                >
+                  Go Online
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="relative max-w-4xl mx-auto">
             {/* Main Carousel Container with Preview */}
             <div className="relative overflow-visible">
               <div className="flex items-center justify-center gap-2 md:gap-3">
@@ -715,11 +800,11 @@ function DriverPageContent() {
 
             {/* Carousel Navigation */}
             {requestedBookings.length > 1 && (
-              <div className="mt-6 flex items-center justify-between">
+              <div className="mt-4 flex items-center justify-between">
                 <button
                   onClick={goToPrevious}
                   disabled={currentIndex === 0}
-                  className="p-3 rounded-full bg-white shadow-md border border-gray-200 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                  className="p-3 rounded-full bg-white shadow-md border border-gray-200 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors z-10"
                 >
                   <svg
                     className="w-6 h-6 text-gray-700"
@@ -753,7 +838,7 @@ function DriverPageContent() {
                 <button
                   onClick={goToNext}
                   disabled={currentIndex === requestedBookings.length - 1}
-                  className="p-3 rounded-full bg-white shadow-md border border-gray-200 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                  className="p-3 rounded-full bg-white shadow-md border border-gray-200 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors z-10"
                 >
                   <svg
                     className="w-6 h-6 text-gray-700"
@@ -771,8 +856,9 @@ function DriverPageContent() {
                 </button>
               </div>
             )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
 
         {/* Chat Modal */}
         {activeBookingId && (
@@ -839,15 +925,6 @@ function DriverPageContent() {
           </div>
         )}
       </div>
-
-      {/* Ride Documentation Modal */}
-      {documentingBookingId && (
-        <RideDocumentationForm
-          bookingId={documentingBookingId}
-          onSubmit={handleDocumentationSubmit}
-          onCancel={() => setDocumentingBookingId(null)}
-        />
-      )}
     </div>
   );
 }
@@ -878,3 +955,4 @@ export default function DriverPage() {
     </RoleGate>
   );
 }
+

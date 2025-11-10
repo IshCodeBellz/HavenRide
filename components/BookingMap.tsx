@@ -45,33 +45,36 @@ export default function BookingMap({
 
   // Update pickup marker
   useEffect(() => {
-    console.log('Pickup marker effect triggered:', { pickup, hasMap: !!map.current });
-    
+    console.log("Pickup marker effect triggered:", {
+      pickup,
+      hasMap: !!map.current,
+    });
+
     if (!map.current) {
-      console.log('No map instance yet');
-      return;
-    }
-    
-    if (!pickup) {
-      console.log('No pickup coordinates');
-      return;
-    }
-    
-    if (pickup.lat === 0) {
-      console.log('Pickup lat is 0, skipping');
+      console.log("No map instance yet");
       return;
     }
 
-    console.log('Creating/updating pickup marker at:', pickup);
+    if (!pickup) {
+      console.log("No pickup coordinates");
+      return;
+    }
+
+    if (pickup.lat === 0) {
+      console.log("Pickup lat is 0, skipping");
+      return;
+    }
+
+    console.log("Creating/updating pickup marker at:", pickup);
 
     // Remove existing marker if it exists
     if (pickupMarker.current) {
-      console.log('Removing existing pickup marker');
+      console.log("Removing existing pickup marker");
       pickupMarker.current.remove();
       pickupMarker.current = null;
     }
 
-    console.log('Creating new pickup marker');
+    console.log("Creating new pickup marker");
     // Create custom marker element for pickup (A)
     const el = document.createElement("div");
     el.style.width = "40px";
@@ -88,14 +91,19 @@ export default function BookingMap({
       </svg>
     `;
 
-    pickupMarker.current = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+    pickupMarker.current = new mapboxgl.Marker({
+      element: el,
+      anchor: "bottom",
+    })
       .setLngLat([pickup.lng, pickup.lat])
       .setPopup(
-        new mapboxgl.Popup({ offset: 25 }).setHTML("<strong>Pickup Location</strong>")
+        new mapboxgl.Popup({ offset: 25 }).setHTML(
+          "<strong>Pickup Location</strong>"
+        )
       )
       .addTo(map.current);
-    
-    console.log('Pickup marker added to map', pickupMarker.current);
+
+    console.log("Pickup marker added to map", pickupMarker.current);
 
     updateMapBounds();
   }, [pickup]);
@@ -126,10 +134,15 @@ export default function BookingMap({
       </svg>
     `;
 
-    dropoffMarker.current = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+    dropoffMarker.current = new mapboxgl.Marker({
+      element: el,
+      anchor: "bottom",
+    })
       .setLngLat([dropoff.lng, dropoff.lat])
       .setPopup(
-        new mapboxgl.Popup({ offset: 25 }).setHTML("<strong>Drop-off Location</strong>")
+        new mapboxgl.Popup({ offset: 25 }).setHTML(
+          "<strong>Drop-off Location</strong>"
+        )
       )
       .addTo(map.current);
 

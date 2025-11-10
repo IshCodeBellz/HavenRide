@@ -16,15 +16,29 @@ function DriverPastRidesContent() {
     async function fetchBookings() {
       try {
         const res = await fetch("/api/bookings");
-        const data = await res.json();
-        const myCompletedBookings = data.filter(
+        if (!res.ok) {
+          console.error("Failed to fetch bookings:", res.status, res.statusText);
+          setBookings([]);
+          return;
+        }
+        
+        const text = await res.text();
+        if (!text || text.trim() === '') {
+          console.warn("Empty response from bookings API");
+          setBookings([]);
+          return;
+        }
+        
+        const data = JSON.parse(text);
+        const myCompletedBookings = Array.isArray(data) ? data.filter(
           (b: any) =>
             b.driverId === user?.id &&
             (b.status === "COMPLETED" || b.status === "CANCELED")
-        );
+        ) : [];
         setBookings(myCompletedBookings);
       } catch (e) {
-        console.error(e);
+        console.error("Error fetching bookings:", e);
+        setBookings([]);
       } finally {
         setLoading(false);
       }
@@ -47,28 +61,28 @@ function DriverPastRidesContent() {
   return (
     <div className="px-8 py-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#0F3D3E] mb-2">Past Rides</h1>
-        <p className="text-gray-600">View your completed rides history</p>
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold text-[#0F3D3E] mb-1">Past Rides</h1>
+        <p className="text-sm text-gray-600">View your completed rides history</p>
       </div>
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <div className="text-sm text-gray-600 mb-1">Total Rides</div>
-          <div className="text-2xl font-bold text-[#0F3D3E]">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+        <div className="bg-white rounded-2xl p-4 shadow-sm">
+          <div className="text-xs text-gray-600 mb-1">Total Rides</div>
+          <div className="text-xl font-bold text-[#0F3D3E]">
             {filteredBookings.length}
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <div className="text-sm text-gray-600 mb-1">Total Earnings</div>
-          <div className="text-2xl font-bold text-[#0F3D3E]">
+        <div className="bg-white rounded-2xl p-4 shadow-sm">
+          <div className="text-xs text-gray-600 mb-1">Total Earnings</div>
+          <div className="text-xl font-bold text-[#0F3D3E]">
             £{totalEarnings.toFixed(2)}
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <div className="text-sm text-gray-600 mb-1">Avg Per Ride</div>
-          <div className="text-2xl font-bold text-[#0F3D3E]">
+        <div className="bg-white rounded-2xl p-4 shadow-sm">
+          <div className="text-xs text-gray-600 mb-1">Avg Per Ride</div>
+          <div className="text-xl font-bold text-[#0F3D3E]">
             £
             {filteredBookings.length > 0
               ? (
@@ -82,11 +96,11 @@ function DriverPastRidesContent() {
       </div>
 
       {/* Filter Buttons */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-        <div className="flex gap-3">
+      <div className="bg-white rounded-2xl p-4 shadow-sm mb-4">
+        <div className="flex gap-2">
           <button
             onClick={() => setFilter("all")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               filter === "all"
                 ? "bg-[#00796B] text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -96,18 +110,17 @@ function DriverPastRidesContent() {
           </button>
           <button
             onClick={() => setFilter("completed")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               filter === "completed"
                 ? "bg-[#00796B] text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
-            Completed ({bookings.filter((b) => b.status === "COMPLETED").length}
-            )
+            Completed ({bookings.filter((b) => b.status === "COMPLETED").length})
           </button>
           <button
             onClick={() => setFilter("canceled")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               filter === "canceled"
                 ? "bg-[#00796B] text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -137,11 +150,11 @@ function DriverPastRidesContent() {
           {filteredBookings.map((booking) => (
             <div
               key={booking.id}
-              className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
+              className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow"
             >
-              <div className="flex justify-between items-start mb-4">
+              <div className="flex justify-between items-start mb-3">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-3 mb-2 flex-wrap">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-semibold ${
                         booking.status === "COMPLETED"
@@ -158,14 +171,29 @@ function DriverPastRidesContent() {
                         year: "numeric",
                       })}
                     </span>
+                    {booking.status === "COMPLETED" && booking.documentedAt && (
+                      <>
+                        <span className="text-xs text-gray-400">•</span>
+                        <span className="text-xs text-gray-600">
+                          Completed: {new Date(booking.documentedAt).toLocaleDateString("en-GB", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })} at {new Date(booking.documentedAt).toLocaleTimeString("en-GB", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
                 {booking.finalFareAmount && booking.status === "COMPLETED" && (
                   <div className="text-right">
-                    <div className="text-xs text-gray-500 mb-1">
-                      Your Earnings
+                    <div className="text-xs text-gray-500 mb-0.5">
+                      Earnings
                     </div>
-                    <div className="text-2xl font-bold text-[#0F3D3E]">
+                    <div className="text-xl font-bold text-[#0F3D3E]">
                       £{(booking.finalFareAmount * 0.75).toFixed(2)}
                     </div>
                     <div className="text-xs text-gray-400">
@@ -176,25 +204,25 @@ function DriverPastRidesContent() {
               </div>
 
               {/* Route */}
-              <div className="space-y-3 mb-4">
-                <div className="flex items-start gap-3">
+              <div className="space-y-2 mb-3">
+                <div className="flex items-start gap-2">
                   <div className="mt-1">
-                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
                   </div>
                   <div>
-                    <div className="text-xs text-gray-500 mb-1">Pickup</div>
-                    <div className="font-medium text-gray-900">
+                    <div className="text-xs text-gray-500 mb-0.5">Pickup</div>
+                    <div className="font-medium text-sm text-gray-900">
                       {booking.pickupAddress}
                     </div>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-2">
                   <div className="mt-1">
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
                   </div>
                   <div>
-                    <div className="text-xs text-gray-500 mb-1">Drop-off</div>
-                    <div className="font-medium text-gray-900">
+                    <div className="text-xs text-gray-500 mb-0.5">Drop-off</div>
+                    <div className="font-medium text-sm text-gray-900">
                       {booking.dropoffAddress}
                     </div>
                   </div>
@@ -202,7 +230,7 @@ function DriverPastRidesContent() {
               </div>
 
               {/* Ride Details */}
-              <div className="border-t pt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="border-t pt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
                 {booking.estimatedDistance && (
                   <div>
                     <div className="text-xs text-gray-500 mb-1">Distance</div>
@@ -211,14 +239,25 @@ function DriverPastRidesContent() {
                     </div>
                   </div>
                 )}
-                {booking.estimatedDuration && (
+                {booking.status === "COMPLETED" && booking.documentedAt && booking.createdAt ? (
                   <div>
-                    <div className="text-xs text-gray-500 mb-1">Duration</div>
+                    <div className="text-xs text-gray-500 mb-1">
+                      Ride Duration
+                    </div>
+                    <div className="font-medium">
+                      {Math.round(
+                        (new Date(booking.documentedAt).getTime() - new Date(booking.createdAt).getTime()) / (1000 * 60)
+                      )} min
+                    </div>
+                  </div>
+                ) : booking.estimatedDuration ? (
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">Estimated Duration</div>
                     <div className="font-medium">
                       {booking.estimatedDuration.toFixed(0)} min
                     </div>
                   </div>
-                )}
+                ) : null}
                 {booking.requiresWheelchair && (
                   <div>
                     <div className="text-xs text-gray-500 mb-1">
@@ -239,14 +278,14 @@ function DriverPastRidesContent() {
 
               {/* Your Documentation (if completed) */}
               {booking.status === "COMPLETED" && booking.rideQuality && (
-                <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="text-sm font-semibold text-blue-800 mb-3">
+                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="text-xs font-semibold text-blue-800 mb-2">
                     Your Documentation
                   </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
                     <div>
                       <span className="text-gray-600">Quality:</span>
-                      <span className="ml-2 font-medium capitalize">
+                      <span className="ml-1 font-medium capitalize">
                         {booking.rideQuality}
                       </span>
                       <span className="ml-1">
@@ -258,7 +297,7 @@ function DriverPastRidesContent() {
                     </div>
                     <div>
                       <span className="text-gray-600">Comfort:</span>
-                      <span className="ml-2 font-medium capitalize">
+                      <span className="ml-1 font-medium capitalize">
                         {booking.clientComfort.replace("_", " ")}
                       </span>
                       <span className="ml-1">
@@ -268,25 +307,17 @@ function DriverPastRidesContent() {
                     </div>
                   </div>
                   {(booking.accessibilityNotes || booking.issuesReported) && (
-                    <div className="mt-3 pt-3 border-t border-blue-300 space-y-2">
+                    <div className="mt-2 pt-2 border-t border-blue-300 space-y-1">
                       {booking.accessibilityNotes && (
-                        <div>
-                          <div className="text-xs text-gray-600 mb-1">
-                            Accessibility Notes:
-                          </div>
-                          <div className="text-sm text-gray-700">
-                            {booking.accessibilityNotes}
-                          </div>
+                        <div className="text-xs">
+                          <span className="text-gray-600 font-medium">Accessibility Notes:</span>
+                          <span className="ml-1 text-gray-700">{booking.accessibilityNotes}</span>
                         </div>
                       )}
                       {booking.issuesReported && (
-                        <div>
-                          <div className="text-xs text-gray-600 mb-1">
-                            Issues Reported:
-                          </div>
-                          <div className="text-sm text-gray-700">
-                            {booking.issuesReported}
-                          </div>
+                        <div className="text-xs">
+                          <span className="text-gray-600 font-medium">Issues:</span>
+                          <span className="ml-1 text-gray-700">{booking.issuesReported}</span>
                         </div>
                       )}
                     </div>

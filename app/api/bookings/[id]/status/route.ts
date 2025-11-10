@@ -14,7 +14,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const { status, driverId, riderConfirmed } = await req.json();
+  const { status, driverId } = await req.json();
   if (!status)
     return NextResponse.json({ error: "status required" }, { status: 400 });
 
@@ -23,11 +23,6 @@ export async function POST(
     const driver = await prisma.driver.findUnique({ where: { id: driverId } });
     data.driverId = driverId;
     if (driver?.phone) data.driverPhone = driver.phone;
-  }
-  
-  // Handle rider pickup confirmation
-  if (riderConfirmed !== undefined) {
-    data.riderConfirmed = riderConfirmed;
   }
 
   const booking = await prisma.booking.update({ where: { id }, data });

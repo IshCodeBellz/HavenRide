@@ -32,25 +32,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // TODO: Once SystemNotification model is migrated, use:
-    // const notification = await prisma.systemNotification.create({
-    //   data: {
-    //     title,
-    //     message,
-    //     type: "BROADCAST",
-    //     targetRole: targetRole || "ALL",
-    //     isRead: false,
-    //   },
-    // });
+    // Create system notification
+    const notification = await prisma.systemNotification.create({
+      data: {
+        createdById: userId,
+        title,
+        message,
+        targetRole: targetRole === "ALL" ? null : targetRole,
+        isActive: true,
+      },
+    });
 
     // Optionally integrate with Ably for real-time broadcast
-    // const { publishNotification } = await import("@/lib/realtime/publish");
-    // await publishNotification({
-    //   type: "SYSTEM_BROADCAST",
-    //   title,
-    //   message,
-    //   targetRole,
-    // });
+    try {
+      const { publish } = await import("@/lib/realtime/publish");
+      await publish("notifications", "system_broadcast", {
+        id: notification.id,
+        title,
+        message,
+        targetRole: targetRole || "ALL",
+        createdAt: notification.createdAt,
+      });
+    } catch (error) {
+      console.error("Failed to publish notification via Ably:", error);
+      // Continue even if Ably fails - notification is saved to DB
+    }
 
     return NextResponse.json({
       success: true,

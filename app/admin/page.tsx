@@ -392,6 +392,53 @@ function AdminPageContent() {
             </div>
           </Link>
 
+          {/* Incident Management */}
+          <Link href="/admin/incidents">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
+              <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                <div className="w-12 h-12 bg-[#E0F2F1] rounded-xl flex items-center justify-center group-hover:bg-[#00796B] transition-colors">
+                  <svg
+                    className="w-6 h-6 text-[#00796B] group-hover:text-white transition-colors"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-[#263238]">
+                    Incident Management
+                  </h3>
+                  <p className="text-sm text-neutral-500">
+                    Handle escalated incidents & emergencies
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-neutral-600">View incidents</span>
+                <svg
+                  className="w-5 h-5 text-neutral-400 group-hover:text-[#00796B] group-hover:translate-x-1 transition-all"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </div>
+            </div>
+          </Link>
+
           {/* Dispatcher Management */}
           <Link href="/admin/dispatchers">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">

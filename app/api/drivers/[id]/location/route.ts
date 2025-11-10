@@ -3,10 +3,11 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const driverId = params.id;
+    const { id } = await params;
+    const driverId = id;
 
     const driver = await prisma.driver.findUnique({
       where: { id: driverId },

@@ -22,21 +22,18 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // TODO: Once SupportTicket model is migrated, use:
-    // const tickets = await prisma.supportTicket.findMany({
-    //   include: {
-    //     user: {
-    //       select: {
-    //         name: true,
-    //         email: true,
-    //       },
-    //     },
-    //   },
-    //   orderBy: { createdAt: "desc" },
-    // });
-
-    // Temporary: Return mock data structure
-    const tickets: any[] = [];
+    // Fetch all support tickets
+    const tickets = await prisma.supportTicket.findMany({
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
 
     return NextResponse.json({ tickets });
   } catch (error) {

@@ -9,9 +9,9 @@ export function getRealtime() {
   if (realtime) return realtime;
 
   const key = process.env.NEXT_PUBLIC_ABLY_KEY;
-  
+
   // Check if key is missing or is a placeholder value
-  if (!key || key === 'xxx:yyy' || key.includes('xxx') || key.includes('yyy')) {
+  if (!key || key === "xxx:yyy" || key.includes("xxx") || key.includes("yyy")) {
     console.warn(
       "⚠️ Ably key not configured properly - real-time features disabled. Using polling fallback."
     );

@@ -1,10 +1,18 @@
 "use client";
 import { useState } from "react";
+import { useUser } from "@clerk/nextjs";
 import AppLayout from "@/components/AppLayout";
 import RoleGate from "@/components/RoleGate";
 
 function RiderSupportContent() {
+  const { user } = useUser();
   const [searchQuery, setSearchQuery] = useState("");
+  const [showIssueForm, setShowIssueForm] = useState(false);
+  const [issueType, setIssueType] = useState("OTHER");
+  const [issueSubject, setIssueSubject] = useState("");
+  const [issueDescription, setIssueDescription] = useState("");
+  const [issueBookingId, setIssueBookingId] = useState("");
+  const [submittingIssue, setSubmittingIssue] = useState(false);
 
   const helpArticles = [
     {
@@ -121,7 +129,10 @@ function RiderSupportContent() {
             <button className="w-full border-2 border-[#00796B] text-[#00796B] py-3 rounded-lg font-semibold hover:bg-[#E0F2F1] transition-colors">
               Call Support
             </button>
-            <button className="w-full border-2 border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+            <button
+              onClick={() => setShowIssueForm(true)}
+              className="w-full border-2 border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+            >
               Report an Issue
             </button>
             <p className="text-sm text-gray-600 mt-4 text-center">
@@ -137,6 +148,167 @@ function RiderSupportContent() {
           For emergencies, please use the SOS option on your dashboard.
         </p>
       </div>
+
+      {/* Issue Reporting Modal */}
+      {showIssueForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold text-[#0F3D3E]">
+                Report an Issue
+              </h3>
+              <button
+                onClick={() => {
+                  setShowIssueForm(false);
+                  setIssueType("OTHER");
+                  setIssueSubject("");
+                  setIssueDescription("");
+                  setIssueBookingId("");
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!issueSubject || !issueDescription) {
+                  alert("Please fill in subject and description");
+                  return;
+                }
+
+                try {
+                  setSubmittingIssue(true);
+                  const res = await fetch("/api/riders/issues", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      type: issueType,
+                      subject: issueSubject,
+                      description: issueDescription,
+                      bookingId: issueBookingId || null,
+                      priority: issueType === "SAFETY" ? "URGENT" : "MEDIUM",
+                    }),
+                  });
+
+                  if (res.ok) {
+                    alert("Issue reported successfully! Our team will review it soon.");
+                    setShowIssueForm(false);
+                    setIssueType("OTHER");
+                    setIssueSubject("");
+                    setIssueDescription("");
+                    setIssueBookingId("");
+                  } else {
+                    const errorData = await res.json();
+                    alert(`Failed to report issue: ${errorData.error || "Unknown error"}`);
+                  }
+                } catch (error) {
+                  console.error("Error reporting issue:", error);
+                  alert("Failed to report issue");
+                } finally {
+                  setSubmittingIssue(false);
+                }
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Issue Type *
+                </label>
+                <select
+                  value={issueType}
+                  onChange={(e) => setIssueType(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                >
+                  <option value="LOST_ITEM">Lost Item</option>
+                  <option value="RIDE_ISSUE">Ride Issue</option>
+                  <option value="PAYMENT_ISSUE">Payment Issue</option>
+                  <option value="SAFETY">Safety Concern</option>
+                  <option value="OTHER">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Subject *
+                </label>
+                <input
+                  type="text"
+                  value={issueSubject}
+                  onChange={(e) => setIssueSubject(e.target.value)}
+                  placeholder="Brief description of the issue"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description *
+                </label>
+                <textarea
+                  value={issueDescription}
+                  onChange={(e) => setIssueDescription(e.target.value)}
+                  placeholder="Please provide details about the issue..."
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                  rows={5}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Related Booking ID (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={issueBookingId}
+                  onChange={(e) => setIssueBookingId(e.target.value)}
+                  placeholder="If this issue is related to a specific ride"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowIssueForm(false);
+                    setIssueType("OTHER");
+                    setIssueSubject("");
+                    setIssueDescription("");
+                    setIssueBookingId("");
+                  }}
+                  className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingIssue || !issueSubject || !issueDescription}
+                  className="flex-1 bg-[#00796B] text-white py-2 rounded-lg font-medium hover:bg-[#00695C] disabled:opacity-50"
+                >
+                  {submittingIssue ? "Submitting..." : "Submit Report"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

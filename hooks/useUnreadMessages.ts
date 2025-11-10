@@ -13,6 +13,10 @@ export function useUnreadMessages(
 
   // Fetch messages and count unread
   const fetchUnreadCount = useCallback(async () => {
+    if (!bookingId) {
+      return; // Don't fetch if bookingId is invalid
+    }
+    
     try {
       const res = await fetch(`/api/bookings/${bookingId}/messages`);
       if (res.ok) {
@@ -24,8 +28,18 @@ export function useUnreadMessages(
             new Date(m.createdAt).getTime() > lastReadTimestamp
         ).length;
         setUnreadCount(unread);
+      } else {
+        // Don't log errors for 404s or other expected errors
+        if (res.status !== 404) {
+          console.error("Failed to fetch unread count:", res.status, res.statusText);
+        }
       }
     } catch (error) {
+      // Only log if it's not a network error (which might be expected)
+      if (error instanceof TypeError && error.message === "Failed to fetch") {
+        // Network error - might be offline or API down, don't spam console
+        return;
+      }
       console.error("Failed to fetch unread count:", error);
     }
   }, [bookingId, sender, lastReadTimestamp]);

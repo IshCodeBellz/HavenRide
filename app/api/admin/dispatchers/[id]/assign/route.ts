@@ -36,28 +36,33 @@ export async function POST(
       );
     }
 
-    // TODO: Once Dispatcher model is migrated, use:
-    // const dispatcher = await prisma.dispatcher.update({
-    //   where: { id: dispatcherId },
-    //   data: {
-    //     ...(region && { region }),
-    //     ...(shift && { shift }),
-    //   },
-    //   include: {
-    //     user: {
-    //       select: { name: true, email: true },
-    //     },
-    //   },
-    // });
+    // Update dispatcher assignment
+    const updateData: any = {};
+    if (region) updateData.region = region;
+    if (shift) updateData.shift = shift;
 
-    // For now, return success message
+    // Ensure dispatcher record exists (create if doesn't exist)
+    const dispatcher = await prisma.dispatcher.upsert({
+      where: { id: dispatcherId },
+      update: updateData,
+      create: {
+        id: dispatcherId,
+        ...updateData,
+      },
+      include: {
+        user: {
+          select: { name: true, email: true },
+        },
+      },
+    });
+
     return NextResponse.json({
       success: true,
       message: "Dispatcher assignment updated successfully",
       assignment: {
-        dispatcherId,
-        region: region || "Unassigned",
-        shift: shift || "Not set",
+        dispatcherId: dispatcher.id,
+        region: dispatcher.region || null,
+        shift: dispatcher.shift || null,
       },
     });
   } catch (error) {

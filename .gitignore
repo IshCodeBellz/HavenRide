@@ -30,3 +30,7 @@ coverage
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# User uploads
+/public/uploads/
+/public/uploads/documents/

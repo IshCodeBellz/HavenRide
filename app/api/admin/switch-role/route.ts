@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     `;
 
     const userData = currentUser[0];
-    
+
     // Admin status is preserved via isAdmin field, allowing role switching freedom
     if (!userData?.isAdmin && userData?.role !== "ADMIN") {
       console.error("Role switch denied:", {

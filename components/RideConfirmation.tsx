@@ -3,7 +3,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import ChatWidget from "./ChatWidget";
+import SOSButton from "./SOSButton";
+import MapboxNavigation from "./MapboxNavigation";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import { useUser } from "@clerk/nextjs";
 
 // Dynamically import map component to avoid SSR issues
 const DynamicMap = dynamic(() => import("./DriverLocationMap"), {
@@ -62,12 +65,28 @@ export default function RideConfirmation({
   onCancel,
 }: RideConfirmationProps) {
   const router = useRouter();
+  
+  // Validate booking data early
+  if (!booking || !booking.id) {
+    return (
+      <div className="p-4 text-center">
+        <p className="text-red-600">Invalid booking data. Please refresh the page.</p>
+      </div>
+    );
+  }
+  
   const [driverETA, setDriverETA] = useState<number>(5); // ETA to pickup in minutes
   const [estimatedArrival, setEstimatedArrival] = useState<number>(
     booking.estimatedDuration || 8
   );
   const [showChat, setShowChat] = useState(false);
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false); // For mobile drawer
+  const [showNavigation, setShowNavigation] = useState(false); // For Mapbox Navigation
+  const [navigationDestination, setNavigationDestination] = useState<{
+    lat: number;
+    lng: number;
+    name: string;
+  } | null>(null);
   const [currentDriverLocation, setCurrentDriverLocation] = useState<{
     lat: number;
     lng: number;
@@ -76,7 +95,36 @@ export default function RideConfirmation({
       ? { lat: booking.driver.lastLat, lng: booking.driver.lastLng }
       : null
   );
-  const { unreadCount, markAsRead } = useUnreadMessages(booking.id, userRole);
+  // Only fetch unread messages if booking ID is valid
+  const { unreadCount, markAsRead } = useUnreadMessages(
+    booking?.id || "", 
+    userRole
+  );
+  
+  // Fetch payment methods for rider
+  const { user } = useUser();
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("");
+  
+  useEffect(() => {
+    if (userRole === "RIDER" && user?.id) {
+      fetch("/api/riders/payment-methods")
+        .then((res) => res.json())
+        .then((methods) => {
+          setPaymentMethods(methods);
+          // Set default payment method
+          const defaultMethod = methods.find((m: any) => m.isDefault);
+          if (defaultMethod) {
+            setSelectedPaymentMethod(defaultMethod.id);
+          } else if (methods.length > 0) {
+            setSelectedPaymentMethod(methods[0].id);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching payment methods:", error);
+        });
+    }
+  }, [userRole, user?.id]);
 
   // Calculate distance between two coordinates (Haversine formula)
   const calculateDistance = (
@@ -100,40 +148,74 @@ export default function RideConfirmation({
 
   // Fetch real-time driver location and recalculate ETA
   useEffect(() => {
-    if (!booking.driverId || !booking.pickupLat || !booking.pickupLng) {
-      console.log("Missing data for driver location:", {
-        driverId: booking.driverId,
-        pickupLat: booking.pickupLat,
-        pickupLng: booking.pickupLng,
-      });
+    if (!booking.driverId) {
+      return;
+    }
+
+    // For IN_PROGRESS, need dropoff coordinates; otherwise need pickup coordinates
+    const needsPickup = booking.status !== "IN_PROGRESS";
+    const needsDropoff = booking.status === "IN_PROGRESS";
+    
+    if (needsPickup && (!booking.pickupLat || !booking.pickupLng)) {
+      console.log("Missing pickup data for driver location");
+      return;
+    }
+    
+    if (needsDropoff && (!booking.dropoffLat || !booking.dropoffLng)) {
+      console.log("Missing dropoff data for driver location");
       return;
     }
 
     const fetchDriverLocation = async () => {
       try {
-        const response = await fetch(`/api/drivers/${booking.driverId}/location`);
+        const response = await fetch(
+          `/api/drivers/${booking.driverId}/location`
+        );
         if (response.ok) {
           const data = await response.json();
           console.log("Driver location fetched:", data);
-          
+
           if (data.lastLat && data.lastLng) {
             setCurrentDriverLocation({
               lat: data.lastLat,
               lng: data.lastLng,
             });
 
-            // Recalculate ETA with real driver location
-            const distance = calculateDistance(
-              data.lastLat,
-              data.lastLng,
-              booking.pickupLat,
-              booking.pickupLng
-            );
+            // Calculate ETA based on trip status
+            let distance: number;
+            let targetLat: number;
+            let targetLng: number;
+            
+            if (booking.status === "IN_PROGRESS" && booking.dropoffLat && booking.dropoffLng) {
+              // Calculate ETA to destination (dropoff)
+              distance = calculateDistance(
+                data.lastLat,
+                data.lastLng,
+                booking.dropoffLat,
+                booking.dropoffLng
+              );
+              targetLat = booking.dropoffLat;
+              targetLng = booking.dropoffLng;
+            } else if (booking.pickupLat && booking.pickupLng) {
+              // Calculate ETA to pickup
+              distance = calculateDistance(
+                data.lastLat,
+                data.lastLng,
+                booking.pickupLat,
+                booking.pickupLng
+              );
+              targetLat = booking.pickupLat;
+              targetLng = booking.pickupLng;
+            } else {
+              return;
+            }
 
             // Assume average speed of 30 km/h in city traffic
             const etaMinutes = (distance / 30) * 60;
             const calculatedETA = Math.max(1, Math.round(etaMinutes));
             console.log("Calculated ETA:", {
+              status: booking.status,
+              target: booking.status === "IN_PROGRESS" ? "dropoff" : "pickup",
               distance: distance.toFixed(2) + " km",
               eta: calculatedETA + " min",
             });
@@ -156,11 +238,24 @@ export default function RideConfirmation({
     const interval = setInterval(fetchDriverLocation, 5000);
 
     return () => clearInterval(interval);
-  }, [booking.driverId, booking.pickupLat, booking.pickupLng]);
+  }, [booking.driverId, booking.pickupLat, booking.pickupLng, booking.dropoffLat, booking.dropoffLng, booking.status]);
 
   const totalAmount = booking.priceEstimate?.amount || 10.8;
   const currency = booking.priceEstimate?.currency || "GBP";
   const symbol = currency === "GBP" ? "£" : "€";
+
+  // Debug: Log what's being passed to the map
+  useEffect(() => {
+    console.log("RideConfirmation - Map Props:", {
+      pickupLat: booking.pickupLat,
+      pickupLng: booking.pickupLng,
+      dropoffLat: booking.dropoffLat,
+      dropoffLng: booking.dropoffLng,
+      currentDriverLocation,
+      bookingDriverLat: booking.driver?.lastLat,
+      bookingDriverLng: booking.driver?.lastLng,
+    });
+  }, [booking, currentDriverLocation]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -177,15 +272,23 @@ export default function RideConfirmation({
       <div className="lg:hidden flex-1 relative">
         {/* Full-screen Map */}
         <div className="absolute inset-0">
-          <DynamicMap
-            pickupLat={booking.pickupLat}
-            pickupLng={booking.pickupLng}
-            dropoffLat={booking.dropoffLat}
-            dropoffLng={booking.dropoffLng}
-            driverLat={booking.driver?.lastLat}
-            driverLng={booking.driver?.lastLng}
-            driverId={booking.driverId}
-          />
+          {booking.pickupLat && booking.pickupLng && booking.dropoffLat && booking.dropoffLng ? (
+            <DynamicMap
+              key={`${booking.id}-${booking.status}`}
+              pickupLat={booking.pickupLat}
+              pickupLng={booking.pickupLng}
+              dropoffLat={booking.dropoffLat}
+              dropoffLng={booking.dropoffLng}
+              driverLat={currentDriverLocation?.lat}
+              driverLng={currentDriverLocation?.lng}
+              driverId={booking.driverId}
+              status={booking.status}
+            />
+          ) : (
+            <div className="h-full w-full bg-gray-100 flex items-center justify-center">
+              <p className="text-gray-500">Map location data not available</p>
+            </div>
+          )}
 
           {/* Driver ETA Overlay for Riders */}
           {userRole === "RIDER" && booking.driver && (
@@ -203,48 +306,92 @@ export default function RideConfirmation({
                   </div>
                   <div>
                     <p className="font-bold text-sm">
-                      {booking.driver.user.name || "Driver"} is on the way
+                      {booking.status === "IN_PROGRESS"
+                        ? "Dropoff Location"
+                        : `${booking.driver.user.name || "Driver"} is on the way`}
                     </p>
+                    {booking.status === "IN_PROGRESS" && (
+                      <p className="text-xs opacity-90">
+                        {booking.dropoffAddress.split(",")[0]}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-2xl font-bold">{Math.round(driverETA)}</p>
-                  <p className="text-xs opacity-90">min away</p>
+                  <p className="text-xs opacity-90">
+                    {booking.status === "IN_PROGRESS" ? "min to destination" : "min away"}
+                  </p>
                 </div>
               </div>
             </div>
           )}
 
           {/* Driver Distance Overlay - for Drivers */}
-          {userRole === "DRIVER" && currentDriverLocation && booking.pickupLat && booking.pickupLng && (
-            <div className="absolute top-4 left-4 right-4 bg-gradient-to-r from-[#00796B] to-[#0F3D3E] text-white rounded-lg shadow-lg p-3 z-10">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                    <svg className="w-6 h-6 text-[#00796B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
+          {userRole === "DRIVER" &&
+            currentDriverLocation &&
+            ((booking.status === "IN_PROGRESS" && booking.dropoffLat && booking.dropoffLng) ||
+             (booking.status !== "IN_PROGRESS" && booking.pickupLat && booking.pickupLng)) && (
+              <div className="absolute top-4 left-4 right-4 bg-gradient-to-r from-[#00796B] to-[#0F3D3E] text-white rounded-lg shadow-lg p-3 z-10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                      <svg
+                        className="w-6 h-6 text-[#00796B]"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm">
+                        {booking.status === "IN_PROGRESS" ? "Dropoff Location" : "Pickup Location"}
+                      </p>
+                      <p className="text-xs opacity-90">
+                        {booking.status === "IN_PROGRESS" 
+                          ? booking.dropoffAddress.split(",")[0]
+                          : booking.pickupAddress.split(",")[0]}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-bold text-sm">Pickup Location</p>
-                    <p className="text-xs opacity-90">{booking.pickupAddress.split(",")[0]}</p>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">
+                      {booking.status === "IN_PROGRESS" && booking.dropoffLat && booking.dropoffLng
+                        ? calculateDistance(
+                            currentDriverLocation.lat,
+                            currentDriverLocation.lng,
+                            booking.dropoffLat,
+                            booking.dropoffLng
+                          ).toFixed(1)
+                        : booking.pickupLat && booking.pickupLng
+                        ? calculateDistance(
+                            currentDriverLocation.lat,
+                            currentDriverLocation.lng,
+                            booking.pickupLat,
+                            booking.pickupLng
+                          ).toFixed(1)
+                        : "0.0"}
+                    </p>
+                    <p className="text-xs opacity-90">
+                      {booking.status === "IN_PROGRESS" ? `${Math.round(driverETA)} min ETA` : "km away"}
+                    </p>
                   </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold">
-                    {calculateDistance(
-                      currentDriverLocation.lat,
-                      currentDriverLocation.lng,
-                      booking.pickupLat,
-                      booking.pickupLng
-                    ).toFixed(1)}
-                  </p>
-                  <p className="text-xs opacity-90">km away</p>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Route Information - Minimal on mobile */}
           <div className="absolute bottom-20 left-4 right-4 bg-white rounded-lg shadow-lg p-3 space-y-2 z-10">
@@ -253,7 +400,9 @@ export default function RideConfirmation({
                 <div className="w-2 h-2 bg-white rounded-full"></div>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-[#0F3D3E] text-xs">Pickup location</p>
+                <p className="font-medium text-[#0F3D3E] text-xs">
+                  Pickup location
+                </p>
                 <p className="text-xs text-gray-600 truncate">
                   {booking.pickupAddress.split(",")[0]}
                 </p>
@@ -261,22 +410,36 @@ export default function RideConfirmation({
             </div>
             <div className="flex items-start gap-2">
               <div className="w-6 h-6 bg-[#0F3D3E] rounded-full flex items-center justify-center flex-shrink-0">
-                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-3 h-3 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={3}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-[#0F3D3E] text-xs">{booking.dropoffAddress.split(",")[0]}</p>
-                <p className="text-xs text-gray-600">Total trip: {Math.round(estimatedArrival)} mins</p>
+                <p className="font-medium text-[#0F3D3E] text-xs">
+                  {booking.dropoffAddress.split(",")[0]}
+                </p>
+                <p className="text-xs text-gray-600">
+                  Total trip: {Math.round(estimatedArrival)} mins
+                </p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Floating Bottom Drawer */}
-        <div 
+        <div
           className={`absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl transition-all duration-300 ease-in-out z-20 ${
-            isDetailsExpanded ? 'h-[85vh]' : 'h-auto'
+            isDetailsExpanded ? "h-[85vh]" : "h-auto"
           }`}
         >
           {/* Drawer Handle */}
@@ -287,13 +450,18 @@ export default function RideConfirmation({
             <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
             <svg
               className={`w-5 h-5 text-gray-400 transition-transform ${
-                isDetailsExpanded ? 'rotate-180' : ''
+                isDetailsExpanded ? "rotate-180" : ""
               }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
 
@@ -312,8 +480,29 @@ export default function RideConfirmation({
                       ? "Haven Accessible"
                       : booking.rider?.user.name || "Rider"}
                   </h2>
+                  {userRole === "RIDER" && booking.driver?.rating && (
+                    <div className="flex items-center gap-1 mb-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <span
+                          key={i}
+                          className={`text-xs ${
+                            i < Math.round(booking.driver.rating)
+                              ? "text-yellow-400"
+                              : "text-gray-300"
+                          }`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                      <span className="text-xs text-gray-500 ml-1">
+                        {booking.driver.rating.toFixed(1)}
+                      </span>
+                    </div>
+                  )}
                   <p className="text-sm text-gray-600">
-                    {symbol}{Math.floor(totalAmount)}-{Math.ceil(totalAmount)} • {Math.round(estimatedArrival)} min
+                    {symbol}
+                    {Math.floor(totalAmount)}-{Math.ceil(totalAmount)} •{" "}
+                    {Math.round(estimatedArrival)} min
                   </p>
                 </div>
               </div>
@@ -334,24 +523,72 @@ export default function RideConfirmation({
                   )}
                 </button>
                 <button
-                  onClick={() => {
-                    if (userRole === "DRIVER" && booking.pickupLat && booking.pickupLng) {
-                      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                  onClick={async () => {
+                    if (
+                      userRole === "DRIVER" &&
+                      booking.pickupLat &&
+                      booking.pickupLng
+                    ) {
+                      const isIOS = /iPad|iPhone|iPod/.test(
+                        navigator.userAgent
+                      );
                       let destination;
-                      if (booking.status === "ASSIGNED" || booking.status === "EN_ROUTE") {
+                      
+                      if (
+                        booking.status === "ASSIGNED" ||
+                        booking.status === "EN_ROUTE"
+                      ) {
                         destination = `${booking.pickupLat},${booking.pickupLng}`;
-                      } else if (booking.status === "ARRIVED" && booking.dropoffLat && booking.dropoffLng) {
-                        destination = `${booking.dropoffLat},${booking.dropoffLng}`;
-                      }
-                      if (destination) {
-                        if (isIOS) {
-                          window.open(`maps://maps.apple.com/?daddr=${destination}&dirflg=d`, "_blank");
-                        } else {
-                          window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`, "_blank");
-                        }
+                      } else                     if (
+                      booking.status === "ARRIVED" &&
+                      booking.dropoffLat &&
+                      booking.dropoffLng
+                    ) {
+                      // For ARRIVED status, PIN verification happens in onConfirm
+                      // No navigation on "Arrived" button click
+                      destination = null;
+                    } else if (
+                      booking.status === "IN_PROGRESS" &&
+                      booking.dropoffLat &&
+                      booking.dropoffLng
+                    ) {
+                      // Navigate to dropoff location (after PIN verified)
+                      destination = `${booking.dropoffLat},${booking.dropoffLng}`;
+                    }
+
+                    // For IN_PROGRESS, start Mapbox Navigation
+                    if (booking.status === "IN_PROGRESS" && destination && booking.dropoffLat && booking.dropoffLng) {
+                      setNavigationDestination({
+                        lat: booking.dropoffLat,
+                        lng: booking.dropoffLng,
+                        name: booking.dropoffAddress.split(",")[0],
+                      });
+                      setShowNavigation(true);
+                      return; // Don't call onConfirm for IN_PROGRESS
+                    }
+
+                    // Call onConfirm for status transitions (ASSIGNED -> EN_ROUTE -> ARRIVED)
+                    if (onConfirm) {
+                      await onConfirm();
+                    }
+
+                    // Open Mapbox Navigation for ASSIGNED/EN_ROUTE after status update
+                    if (destination && (booking.status === "ASSIGNED" || booking.status === "EN_ROUTE")) {
+                      if (booking.pickupLat && booking.pickupLng) {
+                        // Small delay to ensure status is updated after onConfirm
+                        setTimeout(() => {
+                          setNavigationDestination({
+                            lat: booking.pickupLat!,
+                            lng: booking.pickupLng!,
+                            name: booking.pickupAddress.split(",")[0],
+                          });
+                          setShowNavigation(true);
+                        }, 500);
                       }
                     }
-                    onConfirm?.();
+                    } else {
+                      onConfirm?.();
+                    }
                   }}
                   className="flex-1 bg-[#00796B] text-white py-3 rounded-lg font-semibold text-sm"
                 >
@@ -361,6 +598,10 @@ export default function RideConfirmation({
                     ? "Navigate"
                     : booking.status === "EN_ROUTE"
                     ? "Arrived"
+                    : booking.status === "ARRIVED"
+                    ? "Verify PIN & Start Trip"
+                    : booking.status === "IN_PROGRESS"
+                    ? "Navigate to Dropoff"
                     : "Start Trip"}
                 </button>
               </div>
@@ -385,31 +626,64 @@ export default function RideConfirmation({
                         : booking.rider?.user.name || "Rider"}
                     </h2>
                     {userRole === "RIDER" && (
-                      <p className="text-gray-600 text-sm">
-                        {booking.driver?.user.name || "Your driver"}
-                      </p>
+                      <div>
+                        <p className="text-gray-600 text-sm">
+                          {booking.driver?.user.name || "Your driver"}
+                        </p>
+                        {booking.driver?.rating && (
+                          <div className="flex items-center gap-1 mt-1">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <span
+                                key={i}
+                                className={`text-sm ${
+                                  i < Math.round(booking.driver.rating)
+                                    ? "text-yellow-400"
+                                    : "text-gray-300"
+                                }`}
+                              >
+                                ★
+                              </span>
+                            ))}
+                            <span className="text-xs text-gray-500 ml-1">
+                              {booking.driver.rating.toFixed(1)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-3xl font-bold text-[#0F3D3E]">
-                      {symbol}{Math.floor(totalAmount)}-{Math.ceil(totalAmount)}
-                    </p>
-                    <p className="text-gray-600 text-sm">{Math.round(estimatedArrival)} min</p>
+                {/* PIN Display (where price was) - Only show if not verified and not IN_PROGRESS */}
+                {userRole === "RIDER" && booking.pinCode && booking.status !== "IN_PROGRESS" && !booking.pickupVerified && (
+                  <div className="mb-4 p-4 bg-[#E0F2F1] border-2 border-[#00796B] rounded-xl text-center">
+                    <div className="text-sm text-[#00796B] font-semibold mb-1">
+                      Your Pickup PIN
+                    </div>
+                    <div className="text-3xl font-bold text-[#0F3D3E] tracking-wider">
+                      {booking.pinCode}
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1">
+                      Share this with your driver
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Price removed from here - will be under payment method */}
 
                 {userRole === "RIDER" && booking.driver && (
                   <div className="space-y-2 text-sm pb-4 border-b">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Vehicle make</span>
-                      <span className="font-medium">{booking.driver.vehicleMake || "Toyota"}</span>
+                      <span className="font-medium">
+                        {booking.driver.vehicleMake || "Toyota"}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">License</span>
-                      <span className="font-medium">{booking.driver.vehiclePlate || "ABC123"}</span>
+                      <span className="font-medium">
+                        {booking.driver.vehiclePlate || "ABC123"}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -417,11 +691,15 @@ export default function RideConfirmation({
                 <div className="space-y-2 text-sm pb-4 border-b">
                   <div className="flex items-center gap-2">
                     <span className="text-gray-600">Wheelchair access:</span>
-                    <span className="font-medium">{booking.requiresWheelchair ? "Yes" : "No"}</span>
+                    <span className="font-medium">
+                      {booking.requiresWheelchair ? "Yes" : "No"}
+                    </span>
                   </div>
                   {userRole === "DRIVER" && (
                     <div className="flex items-center gap-2">
-                      <span className="text-gray-600">Assistance required:</span>
+                      <span className="text-gray-600">
+                        Assistance required:
+                      </span>
                       <span className="font-medium">Yes</span>
                     </div>
                   )}
@@ -429,14 +707,37 @@ export default function RideConfirmation({
 
                 {userRole === "RIDER" && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
-                    <select className="w-full border border-gray-300 rounded-lg px-4 py-2">
-                      <option>Card ending in 2483</option>
-                    </select>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Payment Method
+                    </label>
+                    {paymentMethods.length > 0 ? (
+                      <select 
+                        value={selectedPaymentMethod}
+                        onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                      >
+                        {paymentMethods.map((method) => (
+                          <option key={method.id} value={method.id}>
+                            {method.brand} ending in {method.last4}
+                            {method.isDefault ? " (Default)" : ""}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-500">
+                        No payment methods saved
+                      </div>
+                    )}
+                    {/* Price moved here - smaller */}
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-600">
+                        {symbol} {Math.floor(totalAmount)}-{Math.ceil(totalAmount)} • {Math.round(estimatedArrival)} min
+                      </p>
+                    </div>
                   </div>
                 )}
 
-                <div className="flex gap-3 pt-4">
+                <div className={`flex gap-3 pt-4 ${userRole === "DRIVER" && booking.status === "IN_PROGRESS" ? "flex-col" : ""}`}>
                   {onCancel && booking.status !== "IN_PROGRESS" && (
                     <button
                       onClick={onCancel}
@@ -446,24 +747,71 @@ export default function RideConfirmation({
                     </button>
                   )}
                   <button
-                    onClick={() => {
-                      if (userRole === "DRIVER" && booking.pickupLat && booking.pickupLng) {
-                        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                    onClick={async () => {
+                      if (
+                        userRole === "DRIVER" &&
+                        booking.pickupLat &&
+                        booking.pickupLng
+                      ) {
+                        const isIOS = /iPad|iPhone|iPod/.test(
+                          navigator.userAgent
+                        );
                         let destination;
-                        if (booking.status === "ASSIGNED" || booking.status === "EN_ROUTE") {
+                        
+                        if (
+                          booking.status === "ASSIGNED" ||
+                          booking.status === "EN_ROUTE"
+                        ) {
                           destination = `${booking.pickupLat},${booking.pickupLng}`;
-                        } else if (booking.status === "ARRIVED" && booking.dropoffLat && booking.dropoffLng) {
+                        } else if (
+                          booking.status === "ARRIVED" &&
+                          booking.dropoffLat &&
+                          booking.dropoffLng
+                        ) {
+                          // For ARRIVED status, PIN verification happens in onConfirm
+                          // No navigation on "I've Arrived" button click
+                          destination = null;
+                        } else if (
+                          booking.status === "IN_PROGRESS" &&
+                          booking.dropoffLat &&
+                          booking.dropoffLng
+                        ) {
+                          // Navigate to dropoff location (after PIN verified)
                           destination = `${booking.dropoffLat},${booking.dropoffLng}`;
                         }
-                        if (destination) {
-                          if (isIOS) {
-                            window.open(`maps://maps.apple.com/?daddr=${destination}&dirflg=d`, "_blank");
-                          } else {
-                            window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`, "_blank");
+
+                        // Call onConfirm first (which handles PIN verification for ARRIVED status)
+                        if (onConfirm) {
+                          await onConfirm();
+                        }
+
+                        // Only start navigation for specific statuses, not for ARRIVED
+                        if (destination && booking.status === "IN_PROGRESS") {
+                          if (booking.dropoffLat && booking.dropoffLng) {
+                            setNavigationDestination({
+                              lat: booking.dropoffLat,
+                              lng: booking.dropoffLng,
+                              name: booking.dropoffAddress.split(",")[0],
+                            });
+                            setShowNavigation(true);
+                          }
+                        } else if (destination && (booking.status === "ASSIGNED" || booking.status === "EN_ROUTE")) {
+                          // For ASSIGNED/EN_ROUTE, start Mapbox Navigation to pickup location
+                          if (booking.pickupLat && booking.pickupLng) {
+                            // Small delay to ensure status is updated after onConfirm
+                            setTimeout(() => {
+                              setNavigationDestination({
+                                lat: booking.pickupLat!,
+                                lng: booking.pickupLng!,
+                                name: booking.pickupAddress.split(",")[0],
+                              });
+                              setShowNavigation(true);
+                            }, 500);
                           }
                         }
+                      } else {
+                        onConfirm?.();
                       }
-                      onConfirm?.();
                     }}
                     className="flex-1 bg-[#00796B] text-white py-3 rounded-lg font-semibold"
                   >
@@ -474,9 +822,42 @@ export default function RideConfirmation({
                       : booking.status === "EN_ROUTE"
                       ? "I've Arrived"
                       : booking.status === "ARRIVED"
-                      ? "Start Trip"
+                      ? "Verify PIN & Start Trip"
+                      : booking.status === "IN_PROGRESS"
+                      ? "Navigate to Dropoff"
                       : "Continue"}
                   </button>
+                  {userRole === "DRIVER" && booking.status === "IN_PROGRESS" && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log("Complete Ride button clicked, booking status:", booking.status);
+                        console.log("onConfirm available:", !!onConfirm);
+                        if (onConfirm) {
+                          onConfirm();
+                        } else {
+                          console.error("onConfirm handler is not available");
+                        }
+                      }}
+                      className="w-full bg-[#0F3D3E] text-white py-3 rounded-lg font-semibold hover:bg-[#0a2d2e] transition-colors flex items-center justify-center gap-2"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      Complete Ride
+                    </button>
+                  )}
                 </div>
 
                 <button
@@ -518,23 +899,48 @@ export default function RideConfirmation({
                     : booking.rider?.user.name || "Rider"}
                 </h2>
                 {userRole === "RIDER" && (
-                  <p className="text-gray-600">
-                    {booking.driver?.user.name || "Your driver"}
-                  </p>
+                  <div>
+                    <p className="text-gray-600">
+                      {booking.driver?.user.name || "Your driver"}
+                    </p>
+                    {booking.driver?.rating && (
+                      <div className="flex items-center gap-1 mt-1">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <span
+                            key={i}
+                            className={`text-base ${
+                              i < Math.round(booking.driver.rating)
+                                ? "text-yellow-400"
+                                : "text-gray-300"
+                            }`}
+                          >
+                            ★
+                          </span>
+                        ))}
+                        <span className="text-sm text-gray-500 ml-1">
+                          {booking.driver.rating.toFixed(1)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div>
-                <p className="text-3xl font-bold text-[#0F3D3E]">
-                  {symbol} {Math.floor(totalAmount)}-{Math.ceil(totalAmount)}
-                </p>
-                <p className="text-gray-600 text-sm">
-                  {Math.round(estimatedArrival)} min
-                </p>
+            {/* PIN Display (where price was) - Only show if not verified and not IN_PROGRESS */}
+            {userRole === "RIDER" && booking.pinCode && booking.status !== "IN_PROGRESS" && !booking.pickupVerified && (
+              <div className="mb-6 p-4 bg-[#E0F2F1] border-2 border-[#00796B] rounded-xl text-center">
+                <div className="text-sm text-[#00796B] font-semibold mb-1">
+                  Your Pickup PIN
+                </div>
+                <div className="text-3xl font-bold text-[#0F3D3E] tracking-wider">
+                  {booking.pinCode}
+                </div>
+                <div className="text-xs text-gray-600 mt-1">
+                  Share this with your driver
+                </div>
               </div>
-            </div>
+            )}
 
             {userRole === "RIDER" && booking.driver && (
               <div className="space-y-2 text-sm">
@@ -573,13 +979,34 @@ export default function RideConfirmation({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Payment Method
                 </label>
-                <select className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]">
-                  <option>Card ending in 2483</option>
-                </select>
+                {paymentMethods.length > 0 ? (
+                  <select 
+                    value={selectedPaymentMethod}
+                    onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                  >
+                    {paymentMethods.map((method) => (
+                      <option key={method.id} value={method.id}>
+                        {method.brand} ending in {method.last4}
+                        {method.isDefault ? " (Default)" : ""}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-500">
+                    No payment methods saved
+                  </div>
+                )}
+                {/* Price moved here - smaller */}
+                <div className="mt-2">
+                  <p className="text-sm text-gray-600">
+                    {symbol} {Math.floor(totalAmount)}-{Math.ceil(totalAmount)} • {Math.round(estimatedArrival)} min
+                  </p>
+                </div>
               </div>
             )}
 
-            <div className="flex gap-3 mt-6">
+            <div className={`flex gap-3 mt-6 ${userRole === "DRIVER" && booking.status === "IN_PROGRESS" ? "flex-col" : ""}`}>
               {onCancel && booking.status !== "IN_PROGRESS" && (
                 <button
                   onClick={onCancel}
@@ -589,7 +1016,7 @@ export default function RideConfirmation({
                 </button>
               )}
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (
                     userRole === "DRIVER" &&
                     booking.pickupLat &&
@@ -610,27 +1037,50 @@ export default function RideConfirmation({
                       booking.dropoffLat &&
                       booking.dropoffLng
                     ) {
-                      // Navigate to dropoff location
+                      // For ARRIVED status, PIN verification happens in onConfirm
+                      // No navigation on "I've Arrived" button click
+                      destination = null;
+                    } else if (
+                      booking.status === "IN_PROGRESS" &&
+                      booking.dropoffLat &&
+                      booking.dropoffLng
+                    ) {
+                      // Navigate to dropoff location (after PIN verified)
                       destination = `${booking.dropoffLat},${booking.dropoffLng}`;
                     }
 
-                    if (destination) {
-                      if (isIOS) {
-                        // Open Apple Maps on iOS
-                        window.open(
-                          `maps://maps.apple.com/?daddr=${destination}&dirflg=d`,
-                          "_blank"
-                        );
-                      } else {
-                        // Open Google Maps on other platforms
-                        window.open(
-                          `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`,
-                          "_blank"
-                        );
+                    // Call onConfirm first (which handles PIN verification for ARRIVED status)
+                    if (onConfirm) {
+                      await onConfirm();
+                    }
+
+                    // Only start navigation for specific statuses, not for ARRIVED
+                    if (destination && booking.status === "IN_PROGRESS") {
+                      if (booking.dropoffLat && booking.dropoffLng) {
+                        setNavigationDestination({
+                          lat: booking.dropoffLat,
+                          lng: booking.dropoffLng,
+                          name: booking.dropoffAddress.split(",")[0],
+                        });
+                        setShowNavigation(true);
+                      }
+                    } else if (destination && (booking.status === "ASSIGNED" || booking.status === "EN_ROUTE")) {
+                      // For ASSIGNED/EN_ROUTE, start Mapbox Navigation to pickup location
+                      if (booking.pickupLat && booking.pickupLng) {
+                        // Small delay to ensure status is updated after onConfirm
+                        setTimeout(() => {
+                          setNavigationDestination({
+                            lat: booking.pickupLat!,
+                            lng: booking.pickupLng!,
+                            name: booking.pickupAddress.split(",")[0],
+                          });
+                          setShowNavigation(true);
+                        }, 500);
                       }
                     }
+                  } else {
+                    onConfirm?.();
                   }
-                  onConfirm?.();
                 }}
                 className="flex-1 bg-[#00796B] text-white py-3 rounded-lg font-semibold hover:bg-[#00695C] transition-colors flex items-center justify-center gap-2"
               >
@@ -656,9 +1106,42 @@ export default function RideConfirmation({
                   : booking.status === "EN_ROUTE"
                   ? "I've Arrived"
                   : booking.status === "ARRIVED"
-                  ? "Start Trip"
+                  ? "Verify PIN & Start Trip"
+                  : booking.status === "IN_PROGRESS"
+                  ? "Navigate to Dropoff"
                   : "Continue"}
               </button>
+              {userRole === "DRIVER" && booking.status === "IN_PROGRESS" && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log("Complete Ride button clicked (desktop), booking status:", booking.status);
+                    console.log("onConfirm available:", !!onConfirm);
+                    if (onConfirm) {
+                      onConfirm();
+                    } else {
+                      console.error("onConfirm handler is not available");
+                    }
+                  }}
+                  className="w-full bg-[#0F3D3E] text-white py-3 rounded-lg font-semibold hover:bg-[#0a2d2e] transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  Complete Ride
+                </button>
+              )}
             </div>
 
             {/* Chat Button */}
@@ -697,13 +1180,15 @@ export default function RideConfirmation({
           <div className="relative h-full min-h-[500px]">
             {/* Map with driver location */}
             <DynamicMap
+              key={`${booking.id}-${booking.status}`}
               pickupLat={booking.pickupLat}
               pickupLng={booking.pickupLng}
               dropoffLat={booking.dropoffLat}
               dropoffLng={booking.dropoffLng}
-              driverLat={booking.driver?.lastLat}
-              driverLng={booking.driver?.lastLng}
+              driverLat={currentDriverLocation?.lat}
+              driverLng={currentDriverLocation?.lng}
               driverId={booking.driverId}
+              status={booking.status}
             />
 
             {/* Driver ETA Overlay for Riders */}
@@ -722,12 +1207,14 @@ export default function RideConfirmation({
                     </div>
                     <div>
                       <p className="font-bold text-lg">
-                        {booking.driver.user.name || "Your driver"} is on the
-                        way
+                        {booking.status === "IN_PROGRESS"
+                          ? "Dropoff Location"
+                          : `${booking.driver.user.name || "Your driver"} is on the way`}
                       </p>
                       <p className="text-sm opacity-90">
-                        {booking.driver.vehicleMake}{" "}
-                        {booking.driver.vehicleModel}
+                        {booking.status === "IN_PROGRESS"
+                          ? booking.dropoffAddress.split(",")[0]
+                          : `${booking.driver.vehicleMake} ${booking.driver.vehicleModel}`}
                       </p>
                     </div>
                   </div>
@@ -735,42 +1222,79 @@ export default function RideConfirmation({
                     <p className="text-3xl font-bold">
                       {Math.round(driverETA)}
                     </p>
-                    <p className="text-sm opacity-90">min away</p>
+                    <p className="text-sm opacity-90">
+                      {booking.status === "IN_PROGRESS" ? "min to destination" : "min away"}
+                    </p>
                   </div>
                 </div>
               </div>
             )}
 
             {/* Driver Distance Overlay - for Drivers */}
-            {userRole === "DRIVER" && currentDriverLocation && booking.pickupLat && booking.pickupLng && (
-              <div className="absolute top-4 left-4 right-4 bg-gradient-to-r from-[#00796B] to-[#0F3D3E] text-white rounded-lg shadow-lg p-4 z-10">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-                      <svg className="w-7 h-7 text-[#00796B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
+            {userRole === "DRIVER" &&
+              currentDriverLocation &&
+              ((booking.status === "IN_PROGRESS" && booking.dropoffLat && booking.dropoffLng) ||
+               (booking.status !== "IN_PROGRESS" && booking.pickupLat && booking.pickupLng)) && (
+                <div className="absolute top-4 left-4 right-4 bg-gradient-to-r from-[#00796B] to-[#0F3D3E] text-white rounded-lg shadow-lg p-4 z-10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                        <svg
+                          className="w-7 h-7 text-[#00796B]"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-bold text-lg">
+                          {booking.status === "IN_PROGRESS" ? "Dropoff Location" : "Pickup Location"}
+                        </p>
+                        <p className="text-sm opacity-90">
+                          {booking.status === "IN_PROGRESS" 
+                            ? booking.dropoffAddress.split(",")[0]
+                            : booking.pickupAddress.split(",")[0]}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-lg">Pickup Location</p>
-                      <p className="text-sm opacity-90">{booking.pickupAddress.split(",")[0]}</p>
+                    <div className="text-right">
+                      <p className="text-3xl font-bold">
+                        {booking.status === "IN_PROGRESS" && booking.dropoffLat && booking.dropoffLng
+                          ? calculateDistance(
+                              currentDriverLocation.lat,
+                              currentDriverLocation.lng,
+                              booking.dropoffLat,
+                              booking.dropoffLng
+                            ).toFixed(1)
+                          : booking.pickupLat && booking.pickupLng
+                          ? calculateDistance(
+                              currentDriverLocation.lat,
+                              currentDriverLocation.lng,
+                              booking.pickupLat,
+                              booking.pickupLng
+                            ).toFixed(1)
+                          : "0.0"}
+                      </p>
+                      <p className="text-sm opacity-90">
+                        {booking.status === "IN_PROGRESS" ? `${Math.round(driverETA)} min ETA` : "km away"}
+                      </p>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-3xl font-bold">
-                      {calculateDistance(
-                        currentDriverLocation.lat,
-                        currentDriverLocation.lng,
-                        booking.pickupLat,
-                        booking.pickupLng
-                      ).toFixed(1)}
-                    </p>
-                    <p className="text-sm opacity-90">km away</p>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Route Information Overlay */}
             <div
@@ -904,6 +1428,30 @@ export default function RideConfirmation({
               />
             </div>
           </div>
+        </div>
+      )}
+
+      {/* SOS Button - Visible during active rides */}
+      {(booking.status === "ASSIGNED" || 
+        booking.status === "EN_ROUTE" || 
+        booking.status === "ARRIVED" || 
+        booking.status === "IN_PROGRESS") && (
+        <SOSButton />
+      )}
+
+      {/* Mapbox Navigation Modal */}
+      {showNavigation && navigationDestination && (
+        <div className="fixed inset-0 z-50 bg-white">
+          <MapboxNavigation
+            destinationLat={navigationDestination.lat}
+            destinationLng={navigationDestination.lng}
+            destinationName={navigationDestination.name}
+            onClose={() => {
+              setShowNavigation(false);
+              setNavigationDestination(null);
+            }}
+            className="w-full h-full"
+          />
         </div>
       )}
     </div>

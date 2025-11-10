@@ -22,23 +22,48 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // TODO: Once Dispatcher model is migrated, use:
-    // const dispatchers = await prisma.dispatcher.findMany({
-    //   include: {
-    //     user: {
-    //       select: {
-    //         name: true,
-    //         email: true,
-    //       },
-    //     },
-    //   },
-    //   orderBy: { ridesDispatched: "desc" },
-    // });
+    // Fetch all dispatchers with user info
+    const dispatchers = await prisma.dispatcher.findMany({
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+    });
 
-    // Temporary: Return mock data structure
-    const dispatchers: any[] = [];
+    // Calculate metrics for each dispatcher
+    // Note: Since bookings don't track dispatcherId, we'll use default values
+    // In a full implementation, you'd want to add dispatcherId to Booking model
+    const dispatchersWithMetrics = await Promise.all(
+      dispatchers.map(async (dispatcher) => {
+        // Count bookings that were assigned (could be enhanced to track actual dispatcher)
+        const assignedBookings = await prisma.booking.count({
+          where: {
+            status: { in: ["ASSIGNED", "EN_ROUTE", "ARRIVED", "IN_PROGRESS", "COMPLETED"] },
+            createdAt: {
+              gte: dispatcher.createdAt, // Rough estimate
+            },
+          },
+        });
 
-    return NextResponse.json({ dispatchers });
+        return {
+          id: dispatcher.id,
+          user: dispatcher.user,
+          region: dispatcher.region || null,
+          shift: dispatcher.shift || null,
+          ridesDispatched: assignedBookings, // Approximate count
+          avgResponseTime: null, // Would need tracking system
+          status: dispatcher.isActive ? "ACTIVE" : "INACTIVE",
+          lastActiveAt: dispatcher.updatedAt,
+        };
+      })
+    );
+
+    return NextResponse.json({ dispatchers: dispatchersWithMetrics });
   } catch (error) {
     console.error("Failed to fetch dispatchers:", error);
     return NextResponse.json(

@@ -17,6 +17,9 @@ function DispatcherPageContent() {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [chatBookingId, setChatBookingId] = useState<string | null>(null);
   const [autoAssigning, setAutoAssigning] = useState<string | null>(null);
+  const [showModifyModal, setShowModifyModal] = useState(false);
+  const [modifyingBooking, setModifyingBooking] = useState<any>(null);
+  const [calling, setCalling] = useState<string | null>(null);
 
   // Create booking form state
   const [createForm, setCreateForm] = useState({
@@ -28,6 +31,15 @@ function DispatcherPageContent() {
     notes: "",
   });
   const [creating, setCreating] = useState(false);
+
+  // Modify booking form state
+  const [modifyForm, setModifyForm] = useState({
+    pickupAddress: "",
+    dropoffAddress: "",
+    wheelchairRequired: false,
+    scheduledFor: "",
+    notes: "",
+  });
 
   useEffect(() => {
     fetchBookings();
@@ -157,6 +169,119 @@ function DispatcherPageContent() {
     }
   }
 
+  async function handleCancelBooking(bookingId: string) {
+    if (!confirm("Are you sure you want to cancel this booking?")) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "CANCELED" }),
+      });
+
+      if (res.ok) {
+        alert("Booking canceled successfully");
+        fetchBookings();
+      } else {
+        const data = await res.json();
+        alert(`Failed to cancel booking: ${data.error}`);
+      }
+    } catch (error) {
+      console.error("Error canceling booking:", error);
+      alert("Failed to cancel booking");
+    }
+  }
+
+  function openModifyModal(booking: any) {
+    setModifyingBooking(booking);
+    setModifyForm({
+      pickupAddress: booking.pickupAddress || "",
+      dropoffAddress: booking.dropoffAddress || "",
+      wheelchairRequired: booking.requiresWheelchair || false,
+      scheduledFor: booking.pickupTime
+        ? new Date(booking.pickupTime).toISOString().slice(0, 16)
+        : "",
+      notes: booking.specialNotes || "",
+    });
+    setShowModifyModal(true);
+  }
+
+  async function handleModifyBooking() {
+    if (!modifyingBooking) return;
+
+    if (!modifyForm.pickupAddress || !modifyForm.dropoffAddress) {
+      alert("Please fill in pickup and dropoff addresses");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/bookings/${modifyingBooking.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pickupAddress: modifyForm.pickupAddress,
+          dropoffAddress: modifyForm.dropoffAddress,
+          requiresWheelchair: modifyForm.wheelchairRequired,
+          specialNotes: modifyForm.notes,
+          pickupTime: modifyForm.scheduledFor
+            ? new Date(modifyForm.scheduledFor).toISOString()
+            : undefined,
+        }),
+      });
+
+      if (res.ok) {
+        alert("Booking updated successfully!");
+        setShowModifyModal(false);
+        setModifyingBooking(null);
+        fetchBookings();
+      } else {
+        const data = await res.json();
+        alert(`Failed to update booking: ${data.error}`);
+      }
+    } catch (error) {
+      console.error("Error modifying booking:", error);
+      alert("Failed to modify booking");
+    }
+  }
+
+  async function handleCall(riderPhone: string, driverPhone: string | null) {
+    if (!riderPhone) {
+      alert("Rider phone number not available");
+      return;
+    }
+
+    if (!driverPhone) {
+      alert("Driver not assigned yet");
+      return;
+    }
+
+    setCalling(`${riderPhone}-${driverPhone}`);
+    try {
+      const res = await fetch("/api/calls/connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          riderPhone,
+          driverPhone,
+        }),
+      });
+
+      if (res.ok) {
+        alert("Call initiated successfully");
+      } else {
+        const data = await res.json();
+        alert(`Failed to initiate call: ${data.error || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("Error initiating call:", error);
+      alert("Failed to initiate call. Please check Twilio configuration.");
+    } finally {
+      setCalling(null);
+    }
+  }
+
   const requested = bookings.filter((b) => b.status === "REQUESTED");
   const active = bookings.filter(
     (b) => b.status !== "COMPLETED" && b.status !== "CANCELED" && b.driverId
@@ -186,6 +311,12 @@ function DispatcherPageContent() {
               className="px-3 py-2 sm:px-4 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Reports
+            </Link>
+            <Link
+              href="/dispatcher/incidents"
+              className="px-3 py-2 sm:px-4 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Incidents
             </Link>
             <button
               onClick={() => setShowCreateBooking(true)}
@@ -255,12 +386,17 @@ function DispatcherPageContent() {
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center justify-between text-xs text-neutral-500 mb-3">
+                    <div className="flex items-center justify-between text-xs text-neutral-500 mb-2">
                       <span>Rider: {booking.riderId.slice(0, 8)}...</span>
                       <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full font-medium">
                         {booking.status}
                       </span>
                     </div>
+                    {booking.riderPhone && (
+                      <div className="text-xs text-neutral-600 mb-2">
+                        📞 {booking.riderPhone}
+                      </div>
+                    )}
                     <div className="flex flex-col gap-2">
                       <div className="flex gap-2">
                         <button
@@ -330,15 +466,50 @@ function DispatcherPageContent() {
                           </svg>
                         </button>
                       </div>
-                      <button
-                        onClick={() => {
-                          setSelectedBooking(booking);
-                          setShowAssignModal(true);
-                        }}
-                        className="w-full px-4 py-2 border border-[#00796B] text-[#00796B] rounded-lg hover:bg-[#E0F2F1] transition-colors font-medium"
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => {
+                            setSelectedBooking(booking);
+                            setShowAssignModal(true);
+                          }}
+                          className="px-4 py-2 border border-[#00796B] text-[#00796B] rounded-lg hover:bg-[#E0F2F1] transition-colors font-medium text-sm"
+                        >
+                          Manual Assign
+                        </button>
+                        <button
+                          onClick={() => openModifyModal(booking)}
+                          className="px-4 py-2 border border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium text-sm"
+                        >
+                          Modify
+                        </button>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleCancelBooking(booking.id)}
+                          className="flex-1 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium text-sm"
+                        >
+                          Cancel
+                        </button>
+                        {booking.riderPhone && booking.driverPhone && (
+                          <button
+                            onClick={() =>
+                              handleCall(booking.riderPhone, booking.driverPhone)
+                            }
+                            disabled={
+                              calling === `${booking.riderPhone}-${booking.driverPhone}`
+                            }
+                            className="flex-1 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors font-medium text-sm disabled:opacity-50"
+                          >
+                            📞 Call
+                          </button>
+                        )}
+                      </div>
+                      <Link
+                        href={`/dispatcher/incidents?bookingId=${booking.id}`}
+                        className="w-full px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors font-medium text-sm text-center"
                       >
-                        Manual Assignment
-                      </button>
+                        🚨 Report Incident
+                      </Link>
                     </div>
                   </div>
                 ))
@@ -395,7 +566,7 @@ function DispatcherPageContent() {
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center justify-between text-xs mb-3">
+                    <div className="flex items-center justify-between text-xs mb-2">
                       <span className="text-neutral-600">
                         Driver: {booking.driverId?.slice(0, 8) || "Unassigned"}
                       </span>
@@ -413,25 +584,85 @@ function DispatcherPageContent() {
                         {booking.status}
                       </span>
                     </div>
-                    <button
-                      onClick={() => setChatBookingId(booking.id)}
-                      className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                    {(booking.riderPhone || booking.driverPhone) && (
+                      <div className="text-xs text-neutral-600 mb-2 space-y-1">
+                        {booking.riderPhone && (
+                          <div>📞 Rider: {booking.riderPhone}</div>
+                        )}
+                        {booking.driverPhone && (
+                          <div>📞 Driver: {booking.driverPhone}</div>
+                        )}
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => setChatBookingId(booking.id)}
+                        className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                        />
-                      </svg>
-                      Open Chat
-                    </button>
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                          />
+                        </svg>
+                        Open Chat
+                      </button>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => openModifyModal(booking)}
+                          className="px-4 py-2 border border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium text-sm"
+                        >
+                          Modify
+                        </button>
+                        <button
+                          onClick={() => handleCancelBooking(booking.id)}
+                          className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium text-sm"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                      {booking.riderPhone && booking.driverPhone && (
+                        <button
+                          onClick={() =>
+                            handleCall(booking.riderPhone, booking.driverPhone)
+                          }
+                          disabled={
+                            calling === `${booking.riderPhone}-${booking.driverPhone}`
+                          }
+                          className="w-full px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors font-medium text-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                        >
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 5 16.284 5 10V9a2 2 0 012-2z"
+                            />
+                          </svg>
+                          {calling === `${booking.riderPhone}-${booking.driverPhone}`
+                            ? "Calling..."
+                            : "Call Rider & Driver"}
+                        </button>
+                      )}
+                      <Link
+                        href={`/dispatcher/incidents?bookingId=${booking.id}`}
+                        className="w-full px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors font-medium text-sm text-center"
+                      >
+                        🚨 Report Incident
+                      </Link>
+                    </div>
                   </div>
                 ))
               )}
@@ -797,6 +1028,143 @@ function DispatcherPageContent() {
             </div>
             <div className="flex-1 overflow-hidden">
               <ChatWidget bookingId={chatBookingId} sender="DISPATCHER" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modify Booking Modal */}
+      {showModifyModal && modifyingBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-[#263238]">
+                Modify Booking
+              </h2>
+              <button
+                onClick={() => {
+                  setShowModifyModal(false);
+                  setModifyingBooking(null);
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Pickup Address
+                </label>
+                <input
+                  type="text"
+                  value={modifyForm.pickupAddress}
+                  onChange={(e) =>
+                    setModifyForm({
+                      ...modifyForm,
+                      pickupAddress: e.target.value,
+                    })
+                  }
+                  placeholder="Enter pickup location"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Dropoff Address
+                </label>
+                <input
+                  type="text"
+                  value={modifyForm.dropoffAddress}
+                  onChange={(e) =>
+                    setModifyForm({
+                      ...modifyForm,
+                      dropoffAddress: e.target.value,
+                    })
+                  }
+                  placeholder="Enter dropoff location"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={modifyForm.wheelchairRequired}
+                      onChange={(e) =>
+                        setModifyForm({
+                          ...modifyForm,
+                          wheelchairRequired: e.target.checked,
+                        })
+                      }
+                      className="rounded text-[#00796B]"
+                    />
+                    <span className="text-sm text-gray-700">
+                      Wheelchair Required
+                    </span>
+                  </label>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Scheduled Time (Optional)
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={modifyForm.scheduledFor}
+                    onChange={(e) =>
+                      setModifyForm({
+                        ...modifyForm,
+                        scheduledFor: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Notes (Optional)
+                </label>
+                <textarea
+                  rows={3}
+                  value={modifyForm.notes}
+                  onChange={(e) =>
+                    setModifyForm({ ...modifyForm, notes: e.target.value })
+                  }
+                  placeholder="Add any special instructions..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                />
+              </div>
+            </div>
+            <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowModifyModal(false);
+                  setModifyingBooking(null);
+                }}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleModifyBooking}
+                className="px-6 py-2 bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors"
+              >
+                Update Booking
+              </button>
             </div>
           </div>
         </div>

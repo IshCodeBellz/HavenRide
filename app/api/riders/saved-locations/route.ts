@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 
 // GET all saved locations for a rider
@@ -45,21 +45,27 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check if User exists first
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
+    // Ensure User exists in database first
+    const client = await clerkClient();
+    const clerkUser = await client.users.getUser(userId);
+    const userEmail = clerkUser.emailAddresses[0]?.emailAddress || "";
 
-    if (!user) {
-      console.error("User not found:", userId);
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+    if (userEmail) {
+      await prisma.user.upsert({
+        where: { id: userId },
+        update: {},
+        create: {
+          id: userId,
+          email: userEmail,
+          name: clerkUser.firstName && clerkUser.lastName
+            ? `${clerkUser.firstName} ${clerkUser.lastName}`
+            : clerkUser.username || null,
+        },
+      });
     }
 
     // Ensure rider exists
-    const rider = await prisma.rider.upsert({
+    await prisma.rider.upsert({
       where: { id: userId },
       update: {},
       create: {
@@ -69,7 +75,7 @@ export async function POST(request: Request) {
 
     const location = await prisma.savedLocation.create({
       data: {
-        riderId: rider.id,
+        riderId: userId,
         label,
         address,
         latitude,

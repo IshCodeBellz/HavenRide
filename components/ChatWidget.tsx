@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { getChannel } from "@/lib/realtime/ably";
+import { playNotificationSound } from "@/lib/notifications/sound";
+import { stopFlashingTabTitle } from "@/lib/notifications/tabTitle";
 
 type Message = {
   id: string;
@@ -29,6 +31,172 @@ export default function ChatWidget({
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const previousMessageCountRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const isTabActiveRef = useRef(true);
+
+  // Track tab visibility and stop flashing when tab becomes active
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      isTabActiveRef.current = !document.hidden;
+      // Stop flashing when user returns to the tab
+      if (!document.hidden) {
+        stopFlashingTabTitle();
+      }
+    };
+
+    const handleFocus = () => {
+      // Stop flashing when window gains focus
+      stopFlashingTabTitle();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
+    
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, []);
+
+  // Initialize audio context (must be done after user interaction due to autoplay policies)
+  useEffect(() => {
+    let audioContext: AudioContext | null = null;
+    let fallbackAudio: HTMLAudioElement | null = null;
+
+    // Create audio context on first user interaction
+    const initAudio = () => {
+      if (audioContext) return; // Already initialized
+
+      try {
+        // Initialize Web Audio API
+        audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        
+        // Create a simple beep sound function
+        const createBeepSound = () => {
+          if (!audioContext) return;
+          
+          try {
+            // Resume audio context if suspended (required by some browsers)
+            if (audioContext.state === "suspended") {
+              audioContext.resume();
+            }
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800; // 800 Hz tone
+            oscillator.type = "sine";
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+          } catch (e) {
+            console.debug("Error playing beep:", e);
+            // Fallback to HTML5 audio
+            if (fallbackAudio) {
+              fallbackAudio.currentTime = 0;
+              fallbackAudio.play().catch(() => {});
+            }
+          }
+        };
+
+        // Create fallback HTML5 audio
+        fallbackAudio = new Audio();
+        // Generate a simple beep using data URL
+        const sampleRate = 44100;
+        const duration = 0.3;
+        const frequency = 800;
+        const samples = Math.floor(sampleRate * duration);
+        const buffer = new ArrayBuffer(44 + samples * 2);
+        const view = new DataView(buffer);
+        
+        // WAV header
+        const writeString = (offset: number, string: string) => {
+          for (let i = 0; i < string.length; i++) {
+            view.setUint8(offset + i, string.charCodeAt(i));
+          }
+        };
+        writeString(0, "RIFF");
+        view.setUint32(4, 36 + samples * 2, true);
+        writeString(8, "WAVE");
+        writeString(12, "fmt ");
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true);
+        view.setUint16(22, 1, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * 2, true);
+        view.setUint16(32, 2, true);
+        view.setUint16(34, 16, true);
+        writeString(36, "data");
+        view.setUint32(40, samples * 2, true);
+        
+        // Generate sine wave
+        for (let i = 0; i < samples; i++) {
+          const sample = Math.sin(2 * Math.PI * frequency * i / sampleRate);
+          const intSample = Math.max(-32768, Math.min(32767, Math.floor(sample * 32767 * 0.3)));
+          view.setInt16(44 + i * 2, intSample, true);
+        }
+        
+        const blob = new Blob([buffer], { type: "audio/wav" });
+        fallbackAudio.src = URL.createObjectURL(blob);
+        fallbackAudio.volume = 0.5;
+        fallbackAudio.preload = "auto";
+
+        // Store the beep function
+        (audioRef as any).current = { 
+          play: createBeepSound,
+          fallback: fallbackAudio,
+          audioContext: audioContext
+        };
+      } catch (e) {
+        console.warn("Could not initialize audio:", e);
+        // Fallback to simple HTML5 audio
+        fallbackAudio = new Audio();
+        fallbackAudio.volume = 0.5;
+        (audioRef as any).current = { fallback: fallbackAudio };
+      }
+    };
+
+    // Initialize on any user interaction
+    const events = ["click", "touchstart", "keydown"];
+    const initHandlers: (() => void)[] = [];
+    
+    events.forEach(event => {
+      const handler = () => {
+        initAudio();
+        // Remove all handlers after first interaction
+        events.forEach((e, i) => {
+          document.removeEventListener(e, initHandlers[i]);
+        });
+      };
+      initHandlers.push(handler);
+      document.addEventListener(event, handler, { once: true });
+    });
+
+    // Also try to initialize immediately (might work if user has interacted before)
+    try {
+      initAudio();
+    } catch (e) {
+      // Will initialize on next user interaction
+    }
+
+    return () => {
+      events.forEach((event, i) => {
+        document.removeEventListener(event, initHandlers[i]);
+      });
+      if (audioContext) {
+        audioContext.close().catch(() => {});
+      }
+      if (fallbackAudio) {
+        fallbackAudio.pause();
+        fallbackAudio.src = "";
+      }
+    };
+  }, []);
 
   // Request notification permission on mount
   useEffect(() => {
@@ -41,11 +209,6 @@ export default function ChatWidget({
         });
       }
     }
-
-    // Create audio element for notification sound
-    audioRef.current = new Audio(
-      "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZRA0PVKzn77BdGAg+ltzy0IEsBS18yfLaizsGF2e49+eXRAwNUKjl8bJfGghAm+Hzxm0gBSyAzfPaizsIGGm88+ifUhENUKnk8LJeFQdAnuH0yXQjBiyBzvPalzsIF2m98+OgVBEMUKnl7rBbFQU9muDzzH0lBSqCz/PajzsIF2q98d6dTBEMTaro7bJaFQU9nOL0zYAm"
-    );
   }, []);
 
   // Fetch initial messages
@@ -78,14 +241,10 @@ export default function ChatWidget({
       // Don't notify for own messages
       if (message.sender === sender) return;
 
-      // Play notification sound
-      if (audioRef.current) {
-        audioRef.current.play().catch(() => {
-          // Ignore autoplay restrictions
-        });
-      }
+      // Play notification sound (always play, even if tab is inactive or chat is closed)
+      playNotificationSound();
 
-      // Show browser notification
+      // Show browser notification (especially important when tab is inactive)
       if (notificationPermission === "granted") {
         const senderName =
           message.sender === "RIDER"
@@ -93,11 +252,33 @@ export default function ChatWidget({
             : message.sender === "DRIVER"
             ? "Driver"
             : "Dispatcher";
-        new Notification(`New message from ${senderName}`, {
-          body: message.text,
+        
+        // Show notification even if tab is active (for sound + visual feedback)
+        const notification = new Notification(`New message from ${senderName}`, {
+          body: message.text.length > 100 ? message.text.substring(0, 100) + "..." : message.text,
           icon: "/favicon.ico",
           tag: `message-${message.id}`,
           requireInteraction: false,
+          badge: "/favicon.ico",
+        });
+
+        // Auto-close notification after 5 seconds
+        setTimeout(() => {
+          notification.close();
+        }, 5000);
+
+        // Focus window when notification is clicked
+        notification.onclick = () => {
+          window.focus();
+          notification.close();
+        };
+      } else if (!isTabActiveRef.current && notificationPermission === "default") {
+        // If tab is inactive and permission not yet granted, try requesting again
+        Notification.requestPermission().then((permission) => {
+          setNotificationPermission(permission);
+          if (permission === "granted") {
+            showNotification(message);
+          }
         });
       }
     },
@@ -209,6 +390,8 @@ export default function ChatWidget({
   useEffect(() => {
     if (messages.length > 0 && onMarkAsRead) {
       onMarkAsRead();
+      // Stop flashing tab title when chat is open and messages are visible
+      stopFlashingTabTitle();
     }
   }, [messages.length, onMarkAsRead]);
 

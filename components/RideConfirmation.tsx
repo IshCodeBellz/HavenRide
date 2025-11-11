@@ -38,6 +38,7 @@ interface RideConfirmationProps {
       vehiclePlate?: string;
       lastLat?: number;
       lastLng?: number;
+      rating?: number | null;
     };
     rider?: {
       user: {
@@ -65,6 +66,18 @@ export default function RideConfirmation({
   onCancel,
 }: RideConfirmationProps) {
   const router = useRouter();
+  
+  // Debug: Log driver rating
+  useEffect(() => {
+    if (booking.driver) {
+      console.log("Driver rating in booking:", {
+        driverId: booking.driver.id,
+        driverName: booking.driver.user?.name,
+        rating: booking.driver.rating,
+        fullDriver: booking.driver
+      });
+    }
+  }, [booking.driver]);
   
   // Validate booking data early
   if (!booking || !booking.id) {
@@ -274,7 +287,7 @@ export default function RideConfirmation({
         <div className="absolute inset-0">
           {booking.pickupLat && booking.pickupLng && booking.dropoffLat && booking.dropoffLng ? (
             <DynamicMap
-              key={`${booking.id}-${booking.status}`}
+              key={`${booking.id}`}
               pickupLat={booking.pickupLat}
               pickupLng={booking.pickupLng}
               dropoffLat={booking.dropoffLat}
@@ -292,38 +305,80 @@ export default function RideConfirmation({
 
           {/* Driver ETA Overlay for Riders */}
           {userRole === "RIDER" && booking.driver && (
-            <div className="absolute top-4 left-4 right-4 bg-gradient-to-r from-[#00796B] to-[#0F3D3E] text-white rounded-lg shadow-lg p-3 z-10">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                    <svg
-                      className="w-6 h-6 text-[#00796B]"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm">
-                      {booking.status === "IN_PROGRESS"
-                        ? "Dropoff Location"
-                        : `${booking.driver.user.name || "Driver"} is on the way`}
-                    </p>
-                    {booking.status === "IN_PROGRESS" && (
+            <div className="absolute top-4 left-4 right-4 z-10 space-y-3">
+              {booking.status === "ARRIVED" ? (
+                <>
+                  {/* Driver Arrived Banner - Exact same component */}
+                  {booking.status === "ARRIVED" && booking.driver && (
+                    <div className="p-5 bg-gradient-to-r from-[#00796B] to-[#00695C] rounded-xl text-white shadow-lg border-2 border-[#005A4F] animate-pulse">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0">
+                          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-lg font-bold">
+                            {booking.driver.user?.name || "Your driver"} is waiting outside!
+                          </div>
+                          <div className="text-sm text-white/90">
+                            Please provide your pickup PIN
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* PIN Display - Exact same component */}
+                  {booking.pinCode && booking.status !== "IN_PROGRESS" && !booking.pickupVerified && (
+                    <div className="p-5 bg-yellow-50 border-4 border-yellow-400 shadow-xl animate-bounce rounded-xl text-center">
+                      <div className="text-sm text-yellow-800 font-semibold mb-2">
+                        🔔 PROVIDE THIS PIN TO YOUR DRIVER
+                      </div>
+                      <div className="text-5xl font-bold text-yellow-900 tracking-wider">
+                        {booking.pinCode}
+                      </div>
+                      <div className="text-xs text-yellow-700 font-medium mt-2">
+                        Driver is waiting - share this PIN now!
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="bg-gradient-to-r from-[#00796B] to-[#0F3D3E] text-white rounded-lg shadow-lg p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                        <svg
+                          className="w-6 h-6 text-[#00796B]"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm">
+                          {booking.status === "IN_PROGRESS"
+                            ? "Dropoff Location"
+                            : `${booking.driver.user.name || "Driver"} is on the way`}
+                        </p>
+                        {booking.status === "IN_PROGRESS" && (
+                          <p className="text-xs opacity-90">
+                            {booking.dropoffAddress.split(",")[0]}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold">{Math.round(driverETA)}</p>
                       <p className="text-xs opacity-90">
-                        {booking.dropoffAddress.split(",")[0]}
+                        {booking.status === "IN_PROGRESS" ? "min to destination" : "min away"}
                       </p>
-                    )}
+                    </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold">{Math.round(driverETA)}</p>
-                  <p className="text-xs opacity-90">
-                    {booking.status === "IN_PROGRESS" ? "min to destination" : "min away"}
-                  </p>
-                </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -480,23 +535,29 @@ export default function RideConfirmation({
                       ? "Haven Accessible"
                       : booking.rider?.user.name || "Rider"}
                   </h2>
-                  {userRole === "RIDER" && booking.driver?.rating && (
+                  {userRole === "RIDER" && booking.driver && (
                     <div className="flex items-center gap-1 mb-1">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <span
-                          key={i}
-                          className={`text-xs ${
-                            i < Math.round(booking.driver.rating)
-                              ? "text-yellow-400"
-                              : "text-gray-300"
-                          }`}
-                        >
-                          ★
-                        </span>
-                      ))}
-                      <span className="text-xs text-gray-500 ml-1">
-                        {booking.driver.rating.toFixed(1)}
-                      </span>
+                      {booking.driver.rating ? (
+                        <>
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <span
+                              key={i}
+                              className={`text-xs ${
+                                i < Math.round(booking.driver.rating!)
+                                  ? "text-yellow-400"
+                                  : "text-gray-300"
+                              }`}
+                            >
+                              ★
+                            </span>
+                          ))}
+                          <span className="text-xs text-gray-500 ml-1">
+                            {booking.driver.rating.toFixed(1)}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-xs text-gray-400">No rating yet</span>
+                      )}
                     </div>
                   )}
                   <p className="text-sm text-gray-600">
@@ -630,23 +691,29 @@ export default function RideConfirmation({
                         <p className="text-gray-600 text-sm">
                           {booking.driver?.user.name || "Your driver"}
                         </p>
-                        {booking.driver?.rating && (
+                        {booking.driver && (
                           <div className="flex items-center gap-1 mt-1">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <span
-                                key={i}
-                                className={`text-sm ${
-                                  i < Math.round(booking.driver.rating)
-                                    ? "text-yellow-400"
-                                    : "text-gray-300"
-                                }`}
-                              >
-                                ★
-                              </span>
-                            ))}
-                            <span className="text-xs text-gray-500 ml-1">
-                              {booking.driver.rating.toFixed(1)}
-                            </span>
+                            {booking.driver.rating ? (
+                              <>
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                  <span
+                                    key={i}
+                                    className={`text-sm ${
+                                      i < Math.round(booking.driver.rating!)
+                                        ? "text-yellow-400"
+                                        : "text-gray-300"
+                                    }`}
+                                  >
+                                    ★
+                                  </span>
+                                ))}
+                                <span className="text-xs text-gray-500 ml-1">
+                                  {booking.driver.rating.toFixed(1)}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-xs text-gray-400">No rating yet</span>
+                            )}
                           </div>
                         )}
                       </div>
@@ -654,17 +721,38 @@ export default function RideConfirmation({
                   </div>
                 </div>
 
-                {/* PIN Display (where price was) - Only show if not verified and not IN_PROGRESS */}
-                {userRole === "RIDER" && booking.pinCode && booking.status !== "IN_PROGRESS" && !booking.pickupVerified && (
-                  <div className="mb-4 p-4 bg-[#E0F2F1] border-2 border-[#00796B] rounded-xl text-center">
-                    <div className="text-sm text-[#00796B] font-semibold mb-1">
-                      Your Pickup PIN
+                {/* Driver Arrived Banner - Show prominently when driver arrives */}
+                {userRole === "RIDER" && booking.status === "ARRIVED" && booking.driver && (
+                  <div className="mb-4 p-5 bg-gradient-to-r from-[#00796B] to-[#00695C] rounded-xl text-white shadow-lg border-2 border-[#005A4F]">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0">
+                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-lg font-bold">
+                          {booking.driver.user?.name || "Your driver"} is waiting outside!
+                        </div>
+                        <div className="text-sm text-white/90">
+                          Please provide your pickup PIN
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-3xl font-bold text-[#0F3D3E] tracking-wider">
+                  </div>
+                )}
+
+                {/* PIN Display (where price was) - More prominent when ARRIVED */}
+                {userRole === "RIDER" && booking.pinCode && booking.status !== "IN_PROGRESS" && !booking.pickupVerified && (
+                  <div className={`mb-4 p-5 ${booking.status === "ARRIVED" ? "bg-yellow-50 border-4 border-yellow-400 shadow-xl" : "bg-[#E0F2F1] border-2 border-[#00796B]"} rounded-xl text-center`}>
+                    <div className={`text-sm ${booking.status === "ARRIVED" ? "text-yellow-800" : "text-[#00796B]"} font-semibold mb-2`}>
+                      {booking.status === "ARRIVED" ? "🔔 PROVIDE THIS PIN TO YOUR DRIVER" : "Your Pickup PIN"}
+                    </div>
+                    <div className={`text-5xl font-bold ${booking.status === "ARRIVED" ? "text-yellow-900" : "text-[#0F3D3E]"} tracking-wider`}>
                       {booking.pinCode}
                     </div>
-                    <div className="text-xs text-gray-600 mt-1">
-                      Share this with your driver
+                    <div className={`text-xs ${booking.status === "ARRIVED" ? "text-yellow-700 font-medium" : "text-gray-600"} mt-2`}>
+                      {booking.status === "ARRIVED" ? "Driver is waiting - share this PIN now!" : "Share this with your driver"}
                     </div>
                   </div>
                 )}
@@ -758,18 +846,17 @@ export default function RideConfirmation({
                         );
                         let destination;
                         
-                        if (
-                          booking.status === "ASSIGNED" ||
-                          booking.status === "EN_ROUTE"
-                        ) {
+                        if (booking.status === "ASSIGNED") {
+                          // Navigate to pickup location
                           destination = `${booking.pickupLat},${booking.pickupLng}`;
                         } else if (
-                          booking.status === "ARRIVED" &&
+                          booking.status === "EN_ROUTE" ||
+                          (booking.status === "ARRIVED" &&
                           booking.dropoffLat &&
-                          booking.dropoffLng
+                          booking.dropoffLng)
                         ) {
-                          // For ARRIVED status, PIN verification happens in onConfirm
-                          // No navigation on "I've Arrived" button click
+                          // For EN_ROUTE ("I've Arrived") and ARRIVED status, no navigation
+                          // PIN verification happens in onConfirm for ARRIVED
                           destination = null;
                         } else if (
                           booking.status === "IN_PROGRESS" &&
@@ -777,16 +864,18 @@ export default function RideConfirmation({
                           booking.dropoffLng
                         ) {
                           // Navigate to dropoff location (after PIN verified)
+                          // Don't call onConfirm for IN_PROGRESS - just open navigation
                           destination = `${booking.dropoffLat},${booking.dropoffLng}`;
                         }
 
-                        // Call onConfirm first (which handles PIN verification for ARRIVED status)
-                        if (onConfirm) {
+                        // Call onConfirm for status transitions (not for IN_PROGRESS navigation)
+                        if (onConfirm && booking.status !== "IN_PROGRESS") {
                           await onConfirm();
                         }
 
-                        // Only start navigation for specific statuses, not for ARRIVED
+                        // Only start navigation for specific statuses, not for EN_ROUTE or ARRIVED
                         if (destination && booking.status === "IN_PROGRESS") {
+                          // For IN_PROGRESS, just open navigation without calling onConfirm
                           if (booking.dropoffLat && booking.dropoffLng) {
                             setNavigationDestination({
                               lat: booking.dropoffLat,
@@ -795,8 +884,8 @@ export default function RideConfirmation({
                             });
                             setShowNavigation(true);
                           }
-                        } else if (destination && (booking.status === "ASSIGNED" || booking.status === "EN_ROUTE")) {
-                          // For ASSIGNED/EN_ROUTE, start Mapbox Navigation to pickup location
+                        } else if (destination && booking.status === "ASSIGNED") {
+                          // For ASSIGNED only, start Mapbox Navigation to pickup location
                           if (booking.pickupLat && booking.pickupLng) {
                             // Small delay to ensure status is updated after onConfirm
                             setTimeout(() => {
@@ -903,23 +992,29 @@ export default function RideConfirmation({
                     <p className="text-gray-600">
                       {booking.driver?.user.name || "Your driver"}
                     </p>
-                    {booking.driver?.rating && (
+                    {booking.driver && (
                       <div className="flex items-center gap-1 mt-1">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <span
-                            key={i}
-                            className={`text-base ${
-                              i < Math.round(booking.driver.rating)
-                                ? "text-yellow-400"
-                                : "text-gray-300"
-                            }`}
-                          >
-                            ★
-                          </span>
-                        ))}
-                        <span className="text-sm text-gray-500 ml-1">
-                          {booking.driver.rating.toFixed(1)}
-                        </span>
+                        {booking.driver.rating ? (
+                          <>
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <span
+                                key={i}
+                                className={`text-base ${
+                                  i < Math.round(booking.driver.rating!)
+                                    ? "text-yellow-400"
+                                    : "text-gray-300"
+                                }`}
+                              >
+                                ★
+                              </span>
+                            ))}
+                            <span className="text-sm text-gray-500 ml-1">
+                              {booking.driver.rating.toFixed(1)}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-sm text-gray-400">No rating yet</span>
+                        )}
                       </div>
                     )}
                   </div>
@@ -927,17 +1022,38 @@ export default function RideConfirmation({
               </div>
             </div>
 
-            {/* PIN Display (where price was) - Only show if not verified and not IN_PROGRESS */}
-            {userRole === "RIDER" && booking.pinCode && booking.status !== "IN_PROGRESS" && !booking.pickupVerified && (
-              <div className="mb-6 p-4 bg-[#E0F2F1] border-2 border-[#00796B] rounded-xl text-center">
-                <div className="text-sm text-[#00796B] font-semibold mb-1">
-                  Your Pickup PIN
+            {/* Driver Arrived Banner - Mobile */}
+            {userRole === "RIDER" && booking.status === "ARRIVED" && booking.driver && (
+              <div className="mb-4 p-5 bg-gradient-to-r from-[#00796B] to-[#00695C] rounded-xl text-white shadow-lg border-2 border-[#005A4F]">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0">
+                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-lg font-bold">
+                      {booking.driver.user?.name || "Your driver"} is waiting outside!
+                    </div>
+                    <div className="text-sm text-white/90">
+                      Please provide your pickup PIN
+                    </div>
+                  </div>
                 </div>
-                <div className="text-3xl font-bold text-[#0F3D3E] tracking-wider">
+              </div>
+            )}
+
+            {/* PIN Display (where price was) - More prominent when ARRIVED - Mobile */}
+            {userRole === "RIDER" && booking.pinCode && booking.status !== "IN_PROGRESS" && !booking.pickupVerified && (
+              <div className={`mb-6 p-5 ${booking.status === "ARRIVED" ? "bg-yellow-50 border-4 border-yellow-400 shadow-xl" : "bg-[#E0F2F1] border-2 border-[#00796B]"} rounded-xl text-center`}>
+                <div className={`text-sm ${booking.status === "ARRIVED" ? "text-yellow-800" : "text-[#00796B]"} font-semibold mb-2`}>
+                  {booking.status === "ARRIVED" ? "🔔 PROVIDE THIS PIN TO YOUR DRIVER" : "Your Pickup PIN"}
+                </div>
+                <div className={`text-5xl font-bold ${booking.status === "ARRIVED" ? "text-yellow-900" : "text-[#0F3D3E]"} tracking-wider`}>
                   {booking.pinCode}
                 </div>
-                <div className="text-xs text-gray-600 mt-1">
-                  Share this with your driver
+                <div className={`text-xs ${booking.status === "ARRIVED" ? "text-yellow-700 font-medium" : "text-gray-600"} mt-2`}>
+                  {booking.status === "ARRIVED" ? "Driver is waiting - share this PIN now!" : "Share this with your driver"}
                 </div>
               </div>
             )}
@@ -1026,19 +1142,17 @@ export default function RideConfirmation({
                     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
                     let destination;
 
-                    if (
-                      booking.status === "ASSIGNED" ||
-                      booking.status === "EN_ROUTE"
-                    ) {
+                    if (booking.status === "ASSIGNED") {
                       // Navigate to pickup location
                       destination = `${booking.pickupLat},${booking.pickupLng}`;
                     } else if (
-                      booking.status === "ARRIVED" &&
+                      booking.status === "EN_ROUTE" ||
+                      (booking.status === "ARRIVED" &&
                       booking.dropoffLat &&
-                      booking.dropoffLng
+                      booking.dropoffLng)
                     ) {
-                      // For ARRIVED status, PIN verification happens in onConfirm
-                      // No navigation on "I've Arrived" button click
+                      // For EN_ROUTE ("I've Arrived") and ARRIVED status, no navigation
+                      // PIN verification happens in onConfirm for ARRIVED
                       destination = null;
                     } else if (
                       booking.status === "IN_PROGRESS" &&
@@ -1046,16 +1160,18 @@ export default function RideConfirmation({
                       booking.dropoffLng
                     ) {
                       // Navigate to dropoff location (after PIN verified)
+                      // Don't call onConfirm for IN_PROGRESS - just open navigation
                       destination = `${booking.dropoffLat},${booking.dropoffLng}`;
                     }
 
-                    // Call onConfirm first (which handles PIN verification for ARRIVED status)
-                    if (onConfirm) {
+                    // Call onConfirm for status transitions (not for IN_PROGRESS navigation)
+                    if (onConfirm && booking.status !== "IN_PROGRESS") {
                       await onConfirm();
                     }
 
-                    // Only start navigation for specific statuses, not for ARRIVED
+                    // Only start navigation for specific statuses, not for EN_ROUTE or ARRIVED
                     if (destination && booking.status === "IN_PROGRESS") {
+                      // For IN_PROGRESS, just open navigation without calling onConfirm
                       if (booking.dropoffLat && booking.dropoffLng) {
                         setNavigationDestination({
                           lat: booking.dropoffLat,
@@ -1064,8 +1180,8 @@ export default function RideConfirmation({
                         });
                         setShowNavigation(true);
                       }
-                    } else if (destination && (booking.status === "ASSIGNED" || booking.status === "EN_ROUTE")) {
-                      // For ASSIGNED/EN_ROUTE, start Mapbox Navigation to pickup location
+                    } else if (destination && booking.status === "ASSIGNED") {
+                      // For ASSIGNED only, start Mapbox Navigation to pickup location
                       if (booking.pickupLat && booking.pickupLng) {
                         // Small delay to ensure status is updated after onConfirm
                         setTimeout(() => {
@@ -1180,7 +1296,7 @@ export default function RideConfirmation({
           <div className="relative h-full min-h-[500px]">
             {/* Map with driver location */}
             <DynamicMap
-              key={`${booking.id}-${booking.status}`}
+              key={`${booking.id}`}
               pickupLat={booking.pickupLat}
               pickupLng={booking.pickupLng}
               dropoffLat={booking.dropoffLat}
@@ -1193,40 +1309,82 @@ export default function RideConfirmation({
 
             {/* Driver ETA Overlay for Riders */}
             {userRole === "RIDER" && booking.driver && (
-              <div className="absolute top-4 left-4 right-4 bg-gradient-to-r from-[#00796B] to-[#0F3D3E] text-white rounded-lg shadow-lg p-4 z-10">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-                      <svg
-                        className="w-7 h-7 text-[#00796B]"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="font-bold text-lg">
-                        {booking.status === "IN_PROGRESS"
-                          ? "Dropoff Location"
-                          : `${booking.driver.user.name || "Your driver"} is on the way`}
-                      </p>
-                      <p className="text-sm opacity-90">
-                        {booking.status === "IN_PROGRESS"
-                          ? booking.dropoffAddress.split(",")[0]
-                          : `${booking.driver.vehicleMake} ${booking.driver.vehicleModel}`}
-                      </p>
+              <div className="absolute top-4 left-4 right-4 z-10 space-y-4">
+                {booking.status === "ARRIVED" ? (
+                  <>
+                    {/* Driver Arrived Banner - Exact same component */}
+                    {booking.status === "ARRIVED" && booking.driver && (
+                      <div className="p-5 bg-gradient-to-r from-[#00796B] to-[#00695C] rounded-xl text-white shadow-lg border-2 border-[#005A4F] animate-pulse">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0">
+                            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-lg font-bold">
+                              {booking.driver.user?.name || "Your driver"} is waiting outside!
+                            </div>
+                            <div className="text-sm text-white/90">
+                              Please provide your pickup PIN
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* PIN Display - Exact same component */}
+                    {booking.pinCode && booking.status !== "IN_PROGRESS" && !booking.pickupVerified && (
+                      <div className="p-5 bg-yellow-50 border-4 border-yellow-400 shadow-xl animate-bounce rounded-xl text-center">
+                        <div className="text-sm text-yellow-800 font-semibold mb-2">
+                          🔔 PROVIDE THIS PIN TO YOUR DRIVER
+                        </div>
+                        <div className="text-5xl font-bold text-yellow-900 tracking-wider">
+                          {booking.pinCode}
+                        </div>
+                        <div className="text-xs text-yellow-700 font-medium mt-2">
+                          Driver is waiting - share this PIN now!
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="bg-gradient-to-r from-[#00796B] to-[#0F3D3E] text-white rounded-lg shadow-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                          <svg
+                            className="w-7 h-7 text-[#00796B]"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="font-bold text-lg">
+                            {booking.status === "IN_PROGRESS"
+                              ? "Dropoff Location"
+                              : `${booking.driver.user.name || "Your driver"} is on the way`}
+                          </p>
+                          <p className="text-sm opacity-90">
+                            {booking.status === "IN_PROGRESS"
+                              ? booking.dropoffAddress.split(",")[0]
+                              : `${booking.driver.vehicleMake} ${booking.driver.vehicleModel}`}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-3xl font-bold">
+                          {Math.round(driverETA)}
+                        </p>
+                        <p className="text-sm opacity-90">
+                          {booking.status === "IN_PROGRESS" ? "min to destination" : "min away"}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-3xl font-bold">
-                      {Math.round(driverETA)}
-                    </p>
-                    <p className="text-sm opacity-90">
-                      {booking.status === "IN_PROGRESS" ? "min to destination" : "min away"}
-                    </p>
-                  </div>
-                </div>
+                )}
               </div>
             )}
 

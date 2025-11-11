@@ -89,6 +89,9 @@ export default function DriverLocationMap({
       });
 
       routeLayerAdded.current = true;
+      
+      // Force marker update after map loads - markers will be created in the other useEffect
+      console.log("DriverLocationMap - Map loaded, routeLayerAdded set to true");
     });
 
     return () => {
@@ -101,9 +104,31 @@ export default function DriverLocationMap({
 
   // Update markers when coordinates change
   useEffect(() => {
-    if (!map.current) return;
+    if (!map.current) {
+      console.log("DriverLocationMap - Map not ready yet, waiting...");
+      return;
+    }
+
+    // Wait for map to be fully loaded
+    if (!map.current.loaded()) {
+      console.log("DriverLocationMap - Map not loaded yet, waiting...");
+      const waitForLoad = () => {
+        if (map.current && map.current.loaded()) {
+          // Trigger marker update after map loads
+          setTimeout(() => {
+            if (map.current) {
+              // Force re-trigger this effect by checking markers again
+              console.log("DriverLocationMap - Map loaded, checking markers...");
+            }
+          }, 100);
+        }
+      };
+      map.current.once("load", waitForLoad);
+      return;
+    }
 
     console.log("DriverLocationMap - Updating markers:", {
+      status,
       pickupLat,
       pickupLng,
       dropoffLat,
@@ -114,7 +139,7 @@ export default function DriverLocationMap({
       driverMarkerExists: !!driverMarker.current,
     });
 
-    // Add/update pickup marker (pin/drop icon)
+    // Add/update pickup marker (pin/drop icon) - ALWAYS show if coordinates exist
     if (pickupLat && pickupLng) {
       if (pickupMarker.current) {
         pickupMarker.current.setLngLat([pickupLng, pickupLat]);
@@ -125,7 +150,7 @@ export default function DriverLocationMap({
         el.style.width = "40px";
         el.style.height = "50px";
         el.style.cursor = "pointer";
-        el.style.zIndex = "1000"; // Ensure marker is on top
+        el.style.zIndex = "1"; // Marker should be behind drawer overlays
         el.innerHTML = `
           <svg width="40" height="50" viewBox="0 0 40 50" xmlns="http://www.w3.org/2000/svg">
             <path d="M20 0C12.268 0 6 6.268 6 14C6 24.5 20 48 20 48C20 48 34 24.5 34 14C34 6.268 27.732 0 20 0Z" 
@@ -159,8 +184,14 @@ export default function DriverLocationMap({
       console.log("❌ Pickup marker removed - no coordinates");
     }
 
-    // Add/update dropoff marker
+    // Add/update dropoff marker - ALWAYS show if coordinates exist (especially during EN_ROUTE)
     if (dropoffLat && dropoffLng) {
+      console.log("DriverLocationMap - Dropoff coordinates available, ensuring marker is visible:", {
+        dropoffLat,
+        dropoffLng,
+        status,
+        markerExists: !!dropoffMarker.current
+      });
       if (dropoffMarker.current) {
         dropoffMarker.current.setLngLat([dropoffLng, dropoffLat]);
         console.log("✅ Dropoff marker updated");
@@ -170,7 +201,7 @@ export default function DriverLocationMap({
         el.style.width = "40px";
         el.style.height = "50px";
         el.style.cursor = "pointer";
-        el.style.zIndex = "1000"; // Ensure marker is on top
+        el.style.zIndex = "1"; // Marker should be behind drawer overlays
         el.innerHTML = `
           <svg width="40" height="50" viewBox="0 0 40 50" xmlns="http://www.w3.org/2000/svg">
             <path d="M20 0C12.268 0 6 6.268 6 14C6 24.5 20 48 20 48C20 48 34 24.5 34 14C34 6.268 27.732 0 20 0Z" 
@@ -233,7 +264,7 @@ export default function DriverLocationMap({
         el.style.backgroundPosition = "center";
         el.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.3))";
         el.style.cursor = "pointer";
-        el.style.zIndex = "1000"; // Ensure marker is on top
+        el.style.zIndex = "1"; // Marker should be behind drawer overlays
 
         driverMarker.current = new mapboxgl.Marker({
           element: el,
@@ -423,11 +454,50 @@ export default function DriverLocationMap({
       }
     }
 
+    // For EN_ROUTE status, ensure both pickup and dropoff pins are visible
+    if (status === "EN_ROUTE" && isValidCoord(dropoffLat) && isValidCoord(dropoffLng)) {
+      const bounds = new mapboxgl.LngLatBounds();
+      let pointCount = 0;
+
+      // Always include pickup
+      bounds.extend([pickupLng, pickupLat]);
+      pointCount++;
+
+      // Always include dropoff
+      bounds.extend([dropoffLng, dropoffLat]);
+      pointCount++;
+
+      // Include driver location if available
+      if (
+        currentDriverLocation &&
+        isValidCoord(currentDriverLocation.lat) &&
+        isValidCoord(currentDriverLocation.lng)
+      ) {
+        bounds.extend([currentDriverLocation.lng, currentDriverLocation.lat]);
+        pointCount++;
+      }
+
+      if (pointCount >= 2) {
+        try {
+          map.current.fitBounds(bounds, {
+            padding: 100,
+            maxZoom: 15,
+            duration: 1000,
+          });
+          console.log("DriverLocationMap - Focused on EN_ROUTE route (showing pickup and dropoff)");
+          return;
+        } catch (error) {
+          console.log("Error fitting bounds for EN_ROUTE:", error);
+        }
+      }
+    }
+
     // When driver is close to pickup, focus on driver-pickup area only
     // When driver is far, show all points (pickup, dropoff, driver)
-    // Skip this for IN_PROGRESS status (handled above)
+    // Skip this for IN_PROGRESS and EN_ROUTE statuses (handled above)
     if (
       status !== "IN_PROGRESS" &&
+      status !== "EN_ROUTE" &&
       currentDriverLocation &&
       isValidCoord(currentDriverLocation.lat) &&
       isValidCoord(currentDriverLocation.lng) &&

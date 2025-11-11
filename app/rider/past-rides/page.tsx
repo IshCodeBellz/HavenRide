@@ -15,6 +15,8 @@ export default function PastRidesPage() {
   const [driverComment, setDriverComment] = useState("");
   const [rideComment, setRideComment] = useState("");
   const [submittingRating, setSubmittingRating] = useState(false);
+  const [hoveredDriverStar, setHoveredDriverStar] = useState(0);
+  const [hoveredRideStar, setHoveredRideStar] = useState(0);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -239,11 +241,17 @@ export default function PastRidesPage() {
                         )}
                       </div>
                     </div>
-                    {booking.finalFareAmount && (
+                    {(booking.finalFareAmount || (booking.priceEstimate as any)?.amount) && (
                       <div className="text-right">
                         <div className="text-2xl font-bold text-[#0F3D3E]">
-                          £{booking.finalFareAmount.toFixed(2)}
+                          £{(booking.finalFareAmount || (booking.priceEstimate as any)?.amount || 0).toFixed(2)}
                         </div>
+                        {booking.finalFareAmount && (booking.priceEstimate as any)?.amount && 
+                         booking.finalFareAmount !== (booking.priceEstimate as any)?.amount && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            Est: £{((booking.priceEstimate as any)?.amount || 0).toFixed(2)}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -460,10 +468,18 @@ export default function PastRidesPage() {
 
           {/* Rating Modal */}
           {ratingBookingId && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-2xl p-6 max-w-md w-full">
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div 
+                className="rounded-2xl p-6 max-w-md w-full border border-white/40 shadow-2xl"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.15)',
+                  backdropFilter: 'blur(30px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+                  boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+                }}
+              >
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold text-[#0F3D3E]">
+                  <h3 className="text-xl font-semibold text-white">
                     Rate Your Ride
                   </h3>
                   <button
@@ -474,7 +490,7 @@ export default function PastRidesPage() {
                       setDriverComment("");
                       setRideComment("");
                     }}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-white/70 hover:text-white"
                   >
                     <svg
                       className="w-6 h-6"
@@ -495,60 +511,74 @@ export default function PastRidesPage() {
                 <div className="space-y-6">
                   {/* Driver Rating */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-white mb-2">
                       Rate Your Driver
                     </label>
-                    <div className="flex items-center gap-2">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => setDriverRating(star)}
-                          className={`text-3xl transition-colors ${
-                            star <= driverRating
-                              ? "text-yellow-400"
-                              : "text-gray-300"
-                          }`}
-                        >
-                          ★
-                        </button>
-                      ))}
+                    <div 
+                      className="flex items-center gap-2"
+                      onMouseLeave={() => setHoveredDriverStar(0)}
+                    >
+                      {[1, 2, 3, 4, 5].map((star) => {
+                        const isHighlighted = star <= (hoveredDriverStar || driverRating);
+                        return (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setDriverRating(star)}
+                            onMouseEnter={() => setHoveredDriverStar(star)}
+                            className={`text-3xl transition-colors ${
+                              isHighlighted
+                                ? "text-yellow-400"
+                                : "text-white/40"
+                            }`}
+                          >
+                            ★
+                          </button>
+                        );
+                      })}
                     </div>
                     <textarea
                       value={driverComment}
                       onChange={(e) => setDriverComment(e.target.value)}
                       placeholder="Optional feedback about your driver..."
-                      className="w-full mt-2 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                      className="w-full mt-2 border border-white/30 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       rows={2}
                     />
                   </div>
 
                   {/* Ride Rating */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-white mb-2">
                       Rate Your Ride Experience
                     </label>
-                    <div className="flex items-center gap-2">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => setRideRating(star)}
-                          className={`text-3xl transition-colors ${
-                            star <= rideRating
-                              ? "text-yellow-400"
-                              : "text-gray-300"
-                          }`}
-                        >
-                          ★
-                        </button>
-                      ))}
+                    <div 
+                      className="flex items-center gap-2"
+                      onMouseLeave={() => setHoveredRideStar(0)}
+                    >
+                      {[1, 2, 3, 4, 5].map((star) => {
+                        const isHighlighted = star <= (hoveredRideStar || rideRating);
+                        return (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setRideRating(star)}
+                            onMouseEnter={() => setHoveredRideStar(star)}
+                            className={`text-3xl transition-colors ${
+                              isHighlighted
+                                ? "text-yellow-400"
+                                : "text-white/40"
+                            }`}
+                          >
+                            ★
+                          </button>
+                        );
+                      })}
                     </div>
                     <textarea
                       value={rideComment}
                       onChange={(e) => setRideComment(e.target.value)}
                       placeholder="Optional feedback about your ride..."
-                      className="w-full mt-2 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                      className="w-full mt-2 border border-white/30 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       rows={2}
                     />
                   </div>
@@ -562,7 +592,7 @@ export default function PastRidesPage() {
                         setDriverComment("");
                         setRideComment("");
                       }}
-                      className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-50"
+                      className="flex-1 border border-white/30 text-white py-2 rounded-lg font-medium hover:bg-white/10"
                     >
                       Cancel
                     </button>

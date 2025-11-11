@@ -204,6 +204,10 @@ function RiderProfileContent() {
   // Profile picture
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  
+  // Rating
+  const [rating, setRating] = useState<number | null>(null);
+  const [ratingCount, setRatingCount] = useState(0);
 
   // Fetch all profile data on mount
   useEffect(() => {
@@ -251,6 +255,14 @@ function RiderProfileContent() {
       if (contactsRes.ok) {
         const contactsData = await contactsRes.json();
         setEmergencyContacts(contactsData);
+      }
+      
+      // Fetch rider rating
+      const ratingRes = await fetch("/api/riders/rating");
+      if (ratingRes.ok) {
+        const ratingData = await ratingRes.json();
+        setRating(ratingData.rating);
+        setRatingCount(ratingData.count || 0);
       }
     } catch (error) {
       console.error("Error fetching profile data:", error);
@@ -612,6 +624,33 @@ function RiderProfileContent() {
               </button>
             </div>
           </div>
+
+          {rating !== null && (
+            <div className="mb-4 pb-4 border-b">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span
+                      key={i}
+                      className={`text-xl ${
+                        i < Math.round(rating)
+                          ? "text-yellow-400"
+                          : "text-gray-300"
+                      }`}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+                <span className="text-lg font-semibold text-[#0F3D3E]">
+                  {rating.toFixed(1)}
+                </span>
+                <span className="text-sm text-gray-500">
+                  ({ratingCount} {ratingCount === 1 ? "ride" : "rides"})
+                </span>
+              </div>
+            </div>
+          )}
 
           <div className="space-y-4">
             <div>

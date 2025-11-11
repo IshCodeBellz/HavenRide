@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 // POST create a rating for a completed ride
 export async function POST(request: NextRequest) {
+  let bookingId: string | undefined;
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -11,7 +12,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { bookingId, driverRating, rideRating, driverComment, rideComment } = body;
+    bookingId = body.bookingId;
+    const { driverRating, rideRating, driverComment, rideComment } = body;
 
     if (!bookingId || !driverRating || !rideRating) {
       return NextResponse.json(
@@ -72,34 +74,76 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Update driver's average rating
+    // Update driver's average rating (non-blocking - don't fail if this errors)
     if (booking.driverId) {
-      const driverRatings = await prisma.rideRating.findMany({
-        where: {
-          booking: {
+      try {
+        // Get all bookings for this driver
+        const driverBookings = await prisma.booking.findMany({
+          where: {
             driverId: booking.driverId,
+            status: "COMPLETED",
           },
-        },
-        select: {
-          driverRating: true,
-        },
-      });
-
-      if (driverRatings.length > 0) {
-        const avgRating =
-          driverRatings.reduce((sum, r) => sum + r.driverRating, 0) /
-          driverRatings.length;
-
-        await prisma.driver.update({
-          where: { id: booking.driverId },
-          data: { rating: avgRating },
+          select: {
+            id: true,
+          },
         });
+
+        // Get all ratings for these bookings
+        const driverRatings = await prisma.rideRating.findMany({
+          where: {
+            bookingId: {
+              in: driverBookings.map((b) => b.id),
+            },
+          },
+          select: {
+            driverRating: true,
+          },
+        });
+
+        if (driverRatings.length > 0) {
+          const avgRating =
+            driverRatings.reduce((sum, r) => sum + r.driverRating, 0) /
+            driverRatings.length;
+
+          await prisma.driver.update({
+            where: { id: booking.driverId },
+            data: { rating: avgRating },
+          });
+          
+          console.log(`Updated driver ${booking.driverId} rating to ${avgRating.toFixed(2)} based on ${driverRatings.length} ratings`);
+        } else {
+          // No ratings yet, set to null
+          await prisma.driver.update({
+            where: { id: booking.driverId },
+            data: { rating: null },
+          });
+        }
+      } catch (updateError) {
+        // Log error but don't fail the request since rating was already created
+        console.error("Error updating driver rating:", updateError);
       }
     }
 
     return NextResponse.json(rating, { status: 201 });
   } catch (error) {
     console.error("Error creating rating:", error);
+    
+    // Check if rating was actually created despite the error
+    if (bookingId) {
+      try {
+        const existingRating = await prisma.rideRating.findUnique({
+          where: { bookingId },
+        });
+        if (existingRating) {
+          // Rating was created successfully, return it even though there was an error
+          return NextResponse.json(existingRating, { status: 201 });
+        }
+      } catch (checkError) {
+        // If we can't check, proceed with error response
+        console.error("Error checking if rating exists:", checkError);
+      }
+    }
+    
     return NextResponse.json(
       { error: "Failed to create rating" },
       { status: 500 }
@@ -154,4 +198,5 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
 

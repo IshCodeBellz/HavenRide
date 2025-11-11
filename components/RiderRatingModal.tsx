@@ -58,48 +58,65 @@ export default function RiderRatingModal({
     rating: number;
     onRatingChange: (rating: number) => void;
     label: string;
-  }) => (
-    <div className="space-y-2">
-      <label className="block text-xs sm:text-sm font-semibold text-gray-700">
-        {label} <span className="text-red-500">*</span>
-      </label>
-      <div className="flex items-center gap-1 sm:gap-2">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            type="button"
-            onClick={() => onRatingChange(star)}
-            className={`text-2xl sm:text-3xl transition-colors ${
-              star <= rating
-                ? "text-yellow-400"
-                : "text-gray-300 hover:text-yellow-200"
-            }`}
-          >
-            ★
-          </button>
-        ))}
-        {rating > 0 && (
-          <span className="ml-2 text-sm text-gray-600">
-            {rating} {rating === 1 ? "star" : "stars"}
-          </span>
-        )}
+  }) => {
+    const [hoveredStar, setHoveredStar] = useState(0);
+    
+    return (
+      <div className="space-y-2">
+        <label className="block text-xs sm:text-sm font-semibold text-white">
+          {label} <span className="text-red-400">*</span>
+        </label>
+        <div 
+          className="flex items-center gap-1 sm:gap-2"
+          onMouseLeave={() => setHoveredStar(0)}
+        >
+          {[1, 2, 3, 4, 5].map((star) => {
+            const isHighlighted = star <= (hoveredStar || rating);
+            return (
+              <button
+                key={star}
+                type="button"
+                onClick={() => onRatingChange(star)}
+                onMouseEnter={() => setHoveredStar(star)}
+                className={`text-2xl sm:text-3xl transition-colors ${
+                  isHighlighted
+                    ? "text-yellow-400"
+                    : "text-white/40"
+                }`}
+              >
+                ★
+              </button>
+            );
+          })}
+          {(hoveredStar || rating) > 0 && (
+            <span className="ml-2 text-sm text-white/90">
+              {hoveredStar || rating} {(hoveredStar || rating) === 1 ? "star" : "stars"}
+            </span>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-[60]"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-[60]"
       onClick={onCancel}
     >
       <div
-        className="bg-white rounded-lg p-4 sm:p-6 max-w-md w-full max-h-[90vh] overflow-y-auto"
+        className="rounded-2xl p-4 sm:p-6 max-w-md w-full max-h-[90vh] overflow-y-auto border border-white/40 shadow-2xl"
+        style={{
+          background: 'rgba(255, 255, 255, 0.15)',
+          backdropFilter: 'blur(30px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+          boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4">
+        <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4 text-white">
           Rate Your Ride
         </h2>
-        <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
+        <p className="text-sm sm:text-base text-white/90 mb-4 sm:mb-6">
           How was your experience with {driverName}?
         </p>
 
@@ -113,14 +130,14 @@ export default function RiderRatingModal({
 
           {/* Driver Comment */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2 text-gray-700">
+            <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2 text-white">
               Comments about the Driver (Optional)
             </label>
             <textarea
               value={driverComment}
               onChange={(e) => setDriverComment(e.target.value)}
               placeholder="Share your thoughts about the driver..."
-              className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-white/30 bg-white/10 backdrop-blur-sm rounded-lg p-2.5 sm:p-3 text-sm sm:text-base text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               rows={2}
             />
           </div>
@@ -134,25 +151,25 @@ export default function RiderRatingModal({
 
           {/* Ride Comment */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2 text-gray-700">
+            <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2 text-white">
               Comments about the Ride (Optional)
             </label>
             <textarea
               value={rideComment}
               onChange={(e) => setRideComment(e.target.value)}
               placeholder="Share your thoughts about the ride experience..."
-              className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-white/30 bg-white/10 backdrop-blur-sm rounded-lg p-2.5 sm:p-3 text-sm sm:text-base text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               rows={2}
             />
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4 border-t">
+          <div className="flex gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-white/20">
             <button
               type="button"
               onClick={onCancel}
               disabled={submitting}
-              className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 border rounded-lg font-semibold text-sm sm:text-base hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 border border-white/30 rounded-lg font-semibold text-sm sm:text-base text-white hover:bg-white/10 transition-colors disabled:opacity-50"
             >
               Skip
             </button>

@@ -44,6 +44,8 @@ function DriverProfileContent() {
   const [verificationDetails, setVerificationDetails] = useState<{
     [key: string]: string;
   }>({});
+  const [rating, setRating] = useState<number | null>(null);
+  const [ratingCount, setRatingCount] = useState<number>(0);
 
   useEffect(() => {
     fetchDriverData();
@@ -64,6 +66,10 @@ function DriverProfileContent() {
         });
         setPhone(data.phone || "");
         setVerificationStatus(data.verificationStatus || "PENDING");
+        // Handle rating - could be null, undefined, or 0
+        const ratingValue = data.rating;
+        setRating(ratingValue !== null && ratingValue !== undefined && ratingValue > 0 ? ratingValue : null);
+        setRatingCount(data.ratingCount || 0);
       }
       
       // Fetch user profile data (name, email, image)
@@ -337,6 +343,46 @@ function DriverProfileContent() {
               {uploadingPhoto ? "Uploading..." : "Change Photo"}
             </button>
           </div>
+        </div>
+
+        {/* Driver Rating Section */}
+        <div className="border-t pt-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4 text-[#0F3D3E]">
+            Driver Rating
+          </h2>
+          {rating !== null && rating !== undefined && rating > 0 ? (
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex items-center gap-1">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span
+                    key={i}
+                    className={`text-2xl ${
+                      i < Math.round(rating)
+                        ? "text-yellow-400"
+                        : "text-gray-300"
+                    }`}
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-2xl font-bold text-[#0F3D3E]">
+                  {rating.toFixed(1)}
+                </span>
+                <span className="text-sm text-gray-500">out of 5</span>
+                {ratingCount > 0 && (
+                  <span className="text-sm text-gray-500">
+                    ({ratingCount} {ratingCount === 1 ? 'review' : 'reviews'})
+                  </span>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="text-gray-500">
+              <p className="text-sm">No ratings yet. Complete rides to receive ratings from riders.</p>
+            </div>
+          )}
         </div>
 
         <div>

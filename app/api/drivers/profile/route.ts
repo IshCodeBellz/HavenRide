@@ -19,6 +19,7 @@ export async function GET() {
         wheelchairCapable: true,
         phone: true,
         verificationStatus: true,
+        rating: true,
       },
     });
 
@@ -26,7 +27,55 @@ export async function GET() {
       return NextResponse.json({ error: "Driver not found" }, { status: 404 });
     }
 
-    return NextResponse.json(driver);
+    // Get completed bookings to calculate rating count
+    const driverBookings = await prisma.booking.findMany({
+      where: {
+        driverId: userId,
+        status: "COMPLETED",
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    let ratingCount = 0;
+    let calculatedRating = driver.rating;
+
+    if (driverBookings.length > 0) {
+      const driverRatings = await prisma.rideRating.findMany({
+        where: {
+          bookingId: {
+            in: driverBookings.map((b) => b.id),
+          },
+        },
+        select: {
+          driverRating: true,
+        },
+      });
+
+      ratingCount = driverRatings.length;
+
+      // If rating is null or 0, but we have ratings, recalculate
+      if ((!driver.rating || driver.rating === 0) && driverRatings.length > 0) {
+        calculatedRating =
+          driverRatings.reduce((sum, r) => sum + r.driverRating, 0) /
+          driverRatings.length;
+
+        // Update the driver's rating in the database
+        await prisma.driver.update({
+          where: { id: userId },
+          data: { rating: calculatedRating },
+        });
+      } else if (driverRatings.length > 0 && driver.rating) {
+        calculatedRating = driver.rating;
+      }
+    }
+
+    return NextResponse.json({
+      ...driver,
+      rating: calculatedRating,
+      ratingCount,
+    });
   } catch (error) {
     console.error("Error fetching driver profile:", error);
     return NextResponse.json(

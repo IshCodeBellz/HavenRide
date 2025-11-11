@@ -67,17 +67,36 @@ function ActiveBookingCard({
         </div>
       </div>
 
-      {/* PIN Display - Only show if not verified and not IN_PROGRESS */}
-      {booking.pinCode && booking.status !== "IN_PROGRESS" && !booking.pickupVerified && (
-        <div className="mt-4 p-4 bg-[#E0F2F1] border-2 border-[#00796B] rounded-xl text-center">
-          <div className="text-sm text-[#00796B] font-semibold mb-1">
-            Your Pickup PIN
+      {/* Driver Arrived Banner */}
+      {booking.status === "ARRIVED" && booking.driver && (
+        <div className="mb-3 p-4 bg-gradient-to-r from-[#00796B] to-[#00695C] rounded-xl text-white shadow-lg animate-pulse">
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <div className="flex-1">
+              <div className="font-bold text-sm">
+                {booking.driver.user?.name || "Your driver"} is waiting outside!
+              </div>
+              <div className="text-xs text-white/90">
+                Provide your pickup PIN below
+              </div>
+            </div>
           </div>
-          <div className="text-3xl font-bold text-[#0F3D3E] tracking-wider">
+        </div>
+      )}
+
+      {/* PIN Display - More prominent when ARRIVED */}
+      {booking.pinCode && booking.status !== "IN_PROGRESS" && !booking.pickupVerified && (
+        <div className={`mt-4 p-5 ${booking.status === "ARRIVED" ? "bg-yellow-50 border-4 border-yellow-400 shadow-xl animate-bounce" : "bg-[#E0F2F1] border-2 border-[#00796B]"} rounded-xl text-center`}>
+          <div className={`text-sm ${booking.status === "ARRIVED" ? "text-yellow-800" : "text-[#00796B]"} font-semibold mb-2`}>
+            {booking.status === "ARRIVED" ? "🔔 PROVIDE THIS PIN TO YOUR DRIVER" : "Your Pickup PIN"}
+          </div>
+          <div className={`text-4xl font-bold ${booking.status === "ARRIVED" ? "text-yellow-900" : "text-[#0F3D3E]"} tracking-wider`}>
             {booking.pinCode}
           </div>
-          <div className="text-xs text-gray-600 mt-1">
-            Share this with your driver
+          <div className={`text-xs ${booking.status === "ARRIVED" ? "text-yellow-700 font-medium" : "text-gray-600"} mt-2`}>
+            {booking.status === "ARRIVED" ? "Driver is waiting - share this PIN now!" : "Share this with your driver"}
           </div>
         </div>
       )}
@@ -116,6 +135,8 @@ function RiderPageContent() {
   const router = useRouter();
   const fetchingRef = useRef(false);
   const previousBookingsRef = useRef<any[]>([]);
+  const pickupCoordsRef = useRef<{ lat: number; lng: number } | null>(null);
+  const dropoffCoordsRef = useRef<{ lat: number; lng: number } | null>(null);
   const [pickup, setPickup] = useState("");
   const [pickupCoords, setPickupCoords] = useState<{
     lat: number;
@@ -169,7 +190,9 @@ function RiderPageContent() {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
-          setPickupCoords({ lat: latitude, lng: longitude });
+          const coords = { lat: latitude, lng: longitude };
+          pickupCoordsRef.current = coords;
+          setPickupCoords(coords);
 
           // Optionally reverse geocode to get address
           try {
@@ -219,12 +242,15 @@ function RiderPageContent() {
           newDriverId: newBooking.driverId,
         });
 
+        // Check if driver cancelled (driverId was set but is now null, and status is CANCELED)
         if (
           oldBooking &&
           (oldBooking.status === "ASSIGNED" ||
             oldBooking.status === "EN_ROUTE" ||
             oldBooking.status === "ARRIVED") &&
-          newBooking.status === "CANCELED"
+          newBooking.status === "CANCELED" &&
+          oldBooking.driverId && // Had a driver before
+          !newBooking.driverId // Driver is now null (driver cancelled)
         ) {
           // Driver cancelled! Show the "finding another driver" screen
           console.log("🚨 Driver cancelled ride:", newBooking.id);
@@ -252,6 +278,87 @@ function RiderPageContent() {
             setFindingAnotherDriver(false);
             setCancelledBookingId(null);
           }, 5000);
+        }
+        // If rider cancelled (status is CANCELED but driverId didn't change to null), 
+        // just let it cancel normally - no special screen needed
+
+        // Check if driver has arrived (status changed to ARRIVED)
+        if (
+          oldBooking &&
+          oldBooking.status !== "ARRIVED" &&
+          newBooking.status === "ARRIVED"
+        ) {
+          // Driver has arrived! Show notification
+          console.log("🚗 Driver has arrived for booking:", newBooking.id);
+          
+          // Play notification sound immediately
+          (async () => {
+            try {
+              const { playNotificationSound } = await import("@/lib/notifications/sound");
+              playNotificationSound();
+            } catch (error) {
+              console.error("Error playing notification sound:", error);
+            }
+          })();
+          
+          // Flash tab title immediately
+          (async () => {
+            try {
+              const { updateTabTitleCount } = await import("@/lib/notifications/tabTitle");
+              updateTabTitleCount(1); // Use 1 to indicate driver arrived
+            } catch (error) {
+              console.error("Error updating tab title:", error);
+            }
+          })();
+          
+          // Show browser notification
+          if ("Notification" in window) {
+            if (Notification.permission === "granted") {
+              const driverName = newBooking.driver?.user?.name || "Your driver";
+              const notification = new Notification("Driver Has Arrived!", {
+                body: `${driverName} is waiting outside. Please provide your pickup PIN.`,
+                icon: "/favicon.ico",
+                tag: `driver-arrived-${newBooking.id}`,
+                requireInteraction: false,
+                badge: "/favicon.ico",
+              });
+
+              setTimeout(() => {
+                notification.close();
+              }, 10000); // Show for 10 seconds
+
+              notification.onclick = () => {
+                window.focus();
+                notification.close();
+              };
+            } else if (Notification.permission === "default") {
+              // Request permission if not yet asked
+              Notification.requestPermission().then((permission) => {
+                if (permission === "granted") {
+                  const driverName = newBooking.driver?.user?.name || "Your driver";
+                  const notification = new Notification("Driver Has Arrived!", {
+                    body: `${driverName} is waiting outside. Please provide your pickup PIN.`,
+                    icon: "/favicon.ico",
+                    tag: `driver-arrived-${newBooking.id}`,
+                    requireInteraction: false,
+                    badge: "/favicon.ico",
+                  });
+
+                  setTimeout(() => {
+                    notification.close();
+                  }, 10000);
+
+                  notification.onclick = () => {
+                    window.focus();
+                    notification.close();
+                  };
+                }
+              });
+            }
+          }
+          
+          // Ensure the booking is selected so rider can see the PIN
+          setSelectedBookingId(newBooking.id);
         }
 
         // Check if booking was just completed and needs rating
@@ -364,14 +471,18 @@ function RiderPageContent() {
 
             if (data.features && data.features.length > 0) {
               const address = data.features[0].place_name;
+              const coords = { lat: latitude, lng: longitude };
+              pickupCoordsRef.current = coords;
               setPickup(address);
-              setPickupCoords({ lat: latitude, lng: longitude });
+              setPickupCoords(coords);
             }
           } catch (error) {
             console.error("Error reverse geocoding:", error);
             // Still set coordinates even if reverse geocoding fails
+            const coords = { lat: latitude, lng: longitude };
+            pickupCoordsRef.current = coords;
             setPickup(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
-            setPickupCoords({ lat: latitude, lng: longitude });
+            setPickupCoords(coords);
           } finally {
             setLoadingLocation(false);
             resolve();
@@ -407,15 +518,41 @@ function RiderPageContent() {
   }
 
   async function handleEstimate() {
-    if (
-      !pickup ||
-      !dropoff ||
-      !pickupCoords ||
-      !dropoffCoords ||
-      pickupCoords.lat === 0 ||
-      dropoffCoords.lat === 0
-    ) {
-      alert("Please select valid pickup and dropoff locations");
+    // Use refs as fallback if state hasn't updated yet
+    const currentPickupCoords = pickupCoords || pickupCoordsRef.current;
+    const currentDropoffCoords = dropoffCoords || dropoffCoordsRef.current;
+    
+    // Validate pickup
+    if (!pickup) {
+      alert("Please select a pickup location");
+      return;
+    }
+    
+    if (!currentPickupCoords || 
+        currentPickupCoords.lat === 0 || 
+        currentPickupCoords.lat === null || 
+        currentPickupCoords.lat === undefined ||
+        currentPickupCoords.lng === 0 || 
+        currentPickupCoords.lng === null || 
+        currentPickupCoords.lng === undefined) {
+      alert("Pickup location coordinates are invalid. Please select your pickup location again.");
+      return;
+    }
+    
+    // Validate dropoff
+    if (!dropoff) {
+      alert("Please select a dropoff location");
+      return;
+    }
+    
+    if (!currentDropoffCoords || 
+        currentDropoffCoords.lat === 0 || 
+        currentDropoffCoords.lat === null || 
+        currentDropoffCoords.lat === undefined ||
+        currentDropoffCoords.lng === 0 || 
+        currentDropoffCoords.lng === null || 
+        currentDropoffCoords.lng === undefined) {
+      alert("Dropoff location coordinates are invalid. Please select your dropoff location again.");
       return;
     }
     setLoading(true);
@@ -424,8 +561,8 @@ function RiderPageContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          pickup: pickupCoords,
-          dropoff: dropoffCoords,
+          pickup: currentPickupCoords,
+          dropoff: currentDropoffCoords,
           requiresWheelchair: wheelchair,
         }),
       });
@@ -444,14 +581,23 @@ function RiderPageContent() {
       return;
     }
 
+    // Use refs as fallback if state hasn't updated yet
+    const currentPickupCoords = pickupCoords || pickupCoordsRef.current;
+    const currentDropoffCoords = dropoffCoords || dropoffCoordsRef.current;
+
+    if (!currentPickupCoords || !currentDropoffCoords) {
+      alert("Please select valid pickup and dropoff locations");
+      return;
+    }
+
     // Redirect to payment page with booking details
     const params = new URLSearchParams({
       pickup: pickup,
       dropoff: dropoff,
-      pickupLat: pickupCoords?.lat.toString() || "0",
-      pickupLng: pickupCoords?.lng.toString() || "0",
-      dropoffLat: dropoffCoords?.lat.toString() || "0",
-      dropoffLng: dropoffCoords?.lng.toString() || "0",
+      pickupLat: currentPickupCoords.lat.toString(),
+      pickupLng: currentPickupCoords.lng.toString(),
+      dropoffLat: currentDropoffCoords.lat.toString(),
+      dropoffLng: currentDropoffCoords.lng.toString(),
       amount: estimate.amount.toString(),
       distanceKm: estimate.distanceKm.toString(),
       wheelchair: wheelchair.toString(),
@@ -471,7 +617,15 @@ function RiderPageContent() {
   }, [pickup, pickupCoords, dropoff, dropoffCoords]);
 
   async function handleCancelBooking(bookingId: string) {
-    if (!confirm("Are you sure you want to cancel this ride?")) {
+    const booking = bookings.find((b) => b.id === bookingId);
+    const hasPayment = booking?.paymentIntentId;
+    const canRefund = booking?.status === "REQUESTED" || booking?.status === "ASSIGNED";
+    
+    const confirmMessage = hasPayment && canRefund
+      ? "Are you sure you want to cancel this ride? Your payment will be refunded."
+      : "Are you sure you want to cancel this ride?";
+    
+    if (!confirm(confirmMessage)) {
       return;
     }
 
@@ -484,6 +638,11 @@ function RiderPageContent() {
 
       if (res.ok) {
         await fetchBookings();
+        if (hasPayment && canRefund) {
+          alert("Ride cancelled. Your refund is being processed and will appear in your account within 5-10 business days.");
+        } else {
+          alert("Ride cancelled successfully.");
+        }
       } else {
         alert("Failed to cancel booking");
       }
@@ -817,6 +976,7 @@ function RiderPageContent() {
                 <MapboxAutocomplete
                   value={dropoff}
                   onChange={(address, coords) => {
+                    dropoffCoordsRef.current = coords;
                     setDropoff(address);
                     setDropoffCoords(coords);
                     // Auto-get current location for pickup if not set
@@ -955,28 +1115,100 @@ function RiderPageContent() {
                     <button
                       key={destination.id}
                       onClick={async () => {
-                        // Set dropoff from recent destination
-                        setDropoff(destination.dropoffAddress);
-                        setDropoffCoords({
-                          lat: destination.dropoffLat || 0,
-                          lng: destination.dropoffLng || 0,
-                        });
+                        try {
+                          // Set dropoff address first
+                          setDropoff(destination.dropoffAddress);
+                          
+                          let dropoffCoordsValue: { lat: number; lng: number } | null = null;
 
-                        // Get current location for pickup if not already set
-                        if (!pickup || !pickupCoords) {
-                          await handleUseCurrentLocation();
-                        }
-
-                        // Auto-trigger estimate after a short delay to ensure coords are set
-                        setTimeout(() => {
-                          if (
-                            pickupCoords &&
-                            destination.dropoffLat &&
-                            destination.dropoffLng
-                          ) {
-                            handleEstimate();
+                          // Check if destination has coordinates, if not geocode the address
+                          if (destination.dropoffLat && destination.dropoffLng && 
+                              destination.dropoffLat !== 0 && destination.dropoffLng !== 0) {
+                            // Use existing coordinates
+                            dropoffCoordsValue = {
+                              lat: destination.dropoffLat,
+                              lng: destination.dropoffLng,
+                            };
+                          } else {
+                            // Geocode the address to get coordinates
+                            const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+                            const response = await fetch(
+                              `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(destination.dropoffAddress)}.json?access_token=${token}&limit=1`
+                            );
+                            const data = await response.json();
+                            
+                            if (data.features && data.features.length > 0) {
+                              const [lng, lat] = data.features[0].center;
+                              dropoffCoordsValue = { lat, lng };
+                            } else {
+                              alert("Could not find coordinates for this destination. Please select it from the search instead.");
+                              return;
+                            }
                           }
-                        }, 500);
+
+                          // Set coordinates in both ref and state immediately
+                          dropoffCoordsRef.current = dropoffCoordsValue;
+                          setDropoffCoords(dropoffCoordsValue);
+
+                          // Get current location for pickup if not already set
+                          if (!pickup || !pickupCoords) {
+                            try {
+                              await handleUseCurrentLocation();
+                            } catch (error) {
+                              console.error("Failed to get current location:", error);
+                              // Still try to estimate if we have dropoff coords
+                            }
+                          }
+
+                          // Wait a bit for state to update, then trigger estimate
+                          // Use refs to get the latest coordinate values (not stale closure)
+                          setTimeout(() => {
+                            const currentPickup = pickupCoordsRef.current;
+                            const currentDropoff = dropoffCoordsRef.current;
+
+                            console.log("Checking coordinates for estimate:", {
+                              pickup: currentPickup,
+                              dropoff: currentDropoff,
+                              pickupState: pickupCoords,
+                              dropoffState: dropoffCoords,
+                            });
+
+                            if (
+                              currentPickup &&
+                              currentDropoff &&
+                              currentPickup.lat !== 0 &&
+                              currentPickup.lat !== null &&
+                              currentPickup.lat !== undefined &&
+                              currentPickup.lng !== 0 &&
+                              currentPickup.lng !== null &&
+                              currentPickup.lng !== undefined &&
+                              currentDropoff.lat !== 0 &&
+                              currentDropoff.lat !== null &&
+                              currentDropoff.lat !== undefined &&
+                              currentDropoff.lng !== 0 &&
+                              currentDropoff.lng !== null &&
+                              currentDropoff.lng !== undefined
+                            ) {
+                              // Ensure state is also updated before calling handleEstimate
+                              if (!pickupCoords) {
+                                setPickupCoords(currentPickup);
+                              }
+                              if (!dropoffCoords) {
+                                setDropoffCoords(currentDropoff);
+                              }
+                              handleEstimate();
+                            } else {
+                              console.warn("Coordinates not ready yet:", {
+                                pickup: currentPickup,
+                                dropoff: currentDropoff,
+                              });
+                              alert("Please wait for location to load, or select locations manually.");
+                            }
+                          }, 1000);
+                        } catch (error) {
+                          console.error("Error selecting recent destination:", error);
+                          alert("An error occurred. Please try selecting the destination from the search instead.");
+                        }
                       }}
                       className="w-full bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-[#00796B] hover:shadow-md transition-all text-left group"
                     >
@@ -1235,6 +1467,7 @@ function RiderPageContent() {
                 <MapboxAutocomplete
                   value={pickup}
                   onChange={(address, coords) => {
+                    pickupCoordsRef.current = coords;
                     setPickup(address);
                     setPickupCoords(coords);
                   }}

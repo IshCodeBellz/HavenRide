@@ -47,11 +47,17 @@ export default function RideDocumentationForm({
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-[60]"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-[60]"
       onClick={onCancel}
     >
       <div 
-        className="bg-white rounded-lg p-4 sm:p-6 max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
+        className="rounded-2xl p-4 sm:p-6 max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto border border-white/40 shadow-2xl"
+        style={{
+          background: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4">Document Ride Completion</h2>

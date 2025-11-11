@@ -118,6 +118,9 @@ model Driver {
   totalEarnings  Float @default(0)
   pendingPayout  Float @default(0)
 
+  // Rating (average of all driver ratings from riders)
+  rating Float? // Average rating (1-5) based on driverRating from RideRating
+
   updatedAt             DateTime         @updatedAt
   bookings              Booking[]        @relation("DriverBookings")
   verificationDocuments DriverDocument[]

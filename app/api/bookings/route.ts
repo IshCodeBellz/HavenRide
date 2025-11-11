@@ -26,13 +26,24 @@ export async function GET() {
               }
             }
           }
+        },
+        ratings: {
+          select: {
+            driverRating: true,
+            rideRating: true,
+            driverComment: true,
+            rideComment: true,
+          }
         }
       }
     });
     return NextResponse.json(list || []);
   } catch (error) {
     console.error("Error fetching bookings:", error);
-    return NextResponse.json([], { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch bookings", details: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
   }
 }
 

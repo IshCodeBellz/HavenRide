@@ -324,6 +324,71 @@ function DriverPastRidesContent() {
                   )}
                 </div>
               )}
+
+              {/* Rider's Rating (if completed and rated) */}
+              {booking.status === "COMPLETED" && booking.ratings && booking.ratings.length > 0 && (
+                <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="text-xs font-semibold text-green-800 mb-2">
+                    Rider's Rating
+                  </div>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs">
+                    <div className="flex items-center gap-1">
+                      <span className="text-gray-600">Driver:</span>
+                      <div className="flex items-center gap-0.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <span
+                            key={i}
+                            className={`text-sm ${
+                              i < booking.ratings[0].driverRating
+                                ? "text-yellow-400"
+                                : "text-gray-300"
+                            }`}
+                          >
+                            ★
+                          </span>
+                        ))}
+                        <span className="text-xs text-gray-500 ml-1">
+                          ({booking.ratings[0].driverRating}/5)
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-gray-600">Ride:</span>
+                      <div className="flex items-center gap-0.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <span
+                            key={i}
+                            className={`text-sm ${
+                              i < booking.ratings[0].rideRating
+                                ? "text-yellow-400"
+                                : "text-gray-300"
+                            }`}
+                          >
+                            ★
+                          </span>
+                        ))}
+                        <span className="text-xs text-gray-500 ml-1">
+                          ({booking.ratings[0].rideRating}/5)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  {(booking.ratings[0].driverComment || booking.ratings[0].rideComment) && (
+                    <div className="mt-2 pt-2 border-t border-green-300 space-y-1">
+                      {booking.ratings[0].driverComment && (
+                        <div className="text-xs text-gray-700">
+                          <span className="font-medium">Driver:</span> {booking.ratings[0].driverComment}
+                        </div>
+                      )}
+                      {booking.ratings[0].rideComment && (
+                        <div className="text-xs text-gray-700">
+                          <span className="font-medium">Ride:</span> {booking.ratings[0].rideComment}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>

@@ -185,7 +185,7 @@ export default function BookingMap({
         el.style.width = "48px";
         el.style.height = "48px";
         el.style.cursor = "pointer";
-        el.style.zIndex = "1000"; // Ensure it's visible above other elements
+        el.style.zIndex = "1"; // Behind ride request cards (which are z-10)
         el.innerHTML = `
           <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
             <defs>

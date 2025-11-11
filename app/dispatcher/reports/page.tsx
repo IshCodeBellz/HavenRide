@@ -14,10 +14,21 @@ function ReportsPageContent() {
     to: new Date().toISOString().split("T")[0],
   });
   const [exporting, setExporting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isMobile, setIsMobile] = useState(false);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchBookings();
     fetchDrivers();
+    
+    // Check if mobile on mount and resize
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   async function fetchBookings() {
@@ -57,6 +68,17 @@ function ReportsPageContent() {
     const bookingDate = new Date(b.pickupTime).toISOString().split("T")[0];
     return bookingDate >= dateRange.from && bookingDate <= dateRange.to;
   });
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedBookings = filteredBookings.slice(startIndex, endIndex);
+
+  // Reset to page 1 when date range changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [dateRange.from, dateRange.to]);
 
   // CSV export functions
   const exportBookingsCSV = () => {
@@ -165,14 +187,14 @@ function ReportsPageContent() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 md:py-8">
+          <div className="flex flex-col items-center gap-4 sm:gap-5 md:gap-6 relative">
             <Link
               href="/dispatcher"
-              className="text-gray-400 hover:text-gray-600"
+              className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 flex-shrink-0"
             >
               <svg
-                className="w-6 h-6"
+                className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -185,62 +207,58 @@ function ReportsPageContent() {
                 />
               </svg>
             </Link>
-            <h1 className="text-2xl font-bold text-[#263238]">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#263238] text-center">
               Reports & Analytics
             </h1>
-          </div>
-          <div className="flex gap-3">
-            <Link
-              href="/dispatcher/map"
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Live Map
-            </Link>
-            <Link
-              href="/dispatcher"
-              className="px-4 py-2 bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors"
-            >
-              Dashboard
-            </Link>
+            <div className="flex gap-3 sm:gap-4 md:gap-5 flex-shrink-0">
+              <Link
+                href="/dispatcher/map"
+                className="px-4 sm:px-5 md:px-6 lg:px-7 py-2.5 sm:py-3 md:py-3.5 text-base sm:text-lg border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
+              >
+                Live Map
+              </Link>
+              <Link
+                href="/dispatcher"
+                className="px-4 sm:px-5 md:px-6 lg:px-7 py-2.5 sm:py-3 md:py-3.5 text-base sm:text-lg bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors whitespace-nowrap"
+              >
+                Dashboard
+              </Link>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
         {/* Date Range Filter */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-[#263238] mb-4">
-            Date Range
-          </h2>
-          <div className="flex gap-4 items-end">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                From
-              </label>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            <h2 className="text-sm font-semibold text-[#263238] whitespace-nowrap">
+              Date Range
+            </h2>
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-gray-600 whitespace-nowrap">From</label>
               <input
                 type="date"
                 value={dateRange.from}
                 onChange={(e) =>
                   setDateRange({ ...dateRange, from: e.target.value })
                 }
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                To
-              </label>
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-gray-600 whitespace-nowrap">To</label>
               <input
                 type="date"
                 value={dateRange.to}
                 onChange={(e) =>
                   setDateRange({ ...dateRange, to: e.target.value })
                 }
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
               />
             </div>
             <button
-              className="px-6 py-2 bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors"
+              className="px-4 py-1.5 text-sm bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors whitespace-nowrap"
               onClick={() => {
                 fetchBookings();
                 fetchDrivers();
@@ -248,15 +266,15 @@ function ReportsPageContent() {
             >
               Apply Filter
             </button>
-            <div className="relative">
+            <div className="flex items-center gap-2 ml-auto">
               <button
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                className="px-4 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1.5"
                 onClick={exportBookingsCSV}
                 disabled={exporting}
               >
                 {exporting ? (
                   <>
-                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24">
                       <circle
                         className="opacity-25"
                         cx="12"
@@ -272,12 +290,12 @@ function ReportsPageContent() {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       />
                     </svg>
-                    Exporting...
+                    <span className="text-xs">Exporting...</span>
                   </>
                 ) : (
                   <>
                     <svg
-                      className="w-4 h-4"
+                      className="w-3.5 h-3.5"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -289,31 +307,31 @@ function ReportsPageContent() {
                         d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                       />
                     </svg>
-                    Export Bookings
+                    <span className="text-xs">Export Bookings</span>
                   </>
                 )}
               </button>
-            </div>
-            <button
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
-              onClick={exportDriverPerformanceCSV}
-              disabled={exporting}
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+              <button
+                className="px-4 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1.5"
+                onClick={exportDriverPerformanceCSV}
+                disabled={exporting}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              Export Drivers
-            </button>
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                <span className="text-xs">Export Drivers</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -419,10 +437,17 @@ function ReportsPageContent() {
         </div>
 
         {/* Recent Bookings */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-[#263238] mb-4">
-            Recent Bookings
-          </h2>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 overflow-hidden">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-[#263238]">
+              Recent Bookings
+            </h2>
+            {filteredBookings.length > 0 && (
+              <span className="text-sm text-gray-600">
+                Showing {startIndex + 1}-{Math.min(endIndex, filteredBookings.length)} of {filteredBookings.length}
+              </span>
+            )}
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
@@ -445,7 +470,7 @@ function ReportsPageContent() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredBookings.slice(0, 20).map((booking) => (
+                {paginatedBookings.map((booking) => (
                   <tr key={booking.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm font-mono text-gray-600">
                       {booking.id.slice(0, 8)}...
@@ -487,6 +512,60 @@ function ReportsPageContent() {
               </tbody>
             </table>
           </div>
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+                <div className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
+                  Page {currentPage} of {totalPages}
+                </div>
+                <div className="flex items-center gap-1 sm:gap-2 justify-center w-full sm:w-auto overflow-x-auto pb-1 -mx-1 px-1 sm:mx-0 sm:px-0">
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="px-2 sm:px-3 py-1.5 text-xs sm:text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap flex-shrink-0"
+                  >
+                    Prev
+                  </button>
+                  <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
+                    {Array.from({ length: Math.min(isMobile ? 3 : 5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      const maxVisible = isMobile ? 3 : 5;
+                      if (totalPages <= maxVisible) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= Math.ceil(maxVisible / 2)) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - Math.floor(maxVisible / 2)) {
+                        pageNum = totalPages - maxVisible + 1 + i;
+                      } else {
+                        pageNum = currentPage - Math.floor(maxVisible / 2) + i;
+                      }
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={`px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm rounded-lg transition-colors flex-shrink-0 min-w-[2rem] sm:min-w-[2.5rem] ${
+                            currentPage === pageNum
+                              ? "bg-[#00796B] text-white"
+                              : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-2 sm:px-3 py-1.5 text-xs sm:text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap flex-shrink-0"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

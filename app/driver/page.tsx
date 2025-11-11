@@ -491,7 +491,7 @@ function DriverPageContent() {
         </div>
 
         {/* Job Availability - Bottom (moved up to avoid SOS button) */}
-        <div className="absolute bottom-24 left-4 right-4 z-10">
+        <div className="absolute bottom-24 left-4 right-4 z-20">
           {initialLoadRef.current ? (
             <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg text-center">
               <div className="inline-block p-2 sm:p-3 bg-gray-100 rounded-full mb-3">

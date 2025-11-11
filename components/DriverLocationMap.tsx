@@ -254,17 +254,31 @@ export default function DriverLocationMap({
           currentDriverLocation.lat,
         ]);
       } else {
+        // Create custom car icon marker
         const el = document.createElement("div");
         el.className = "driver-marker";
-        el.style.width = "50px";
-        el.style.height = "50px";
-        el.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300BCD4"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>')`;
-        el.style.backgroundSize = "contain";
-        el.style.backgroundRepeat = "no-repeat";
-        el.style.backgroundPosition = "center";
-        el.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.3))";
+        el.style.width = "48px";
+        el.style.height = "48px";
         el.style.cursor = "pointer";
         el.style.zIndex = "1"; // Marker should be behind drawer overlays
+        el.innerHTML = `
+          <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+              </filter>
+            </defs>
+            <g filter="url(#shadow)">
+              <path d="M8 20L10 14C10.5 12.5 12 11.5 13.5 11.5H34.5C36 11.5 37.5 12.5 38 14L40 20H44C45.1 20 46 20.9 46 22V24C46 25.1 45.1 26 44 26H42V36C42 37.1 41.1 38 40 38H38C36.9 38 36 37.1 36 36V34H12V36C12 37.1 11.1 38 10 38H8C6.9 38 6 37.1 6 36V26H4C2.9 26 2 25.1 2 24V22C2 20.9 2.9 20 4 20H8Z" 
+                    fill="#00796B" 
+                    stroke="white" 
+                    stroke-width="2"/>
+              <circle cx="14" cy="30" r="3" fill="white"/>
+              <circle cx="34" cy="30" r="3" fill="white"/>
+              <path d="M10 20H38L36 15H12L10 20Z" fill="#0F3D3E"/>
+            </g>
+          </svg>
+        `;
 
         driverMarker.current = new mapboxgl.Marker({
           element: el,
@@ -273,7 +287,7 @@ export default function DriverLocationMap({
           .setLngLat([currentDriverLocation.lng, currentDriverLocation.lat])
           .setPopup(
             new mapboxgl.Popup({ offset: 25 }).setHTML(
-              "<strong>Driver</strong>"
+              "<strong>Your Location</strong>"
             )
           )
           .addTo(map.current);

@@ -151,30 +151,82 @@ export default function BookingMap({
 
   // Update driver marker
   useEffect(() => {
-    if (!map.current || !driverLocation || driverLocation.lat === 0) return;
-
-    if (driverMarker.current) {
-      driverMarker.current.setLngLat([driverLocation.lng, driverLocation.lat]);
-    } else {
-      const el = document.createElement("div");
-      el.className = "w-10 h-10";
-      el.innerHTML = `
-        <div class="relative">
-          <div class="absolute inset-0 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl shadow-lg">
-            🚐
-          </div>
-        </div>
-      `;
-
-      driverMarker.current = new mapboxgl.Marker({ element: el })
-        .setLngLat([driverLocation.lng, driverLocation.lat])
-        .setPopup(
-          new mapboxgl.Popup().setHTML("<strong>Driver Location</strong>")
-        )
-        .addTo(map.current);
+    if (!map.current || !driverLocation) {
+      console.log("BookingMap - Driver marker: No map or location", {
+        hasMap: !!map.current,
+        hasLocation: !!driverLocation,
+        location: driverLocation,
+      });
+      return;
+    }
+    
+    // Check if location is valid (not 0,0)
+    if (driverLocation.lat === 0 && driverLocation.lng === 0) {
+      console.log("BookingMap - Driver marker: Invalid location (0,0)");
+      return;
     }
 
-    updateMapBounds();
+    console.log("BookingMap - Creating/updating driver marker at:", driverLocation);
+
+    const createOrUpdateMarker = () => {
+      if (!map.current) {
+        console.log("BookingMap - Map not available in createOrUpdateMarker");
+        return;
+      }
+
+      if (driverMarker.current) {
+        // Update existing marker position
+        console.log("BookingMap - Updating existing driver marker");
+        driverMarker.current.setLngLat([driverLocation.lng, driverLocation.lat]);
+      } else {
+        console.log("BookingMap - Creating new driver marker");
+        // Create custom car icon marker
+        const el = document.createElement("div");
+        el.style.width = "48px";
+        el.style.height = "48px";
+        el.style.cursor = "pointer";
+        el.style.zIndex = "1000"; // Ensure it's visible above other elements
+        el.innerHTML = `
+          <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="car-shadow-booking" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+              </filter>
+            </defs>
+            <g filter="url(#car-shadow-booking)">
+              <path d="M8 20L10 14C10.5 12.5 12 11.5 13.5 11.5H34.5C36 11.5 37.5 12.5 38 14L40 20H44C45.1 20 46 20.9 46 22V24C46 25.1 45.1 26 44 26H42V36C42 37.1 41.1 38 40 38H38C36.9 38 36 37.1 36 36V34H12V36C12 37.1 11.1 38 10 38H8C6.9 38 6 37.1 6 36V26H4C2.9 26 2 25.1 2 24V22C2 20.9 2.9 20 4 20H8Z" 
+                    fill="#00796B" 
+                    stroke="white" 
+                    stroke-width="2"/>
+              <circle cx="14" cy="30" r="3" fill="white"/>
+              <circle cx="34" cy="30" r="3" fill="white"/>
+              <path d="M10 20H38L36 15H12L10 20Z" fill="#0F3D3E"/>
+            </g>
+          </svg>
+        `;
+
+        driverMarker.current = new mapboxgl.Marker({
+          element: el,
+          anchor: "center",
+        })
+          .setLngLat([driverLocation.lng, driverLocation.lat])
+          .setPopup(
+            new mapboxgl.Popup({ offset: 25 }).setHTML("<strong>Your Location</strong>")
+          )
+          .addTo(map.current);
+        
+        console.log("BookingMap - Driver marker added successfully");
+      }
+
+      updateMapBounds();
+    };
+
+    // Wait for map to be fully loaded
+    if (map.current.loaded()) {
+      createOrUpdateMarker();
+    } else {
+      map.current.once("load", createOrUpdateMarker);
+    }
   }, [driverLocation]);
 
   // Draw route between pickup and dropoff
@@ -263,6 +315,10 @@ export default function BookingMap({
         maxZoom: 15,
         duration: 1000,
       });
+    } else if (driverLocation && driverLocation.lat !== 0) {
+      // If only driver location, center on it
+      map.current.setCenter([driverLocation.lng, driverLocation.lat]);
+      map.current.setZoom(15);
     }
   };
 

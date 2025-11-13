@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">HavenRide</string>
+    <string name="title_activity_main">HavenRide</string>
+    <string name="package_name">com.havenride.app</string>
+    <string name="custom_url_scheme">com.havenride.app</string>
+</resources>

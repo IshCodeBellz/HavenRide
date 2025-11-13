@@ -10,6 +10,20 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // PWA and mobile app support
+  async headers() {
+    return [
+      {
+        source: '/manifest.json',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/manifest+json',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

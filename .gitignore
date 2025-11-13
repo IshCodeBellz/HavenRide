@@ -34,3 +34,9 @@ coverage
 # User uploads
 /public/uploads/
 /public/uploads/documents/
+
+# Capacitor / Mobile App
+# Uncomment these if you don't want to commit native platform code
+# ios/
+# android/
+# .capacitor/

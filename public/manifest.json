@@ -1,0 +1,36 @@
+{
+  "name": "HavenRide - Accessible Transportation",
+  "short_name": "HavenRide",
+  "description": "Accessible transportation service for everyone",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0F3D3E",
+  "theme_color": "#0F3D3E",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/images/HavenRideIcon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/HavenRideIcon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["transportation", "travel"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Book a Ride",
+      "short_name": "Book",
+      "description": "Book a new ride",
+      "url": "/rider",
+      "icons": [{ "src": "/images/HavenRideIcon.png", "sizes": "96x96" }]
+    }
+  ]
+}
+

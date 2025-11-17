@@ -31,7 +31,11 @@ export default function SOSButton({ onTrigger }: SOSButtonProps) {
       {/* SOS Floating Button */}
       <button
         onClick={handleTriggerSOS}
-        className="fixed bottom-6 right-6 w-16 h-16 bg-red-600 rounded-full shadow-lg hover:bg-red-700 transition-all hover:scale-110 z-50 flex items-center justify-center"
+        className="fixed w-16 h-16 bg-red-600 rounded-full shadow-lg hover:bg-red-700 transition-all hover:scale-110 z-50 flex items-center justify-center safe-area-sos"
+        style={{
+          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)',
+          right: 'calc(env(safe-area-inset-right, 0px) + 1.5rem)',
+        }}
         title="Emergency SOS"
       >
         <span className="text-white font-bold text-lg">SOS</span>

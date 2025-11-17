@@ -21,7 +21,7 @@ export default function AppLayout({
       <main className="flex-1 overflow-auto">
         {/* Role Switcher - Visible for admins */}
         {isAdmin && userRole && (
-          <div className="sticky top-0 z-30 bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center">
+          <div className="sticky top-0 z-30 bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center safe-area-top">
             <div className="flex items-center gap-2">
               <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded">
                 ADMIN MODE

@@ -47,7 +47,7 @@ export default function Testimonials() {
                 {quote}
               </p>
               <div className="flex items-center justify-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-[#26A69A]/20 border border-[#26A69A]/40" />
+                <div className="h-10 w-10 rounded-full bg-[#DAAAB2]/20 border border-[#DAAAB2]/40" />
                 <span className="text-sm font-semibold text-[#263238]">
                   {name}
                 </span>

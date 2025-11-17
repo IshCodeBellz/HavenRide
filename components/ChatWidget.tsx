@@ -459,7 +459,7 @@ export default function ChatWidget({
             <div className="text-center">
               <div className="inline-block p-3 bg-white rounded-full shadow-sm mb-3">
                 <svg
-                  className="w-6 h-6 text-[#00796B] animate-spin"
+                  className="w-6 h-6 text-[#5C7E9B] animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"
                 >
@@ -486,7 +486,7 @@ export default function ChatWidget({
             <div className="text-center">
               <div className="inline-block p-4 bg-white rounded-full shadow-sm mb-3">
                 <svg
-                  className="w-8 h-8 text-[#00796B]"
+                  className="w-8 h-8 text-[#5C7E9B]"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -518,14 +518,14 @@ export default function ChatWidget({
               <div
                 className={`max-w-[70%] rounded-2xl px-4 py-2 shadow-sm ${
                   m.sender === sender
-                    ? "bg-[#00796B] text-white rounded-br-sm"
+                    ? "bg-[#5C7E9B] text-white rounded-br-sm"
                     : "bg-white text-gray-800 rounded-bl-sm"
                 }`}
               >
                 <div className="flex items-center gap-2 mb-1">
                   <span
                     className={`text-xs font-semibold ${
-                      m.sender === sender ? "text-[#E0F2F1]" : "text-[#00796B]"
+                      m.sender === sender ? "text-[#E0D5DB]" : "text-[#5C7E9B]"
                     }`}
                   >
                     {m.sender === "RIDER"
@@ -537,7 +537,7 @@ export default function ChatWidget({
                   <span
                     className={`text-xs ${
                       m.sender === sender
-                        ? "text-[#E0F2F1]/70"
+                        ? "text-[#E0D5DB]/70"
                         : "text-gray-500"
                     }`}
                   >
@@ -615,14 +615,14 @@ export default function ChatWidget({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#00796B] focus:ring-2 focus:ring-[#00796B]/20 transition-colors"
+            className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#5C7E9B] focus:ring-2 focus:ring-[#5C7E9B]/20 transition-colors"
             placeholder="Type a message..."
             autoComplete="off"
           />
           <button
             onClick={send}
             disabled={!input.trim()}
-            className="px-6 py-3 bg-[#00796B] text-white rounded-xl hover:bg-[#00695C] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 font-semibold shadow-sm"
+            className="px-6 py-3 bg-[#5C7E9B] text-white rounded-xl hover:bg-[#4A6B85] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 font-semibold shadow-sm"
           >
             <svg
               className="w-5 h-5"

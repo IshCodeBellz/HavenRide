@@ -45,9 +45,9 @@ function AdminPageContent() {
 
   return (
     <AppLayout userRole="ADMIN" isAdmin={isAdmin}>
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6 safe-area-content">
         {/* Header */}
-        <div className="mb-6 sm:mb-8">
+        <div className="mb-6 sm:mb-8 safe-area-top">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#263238] mb-2">
             Admin Dashboard
           </h1>
@@ -60,7 +60,7 @@ function AdminPageContent() {
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00796B] mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5C7E9B] mx-auto mb-4"></div>
               <p className="text-neutral-600">Loading statistics...</p>
             </div>
           </div>
@@ -71,9 +71,9 @@ function AdminPageContent() {
                 <h3 className="text-sm sm:text-base font-semibold text-neutral-700">
                   Total Users
                 </h3>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#E0F2F1] rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#E0D5DB] rounded-lg flex items-center justify-center">
                   <svg
-                    className="w-6 h-6 text-[#00796B]"
+                    className="w-6 h-6 text-[#5C7E9B]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -100,9 +100,9 @@ function AdminPageContent() {
                 <h3 className="text-sm sm:text-base font-semibold text-neutral-700">
                   Active Drivers
                 </h3>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#E0F2F1] rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#E0D5DB] rounded-lg flex items-center justify-center">
                   <svg
-                    className="w-6 h-6 text-[#00796B]"
+                    className="w-6 h-6 text-[#5C7E9B]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -129,9 +129,9 @@ function AdminPageContent() {
                 <h3 className="text-sm sm:text-base font-semibold text-neutral-700">
                   Today's Rides
                 </h3>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#E0F2F1] rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#E0D5DB] rounded-lg flex items-center justify-center">
                   <svg
-                    className="w-6 h-6 text-[#00796B]"
+                    className="w-6 h-6 text-[#5C7E9B]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -159,11 +159,11 @@ function AdminPageContent() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* User Management */}
           <Link href="/admin/users">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-4 sm:p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-4 sm:p-6 hover:shadow-lg hover:border-[#5C7E9B] transition-all cursor-pointer group">
               <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#E0F2F1] rounded-xl flex items-center justify-center group-hover:bg-[#00796B] transition-colors shrink-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#E0D5DB] rounded-xl flex items-center justify-center group-hover:bg-[#5C7E9B] transition-colors shrink-0">
                   <svg
-                    className="w-5 h-5 sm:w-6 sm:h-6 text-[#00796B] group-hover:text-white transition-colors"
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-[#5C7E9B] group-hover:text-white transition-colors"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -188,7 +188,7 @@ function AdminPageContent() {
               <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="text-neutral-600">View all users</span>
                 <svg
-                  className="w-5 h-5 text-neutral-400 group-hover:text-[#00796B] group-hover:translate-x-1 transition-all"
+                  className="w-5 h-5 text-neutral-400 group-hover:text-[#5C7E9B] group-hover:translate-x-1 transition-all"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -206,11 +206,11 @@ function AdminPageContent() {
 
           {/* Rides Monitor */}
           <Link href="/admin/rides">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#5C7E9B] transition-all cursor-pointer group">
               <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#E0F2F1] rounded-xl flex items-center justify-center group-hover:bg-[#00796B] transition-colors shrink-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#E0D5DB] rounded-xl flex items-center justify-center group-hover:bg-[#5C7E9B] transition-colors shrink-0">
                   <svg
-                    className="w-5 h-5 sm:w-6 sm:h-6 text-[#00796B] group-hover:text-white transition-colors"
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-[#5C7E9B] group-hover:text-white transition-colors"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -235,7 +235,7 @@ function AdminPageContent() {
               <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="text-neutral-600">View all rides</span>
                 <svg
-                  className="w-5 h-5 text-neutral-400 group-hover:text-[#00796B] group-hover:translate-x-1 transition-all"
+                  className="w-5 h-5 text-neutral-400 group-hover:text-[#5C7E9B] group-hover:translate-x-1 transition-all"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -253,11 +253,11 @@ function AdminPageContent() {
 
           {/* Finance & Billing */}
           <Link href="/admin/finance">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#5C7E9B] transition-all cursor-pointer group">
               <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-                <div className="w-12 h-12 bg-[#E0F2F1] rounded-xl flex items-center justify-center group-hover:bg-[#00796B] transition-colors">
+                <div className="w-12 h-12 bg-[#E0D5DB] rounded-xl flex items-center justify-center group-hover:bg-[#5C7E9B] transition-colors">
                   <svg
-                    className="w-6 h-6 text-[#00796B] group-hover:text-white transition-colors"
+                    className="w-6 h-6 text-[#5C7E9B] group-hover:text-white transition-colors"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -282,7 +282,7 @@ function AdminPageContent() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-neutral-600">View financial data</span>
                 <svg
-                  className="w-5 h-5 text-neutral-400 group-hover:text-[#00796B] group-hover:translate-x-1 transition-all"
+                  className="w-5 h-5 text-neutral-400 group-hover:text-[#5C7E9B] group-hover:translate-x-1 transition-all"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -300,11 +300,11 @@ function AdminPageContent() {
 
           {/* Compliance */}
           <Link href="/admin/compliance">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#5C7E9B] transition-all cursor-pointer group">
               <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-                <div className="w-12 h-12 bg-[#E0F2F1] rounded-xl flex items-center justify-center group-hover:bg-[#00796B] transition-colors">
+                <div className="w-12 h-12 bg-[#E0D5DB] rounded-xl flex items-center justify-center group-hover:bg-[#5C7E9B] transition-colors">
                   <svg
-                    className="w-6 h-6 text-[#00796B] group-hover:text-white transition-colors"
+                    className="w-6 h-6 text-[#5C7E9B] group-hover:text-white transition-colors"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -329,7 +329,7 @@ function AdminPageContent() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-neutral-600">View compliance data</span>
                 <svg
-                  className="w-5 h-5 text-neutral-400 group-hover:text-[#00796B] group-hover:translate-x-1 transition-all"
+                  className="w-5 h-5 text-neutral-400 group-hover:text-[#5C7E9B] group-hover:translate-x-1 transition-all"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -347,11 +347,11 @@ function AdminPageContent() {
 
           {/* Support Center */}
           <Link href="/admin/support">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#5C7E9B] transition-all cursor-pointer group">
               <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-                <div className="w-12 h-12 bg-[#E0F2F1] rounded-xl flex items-center justify-center group-hover:bg-[#00796B] transition-colors">
+                <div className="w-12 h-12 bg-[#E0D5DB] rounded-xl flex items-center justify-center group-hover:bg-[#5C7E9B] transition-colors">
                   <svg
-                    className="w-6 h-6 text-[#00796B] group-hover:text-white transition-colors"
+                    className="w-6 h-6 text-[#5C7E9B] group-hover:text-white transition-colors"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -376,7 +376,7 @@ function AdminPageContent() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-neutral-600">Manage support</span>
                 <svg
-                  className="w-5 h-5 text-neutral-400 group-hover:text-[#00796B] group-hover:translate-x-1 transition-all"
+                  className="w-5 h-5 text-neutral-400 group-hover:text-[#5C7E9B] group-hover:translate-x-1 transition-all"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -394,11 +394,11 @@ function AdminPageContent() {
 
           {/* Incident Management */}
           <Link href="/admin/incidents">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#5C7E9B] transition-all cursor-pointer group">
               <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-                <div className="w-12 h-12 bg-[#E0F2F1] rounded-xl flex items-center justify-center group-hover:bg-[#00796B] transition-colors">
+                <div className="w-12 h-12 bg-[#E0D5DB] rounded-xl flex items-center justify-center group-hover:bg-[#5C7E9B] transition-colors">
                   <svg
-                    className="w-6 h-6 text-[#00796B] group-hover:text-white transition-colors"
+                    className="w-6 h-6 text-[#5C7E9B] group-hover:text-white transition-colors"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -423,7 +423,7 @@ function AdminPageContent() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-neutral-600">View incidents</span>
                 <svg
-                  className="w-5 h-5 text-neutral-400 group-hover:text-[#00796B] group-hover:translate-x-1 transition-all"
+                  className="w-5 h-5 text-neutral-400 group-hover:text-[#5C7E9B] group-hover:translate-x-1 transition-all"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -441,11 +441,11 @@ function AdminPageContent() {
 
           {/* Dispatcher Management */}
           <Link href="/admin/dispatchers">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#00796B] transition-all cursor-pointer group">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-[#5C7E9B] transition-all cursor-pointer group">
               <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-                <div className="w-12 h-12 bg-[#E0F2F1] rounded-xl flex items-center justify-center group-hover:bg-[#00796B] transition-colors">
+                <div className="w-12 h-12 bg-[#E0D5DB] rounded-xl flex items-center justify-center group-hover:bg-[#5C7E9B] transition-colors">
                   <svg
-                    className="w-6 h-6 text-[#00796B] group-hover:text-white transition-colors"
+                    className="w-6 h-6 text-[#5C7E9B] group-hover:text-white transition-colors"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -470,7 +470,7 @@ function AdminPageContent() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-neutral-600">Manage dispatchers</span>
                 <svg
-                  className="w-5 h-5 text-neutral-400 group-hover:text-[#00796B] group-hover:translate-x-1 transition-all"
+                  className="w-5 h-5 text-neutral-400 group-hover:text-[#5C7E9B] group-hover:translate-x-1 transition-all"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -495,9 +495,9 @@ function AdminPageContent() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Link
               href="/admin/metrics"
-              className="flex items-center gap-4 p-4 rounded-lg border-2 border-gray-200 hover:border-[#00796B] hover:bg-[#E0F2F1]/30 transition-all group"
+              className="flex items-center gap-4 p-4 rounded-lg border-2 border-gray-200 hover:border-[#5C7E9B] hover:bg-[#E0D5DB]/30 transition-all group"
             >
-              <div className="w-10 h-10 bg-[#00796B] rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 bg-[#5C7E9B] rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                 <svg
                   className="w-5 h-5 text-white"
                   fill="none"
@@ -520,9 +520,9 @@ function AdminPageContent() {
 
             <Link
               href="/admin/ops"
-              className="flex items-center gap-4 p-4 rounded-lg border-2 border-gray-200 hover:border-[#00796B] hover:bg-[#E0F2F1]/30 transition-all group"
+              className="flex items-center gap-4 p-4 rounded-lg border-2 border-gray-200 hover:border-[#5C7E9B] hover:bg-[#E0D5DB]/30 transition-all group"
             >
-              <div className="w-10 h-10 bg-[#26A69A] rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 bg-[#DAAAB2] rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                 <svg
                   className="w-5 h-5 text-white"
                   fill="none"
@@ -551,9 +551,9 @@ function AdminPageContent() {
 
             <Link
               href="/admin/settings"
-              className="flex items-center gap-4 p-4 rounded-lg border-2 border-gray-200 hover:border-[#00796B] hover:bg-[#E0F2F1]/30 transition-all group"
+              className="flex items-center gap-4 p-4 rounded-lg border-2 border-gray-200 hover:border-[#5C7E9B] hover:bg-[#E0D5DB]/30 transition-all group"
             >
-              <div className="w-10 h-10 bg-[#4DB6AC] rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 bg-[#EED3D7] rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                 <svg
                   className="w-5 h-5 text-white"
                   fill="none"

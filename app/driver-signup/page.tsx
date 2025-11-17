@@ -79,7 +79,7 @@ export default function DriverSignupPage() {
             </p>
             <button
               onClick={() => router.push("/")}
-              className="bg-[#00796B] text-white px-10 py-4 rounded-xl font-semibold hover:bg-[#00796B]/90 transition-colors"
+              className="bg-[#5C7E9B] text-white px-10 py-4 rounded-xl font-semibold hover:bg-[#5C7E9B]/90 transition-colors"
             >
               Back to Home
             </button>
@@ -107,7 +107,7 @@ export default function DriverSignupPage() {
           {/* Benefits Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-              <div className="w-16 h-16 bg-[#00796B]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-[#5C7E9B]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <span className="text-3xl">💰</span>
               </div>
               <h3 className="font-semibold text-[#263238] mb-2">
@@ -118,7 +118,7 @@ export default function DriverSignupPage() {
               </p>
             </div>
             <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-              <div className="w-16 h-16 bg-[#00796B]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-[#5C7E9B]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <span className="text-3xl">📅</span>
               </div>
               <h3 className="font-semibold text-[#263238] mb-2">
@@ -129,7 +129,7 @@ export default function DriverSignupPage() {
               </p>
             </div>
             <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-              <div className="w-16 h-16 bg-[#00796B]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-[#5C7E9B]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <span className="text-3xl">❤️</span>
               </div>
               <h3 className="font-semibold text-[#263238] mb-2">
@@ -155,7 +155,7 @@ export default function DriverSignupPage() {
                     out the form below and we'll contact you.
                   </p>
                   <SignInButton mode="modal">
-                    <button className="bg-[#00796B] text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-[#00796B]/90 transition-colors">
+                    <button className="bg-[#5C7E9B] text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-[#5C7E9B]/90 transition-colors">
                       Sign In
                     </button>
                   </SignInButton>
@@ -181,7 +181,7 @@ export default function DriverSignupPage() {
                     value={formData.fullName}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                     placeholder="John Smith"
                   />
                 </div>
@@ -195,7 +195,7 @@ export default function DriverSignupPage() {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                     placeholder="john@example.com"
                   />
                 </div>
@@ -212,7 +212,7 @@ export default function DriverSignupPage() {
                     value={formData.phone}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                     placeholder="+44 7XXX XXXXXX"
                   />
                 </div>
@@ -226,7 +226,7 @@ export default function DriverSignupPage() {
                     value={formData.licenseNumber}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                     placeholder="License number"
                   />
                 </div>
@@ -241,7 +241,7 @@ export default function DriverSignupPage() {
                   value={formData.vehicleType}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 >
                   <option value="">Select vehicle type</option>
                   <option value="sedan">Sedan</option>
@@ -260,7 +260,7 @@ export default function DriverSignupPage() {
                   id="hasWheelchairVehicle"
                   checked={formData.hasWheelchairVehicle}
                   onChange={handleChange}
-                  className="w-5 h-5 text-[#00796B] border-gray-300 rounded focus:ring-[#00796B]"
+                  className="w-5 h-5 text-[#5C7E9B] border-gray-300 rounded focus:ring-[#5C7E9B]"
                 />
                 <label
                   htmlFor="hasWheelchairVehicle"
@@ -279,7 +279,7 @@ export default function DriverSignupPage() {
                   value={formData.message}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00796B] focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent resize-none"
                   placeholder="Why do you want to drive with HavenRide?"
                 />
               </div>
@@ -288,7 +288,7 @@ export default function DriverSignupPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 bg-[#00796B] text-white px-10 py-4 rounded-xl font-semibold hover:bg-[#00796B]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-[#5C7E9B] text-white px-10 py-4 rounded-xl font-semibold hover:bg-[#5C7E9B]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? "Submitting..." : "Submit Application"}
                 </button>
@@ -310,25 +310,25 @@ export default function DriverSignupPage() {
             </h3>
             <ul className="space-y-3 text-neutral-600">
               <li className="flex items-start gap-3">
-                <span className="text-[#00796B] mt-1">✓</span>
+                <span className="text-[#5C7E9B] mt-1">✓</span>
                 <span>
                   Valid UK driving license with at least 2 years experience
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-[#00796B] mt-1">✓</span>
+                <span className="text-[#5C7E9B] mt-1">✓</span>
                 <span>Clean driving record</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-[#00796B] mt-1">✓</span>
+                <span className="text-[#5C7E9B] mt-1">✓</span>
                 <span>Pass background check and DBS clearance</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-[#00796B] mt-1">✓</span>
+                <span className="text-[#5C7E9B] mt-1">✓</span>
                 <span>Vehicle must pass safety inspection</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-[#00796B] mt-1">✓</span>
+                <span className="text-[#5C7E9B] mt-1">✓</span>
                 <span>
                   Complete accessibility training (provided by HavenRide)
                 </span>

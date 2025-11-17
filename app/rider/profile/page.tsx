@@ -146,7 +146,7 @@ function AddPaymentMethodForm({
         <button
           type="submit"
           disabled={!stripe || processing}
-          className="flex-1 bg-[#00796B] text-white py-2 rounded-lg font-medium hover:bg-[#00695C] disabled:opacity-50"
+          className="flex-1 bg-[#5C7E9B] text-white py-2 rounded-lg font-medium hover:bg-[#4A6B85] disabled:opacity-50"
         >
           {processing ? "Saving..." : "Save Card"}
         </button>
@@ -563,7 +563,7 @@ function RiderProfileContent() {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00796B] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5C7E9B] mx-auto mb-4"></div>
           <p className="text-gray-600">Loading profile...</p>
         </div>
       </div>
@@ -571,16 +571,16 @@ function RiderProfileContent() {
   }
 
   return (
-    <div className="px-8 py-6 max-w-6xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#0F3D3E]">Your Account</h1>
+    <div className="px-8 py-6 max-w-6xl mx-auto safe-area-content">
+      <div className="mb-8 safe-area-top">
+        <h1 className="text-3xl font-bold text-[#5C7E9B]">Your Account</h1>
         <p className="text-gray-600">Manage your details and preferences</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Profile Information */}
         <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-[#0F3D3E] mb-6">
+          <h2 className="text-xl font-semibold text-[#5C7E9B] mb-6">
             Profile Information
           </h2>
 
@@ -598,7 +598,7 @@ function RiderProfileContent() {
                   if (parent) {
                     e.currentTarget.style.display = "none";
                     const fallback = document.createElement("div");
-                    fallback.className = "w-20 h-20 bg-[#0F3D3E] rounded-full flex items-center justify-center text-white text-2xl font-bold absolute";
+                    fallback.className = "w-20 h-20 bg-[#5C7E9B] rounded-full flex items-center justify-center text-white text-2xl font-bold absolute";
                     fallback.textContent = user?.firstName?.charAt(0) || "U";
                     parent.appendChild(fallback);
                   }
@@ -609,7 +609,7 @@ function RiderProfileContent() {
               />
             ) : null}
             {(!imageUrl && !user?.imageUrl) && (
-              <div className="w-20 h-20 bg-[#0F3D3E] rounded-full flex items-center justify-center text-white text-2xl font-bold">
+              <div className="w-20 h-20 bg-[#5C7E9B] rounded-full flex items-center justify-center text-white text-2xl font-bold">
                 {user?.firstName?.charAt(0) || "U"}
               </div>
             )}
@@ -618,7 +618,7 @@ function RiderProfileContent() {
               <button
                 onClick={handleChangePhotoClick}
                 disabled={uploadingPhoto}
-                className="text-[#00796B] text-sm font-medium hover:underline disabled:opacity-50"
+                className="text-[#5C7E9B] text-sm font-medium hover:underline disabled:opacity-50"
               >
                 {uploadingPhoto ? "Uploading..." : "Change Photo"}
               </button>
@@ -642,7 +642,7 @@ function RiderProfileContent() {
                     </span>
                   ))}
                 </div>
-                <span className="text-lg font-semibold text-[#0F3D3E]">
+                <span className="text-lg font-semibold text-[#5C7E9B]">
                   {rating.toFixed(1)}
                 </span>
                 <span className="text-sm text-gray-500">
@@ -661,7 +661,7 @@ function RiderProfileContent() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C7E9B]"
                 placeholder="John Doe"
               />
             </div>
@@ -674,7 +674,7 @@ function RiderProfileContent() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C7E9B]"
                 placeholder="johndoe@email.com"
               />
             </div>
@@ -687,7 +687,7 @@ function RiderProfileContent() {
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C7E9B]"
                 placeholder="+44 7911 123456"
               />
             </div>
@@ -695,7 +695,7 @@ function RiderProfileContent() {
             <button
               onClick={handleSaveProfile}
               disabled={saving}
-              className="w-full bg-[#00796B] text-white py-3 rounded-lg font-semibold hover:bg-[#00695C] transition-colors disabled:opacity-50"
+              className="w-full bg-[#5C7E9B] text-white py-3 rounded-lg font-semibold hover:bg-[#4A6B85] transition-colors disabled:opacity-50"
             >
               {saving ? "Saving..." : "Save Changes"}
             </button>
@@ -705,12 +705,12 @@ function RiderProfileContent() {
         {/* Saved Locations */}
         <div className="bg-white rounded-2xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-[#0F3D3E]">
+            <h2 className="text-xl font-semibold text-[#5C7E9B]">
               Saved Locations
             </h2>
             <button
               onClick={() => setShowAddLocation(true)}
-              className="text-[#00796B] hover:text-[#00695C] font-medium text-sm flex items-center gap-1"
+              className="text-[#5C7E9B] hover:text-[#4A6B85] font-medium text-sm flex items-center gap-1"
             >
               <svg
                 className="w-5 h-5"
@@ -742,9 +742,9 @@ function RiderProfileContent() {
                   className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-[#E0F2F1] rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-[#E0D5DB] rounded-full flex items-center justify-center">
                       <svg
-                        className="w-5 h-5 text-[#00796B]"
+                        className="w-5 h-5 text-[#5C7E9B]"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -795,12 +795,12 @@ function RiderProfileContent() {
         {/* Emergency Contacts */}
         <div className="bg-white rounded-2xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-[#0F3D3E]">
+            <h2 className="text-xl font-semibold text-[#5C7E9B]">
               Emergency Contacts
             </h2>
             <button
               onClick={() => setShowAddEmergencyContact(true)}
-              className="text-[#00796B] hover:text-[#00695C] font-medium text-sm flex items-center gap-1"
+              className="text-[#5C7E9B] hover:text-[#4A6B85] font-medium text-sm flex items-center gap-1"
             >
               <svg
                 className="w-5 h-5"
@@ -890,7 +890,7 @@ function RiderProfileContent() {
 
         {/* Accessibility Preferences */}
         <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-[#0F3D3E] mb-6">
+          <h2 className="text-xl font-semibold text-[#5C7E9B] mb-6">
             Accessibility Preferences
           </h2>
 
@@ -900,7 +900,7 @@ function RiderProfileContent() {
                 type="checkbox"
                 checked={alwaysWheelchair}
                 onChange={(e) => setAlwaysWheelchair(e.target.checked)}
-                className="w-5 h-5 text-[#00796B] border-gray-300 rounded focus:ring-[#00796B]"
+                className="w-5 h-5 text-[#5C7E9B] border-gray-300 rounded focus:ring-[#5C7E9B]"
               />
               <div>
                 <p className="font-medium text-gray-900">
@@ -917,7 +917,7 @@ function RiderProfileContent() {
                 type="checkbox"
                 checked={needsAssistance}
                 onChange={(e) => setNeedsAssistance(e.target.checked)}
-                className="w-5 h-5 text-[#00796B] border-gray-300 rounded focus:ring-[#00796B]"
+                className="w-5 h-5 text-[#5C7E9B] border-gray-300 rounded focus:ring-[#5C7E9B]"
               />
               <div>
                 <p className="font-medium text-gray-900">
@@ -933,7 +933,7 @@ function RiderProfileContent() {
 
         {/* Payment Methods */}
         <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-[#0F3D3E] mb-6">
+          <h2 className="text-xl font-semibold text-[#5C7E9B] mb-6">
             Payment Methods
           </h2>
 
@@ -1000,7 +1000,7 @@ function RiderProfileContent() {
 
           <button
             onClick={handleOpenAddPaymentMethod}
-            className="w-full bg-[#00796B] text-white py-3 rounded-lg font-semibold hover:bg-[#00695C] transition-colors"
+            className="w-full bg-[#5C7E9B] text-white py-3 rounded-lg font-semibold hover:bg-[#4A6B85] transition-colors"
           >
             Add New Card
           </button>
@@ -1012,7 +1012,7 @@ function RiderProfileContent() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-[#0F3D3E]">
+              <h3 className="text-xl font-semibold text-[#5C7E9B]">
                 Add Saved Location
               </h3>
               <button
@@ -1050,12 +1050,12 @@ function RiderProfileContent() {
                     onClick={() => setNewLocationLabel("Home")}
                     className={`p-3 border-2 rounded-lg flex flex-col items-center gap-2 transition-colors ${
                       newLocationLabel === "Home"
-                        ? "border-[#00796B] bg-[#E0F2F1]"
+                        ? "border-[#5C7E9B] bg-[#E0D5DB]"
                         : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
                     <svg
-                      className="w-6 h-6 text-[#00796B]"
+                      className="w-6 h-6 text-[#5C7E9B]"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -1074,12 +1074,12 @@ function RiderProfileContent() {
                     onClick={() => setNewLocationLabel("Work")}
                     className={`p-3 border-2 rounded-lg flex flex-col items-center gap-2 transition-colors ${
                       newLocationLabel === "Work"
-                        ? "border-[#00796B] bg-[#E0F2F1]"
+                        ? "border-[#5C7E9B] bg-[#E0D5DB]"
                         : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
                     <svg
-                      className="w-6 h-6 text-[#00796B]"
+                      className="w-6 h-6 text-[#5C7E9B]"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -1098,12 +1098,12 @@ function RiderProfileContent() {
                     onClick={() => setNewLocationLabel("Hospital")}
                     className={`p-3 border-2 rounded-lg flex flex-col items-center gap-2 transition-colors ${
                       newLocationLabel === "Hospital"
-                        ? "border-[#00796B] bg-[#E0F2F1]"
+                        ? "border-[#5C7E9B] bg-[#E0D5DB]"
                         : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
                     <svg
-                      className="w-6 h-6 text-[#00796B]"
+                      className="w-6 h-6 text-[#5C7E9B]"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -1124,7 +1124,7 @@ function RiderProfileContent() {
                   value={newLocationLabel}
                   onChange={(e) => setNewLocationLabel(e.target.value)}
                   placeholder="Or enter custom label"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C7E9B]"
                 />
               </div>
 
@@ -1158,7 +1158,7 @@ function RiderProfileContent() {
                 <button
                   onClick={handleAddLocation}
                   disabled={addingLocation || !newLocationLabel || !newLocationAddress || !newLocationCoords}
-                  className="flex-1 bg-[#00796B] text-white py-2 rounded-lg font-medium hover:bg-[#00695C] disabled:opacity-50"
+                  className="flex-1 bg-[#5C7E9B] text-white py-2 rounded-lg font-medium hover:bg-[#4A6B85] disabled:opacity-50"
                 >
                   {addingLocation ? "Adding..." : "Add Location"}
                 </button>
@@ -1173,7 +1173,7 @@ function RiderProfileContent() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-[#0F3D3E]">
+              <h3 className="text-xl font-semibold text-[#5C7E9B]">
                 Add Emergency Contact
               </h3>
               <button
@@ -1212,7 +1212,7 @@ function RiderProfileContent() {
                   value={newContactName}
                   onChange={(e) => setNewContactName(e.target.value)}
                   placeholder="John Doe"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C7E9B]"
                 />
               </div>
 
@@ -1225,7 +1225,7 @@ function RiderProfileContent() {
                   value={newContactPhone}
                   onChange={(e) => setNewContactPhone(e.target.value)}
                   placeholder="+44 7911 123456"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C7E9B]"
                 />
               </div>
 
@@ -1236,7 +1236,7 @@ function RiderProfileContent() {
                 <select
                   value={newContactRelationship}
                   onChange={(e) => setNewContactRelationship(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C7E9B]"
                 >
                   <option value="">Select relationship</option>
                   <option value="family">Family</option>
@@ -1253,7 +1253,7 @@ function RiderProfileContent() {
                   id="isPrimary"
                   checked={newContactIsPrimary}
                   onChange={(e) => setNewContactIsPrimary(e.target.checked)}
-                  className="w-4 h-4 text-[#00796B] border-gray-300 rounded focus:ring-[#00796B]"
+                  className="w-4 h-4 text-[#5C7E9B] border-gray-300 rounded focus:ring-[#5C7E9B]"
                 />
                 <label htmlFor="isPrimary" className="text-sm text-gray-700">
                   Set as primary emergency contact
@@ -1276,7 +1276,7 @@ function RiderProfileContent() {
                 <button
                   onClick={handleAddEmergencyContact}
                   disabled={addingContact || !newContactName || !newContactPhone}
-                  className="flex-1 bg-[#00796B] text-white py-2 rounded-lg font-medium hover:bg-[#00695C] disabled:opacity-50"
+                  className="flex-1 bg-[#5C7E9B] text-white py-2 rounded-lg font-medium hover:bg-[#4A6B85] disabled:opacity-50"
                 >
                   {addingContact ? "Adding..." : "Add Contact"}
                 </button>
@@ -1291,7 +1291,7 @@ function RiderProfileContent() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-[#0F3D3E]">
+              <h3 className="text-xl font-semibold text-[#5C7E9B]">
                 Add Payment Method
               </h3>
               <button

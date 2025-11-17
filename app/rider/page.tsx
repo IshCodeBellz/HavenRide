@@ -69,7 +69,7 @@ function ActiveBookingCard({
 
       {/* Driver Arrived Banner */}
       {booking.status === "ARRIVED" && booking.driver && (
-        <div className="mb-3 p-4 bg-gradient-to-r from-[#00796B] to-[#00695C] rounded-xl text-white shadow-lg animate-pulse">
+        <div className="mb-3 p-4 bg-gradient-to-r from-[#5C7E9B] to-[#4A6B85] rounded-xl text-white shadow-lg animate-pulse">
           <div className="flex items-center gap-2">
             <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -88,11 +88,11 @@ function ActiveBookingCard({
 
       {/* PIN Display - More prominent when ARRIVED */}
       {booking.pinCode && booking.status !== "IN_PROGRESS" && !booking.pickupVerified && (
-        <div className={`mt-4 p-5 ${booking.status === "ARRIVED" ? "bg-yellow-50 border-4 border-yellow-400 shadow-xl animate-bounce" : "bg-[#E0F2F1] border-2 border-[#00796B]"} rounded-xl text-center`}>
-          <div className={`text-sm ${booking.status === "ARRIVED" ? "text-yellow-800" : "text-[#00796B]"} font-semibold mb-2`}>
+        <div className={`mt-4 p-5 ${booking.status === "ARRIVED" ? "bg-yellow-50 border-4 border-yellow-400 shadow-xl animate-bounce" : "bg-[#E0D5DB] border-2 border-[#5C7E9B]"} rounded-xl text-center`}>
+          <div className={`text-sm ${booking.status === "ARRIVED" ? "text-yellow-800" : "text-[#5C7E9B]"} font-semibold mb-2`}>
             {booking.status === "ARRIVED" ? "🔔 PROVIDE THIS PIN TO YOUR DRIVER" : "Your Pickup PIN"}
           </div>
-          <div className={`text-4xl font-bold ${booking.status === "ARRIVED" ? "text-yellow-900" : "text-[#0F3D3E]"} tracking-wider`}>
+          <div className={`text-4xl font-bold ${booking.status === "ARRIVED" ? "text-yellow-900" : "text-[#5C7E9B]"} tracking-wider`}>
             {booking.pinCode}
           </div>
           <div className={`text-xs ${booking.status === "ARRIVED" ? "text-yellow-700 font-medium" : "text-gray-600"} mt-2`}>
@@ -116,7 +116,7 @@ function ActiveBookingCard({
             markAsRead();
             onOpenChat(booking.id);
           }}
-          className="w-full sm:flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-[#00796B] text-white rounded-lg sm:rounded-xl hover:bg-[#00695C] transition-colors font-semibold relative"
+          className="w-full sm:flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-[#5C7E9B] text-white rounded-lg sm:rounded-xl hover:bg-[#4A6B85] transition-colors font-semibold relative"
         >
           Open Chat
           {unreadCount > 0 && (
@@ -698,7 +698,7 @@ function RiderPageContent() {
                   />
                 </svg>
               </div>
-              <h2 className="text-xl font-bold text-[#0F3D3E] mb-1">
+              <h2 className="text-xl font-bold text-[#5C7E9B] mb-1">
                 Finding Another Driver
               </h2>
               <p className="text-sm text-gray-600">
@@ -710,24 +710,24 @@ function RiderPageContent() {
             {/* Booking Details - Minimal */}
             <div className="bg-orange-50 rounded-xl p-4 mb-4 space-y-2">
               <div className="flex items-start gap-2">
-                <div className="w-6 h-6 bg-[#00796B] rounded-full flex items-center justify-center shrink-0">
+                <div className="w-6 h-6 bg-[#5C7E9B] rounded-full flex items-center justify-center shrink-0">
                   <span className="text-white font-bold text-xs">A</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-gray-600 font-medium">Pickup</p>
-                  <p className="text-sm font-semibold text-[#0F3D3E] truncate">
+                  <p className="text-sm font-semibold text-[#5C7E9B] truncate">
                     {cancelledBooking.pickupAddress.split(",")[0]}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-2">
-                <div className="w-6 h-6 bg-[#0F3D3E] rounded-full flex items-center justify-center shrink-0">
+                <div className="w-6 h-6 bg-[#5C7E9B] rounded-full flex items-center justify-center shrink-0">
                   <span className="text-white font-bold text-xs">B</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-gray-600 font-medium">Dropoff</p>
-                  <p className="text-sm font-semibold text-[#0F3D3E] truncate">
+                  <p className="text-sm font-semibold text-[#5C7E9B] truncate">
                     {cancelledBooking.dropoffAddress.split(",")[0]}
                   </p>
                 </div>
@@ -796,7 +796,7 @@ function RiderPageContent() {
                   />
                 </svg>
               </div>
-              <h2 className="text-xl font-bold text-[#0F3D3E] mb-1">
+              <h2 className="text-xl font-bold text-[#5C7E9B] mb-1">
                 Finding Your Driver
               </h2>
               <p className="text-sm text-gray-600">
@@ -817,24 +817,24 @@ function RiderPageContent() {
 
               <div className="border-t border-blue-200 pt-3 space-y-2">
                 <div className="flex items-start gap-2">
-                  <div className="w-6 h-6 bg-[#00796B] rounded-full flex items-center justify-center shrink-0">
+                  <div className="w-6 h-6 bg-[#5C7E9B] rounded-full flex items-center justify-center shrink-0">
                     <span className="text-white font-bold text-xs">A</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-gray-600 font-medium">Pickup</p>
-                    <p className="text-sm font-semibold text-[#0F3D3E] truncate">
+                    <p className="text-sm font-semibold text-[#5C7E9B] truncate">
                       {pendingBooking.pickupAddress}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2">
-                  <div className="w-6 h-6 bg-[#0F3D3E] rounded-full flex items-center justify-center shrink-0">
+                  <div className="w-6 h-6 bg-[#5C7E9B] rounded-full flex items-center justify-center shrink-0">
                     <span className="text-white font-bold text-xs">B</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-gray-600 font-medium">Dropoff</p>
-                    <p className="text-sm font-semibold text-[#0F3D3E] truncate">
+                    <p className="text-sm font-semibold text-[#5C7E9B] truncate">
                       {pendingBooking.dropoffAddress}
                     </p>
                   </div>
@@ -845,7 +845,7 @@ function RiderPageContent() {
                 <div className="border-t border-blue-200 pt-3">
                   <div className="bg-white rounded-lg p-3 text-center">
                     <p className="text-xs text-gray-600">Your PIN:</p>
-                    <p className="text-2xl font-bold text-[#00796B] tracking-wider">
+                    <p className="text-2xl font-bold text-[#5C7E9B] tracking-wider">
                       {pendingBooking.pinCode}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
@@ -861,7 +861,7 @@ function RiderPageContent() {
                     <span className="text-xs text-gray-600">
                       Estimated Fare
                     </span>
-                    <span className="text-lg font-bold text-[#0F3D3E]">
+                    <span className="text-lg font-bold text-[#5C7E9B]">
                       £{pendingBooking.priceEstimate.amount?.toFixed(2)}
                     </span>
                   </div>
@@ -877,15 +877,15 @@ function RiderPageContent() {
             <div className="flex justify-center mb-4">
               <div className="flex space-x-2">
                 <div
-                  className="w-2 h-2 bg-[#00796B] rounded-full animate-bounce"
+                  className="w-2 h-2 bg-[#5C7E9B] rounded-full animate-bounce"
                   style={{ animationDelay: "0ms" }}
                 ></div>
                 <div
-                  className="w-2 h-2 bg-[#00796B] rounded-full animate-bounce"
+                  className="w-2 h-2 bg-[#5C7E9B] rounded-full animate-bounce"
                   style={{ animationDelay: "150ms" }}
                 ></div>
                 <div
-                  className="w-2 h-2 bg-[#00796B] rounded-full animate-bounce"
+                  className="w-2 h-2 bg-[#5C7E9B] rounded-full animate-bounce"
                   style={{ animationDelay: "300ms" }}
                 ></div>
               </div>
@@ -925,38 +925,14 @@ function RiderPageContent() {
     <div className="h-full flex flex-col bg-gray-50 relative">
       {/* Map Section - Full height */}
       <div className="relative flex-1 h-[calc(100vh-80px)] bg-gray-200">
-        {(pickupCoords || dropoffCoords) && (
-          <BookingMap
-            pickup={pickupCoords}
-            dropoff={dropoffCoords}
-            className="w-full h-full"
-          />
-        )}
-        {!pickupCoords && !dropoffCoords && (
-          <div className="w-full h-full flex items-center justify-center bg-gray-100">
-            <div className="text-center text-gray-500">
-              <svg
-                className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
-                />
-              </svg>
-              <p className="text-xs sm:text-sm font-medium">
-                Map will appear here
-              </p>
-            </div>
-          </div>
-        )}
+        <BookingMap
+          pickup={pickupCoords}
+          dropoff={dropoffCoords}
+          className="w-full h-full"
+        />
 
         {/* Where to Search Box - Overlay on Map (Mobile) */}
-        <div className="md:hidden absolute top-4 left-4 right-4 z-10">
+        <div className="md:hidden absolute left-4 right-4 z-10" style={{ top: 'calc(env(safe-area-inset-top, 0px) + 1rem)' }}>
           <div className="bg-white rounded-2xl p-4 shadow-2xl border border-gray-100">
             <div className="flex items-center gap-3">
               <svg
@@ -1019,7 +995,7 @@ function RiderPageContent() {
                 id="wheelchair-mobile"
                 checked={wheelchair}
                 onChange={(e) => setWheelchair(e.target.checked)}
-                className="w-4 h-4 text-[#00796B] rounded border-gray-300 focus:ring-[#00796B]"
+                className="w-4 h-4 text-[#5C7E9B] rounded border-gray-300 focus:ring-[#5C7E9B]"
               />
               <label
                 htmlFor="wheelchair-mobile"
@@ -1074,7 +1050,7 @@ function RiderPageContent() {
                       id="wheelchair-desktop"
                       checked={wheelchair}
                       onChange={(e) => setWheelchair(e.target.checked)}
-                      className="w-4 h-4 text-[#00796B] rounded border-gray-300 focus:ring-[#00796B]"
+                      className="w-4 h-4 text-[#5C7E9B] rounded border-gray-300 focus:ring-[#5C7E9B]"
                     />
                     <label
                       htmlFor="wheelchair-desktop"
@@ -1210,12 +1186,12 @@ function RiderPageContent() {
                           alert("An error occurred. Please try selecting the destination from the search instead.");
                         }
                       }}
-                      className="w-full bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-[#00796B] hover:shadow-md transition-all text-left group"
+                      className="w-full bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-[#5C7E9B] hover:shadow-md transition-all text-left group"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center shrink-0 group-hover:bg-[#E0F2F1] transition-colors">
+                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center shrink-0 group-hover:bg-[#E0D5DB] transition-colors">
                           <svg
-                            className="w-6 h-6 text-gray-600 group-hover:text-[#00796B]"
+                            className="w-6 h-6 text-gray-600 group-hover:text-[#5C7E9B]"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -1269,7 +1245,7 @@ function RiderPageContent() {
                         pickupCoords?.lat === 0 ||
                         dropoffCoords?.lat === 0
                       }
-                      className="w-full bg-[#00796B] text-white py-3 rounded-xl font-semibold text-base hover:bg-[#00695C] transition-colors disabled:opacity-50"
+                      className="w-full bg-[#5C7E9B] text-white py-3 rounded-xl font-semibold text-base hover:bg-[#4A6B85] transition-colors disabled:opacity-50"
                     >
                       {loading ? "Estimating..." : "Get Estimate"}
                     </button>
@@ -1277,12 +1253,12 @@ function RiderPageContent() {
 
                   {estimate && (
                     <div className="space-y-3">
-                      <div className="bg-[#E0F2F1] rounded-xl p-4">
+                      <div className="bg-[#E0D5DB] rounded-xl p-4">
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-sm text-gray-700">
                             Estimated Fare
                           </span>
-                          <span className="font-bold text-2xl text-[#0F3D3E]">
+                          <span className="font-bold text-2xl text-[#5C7E9B]">
                             £{estimate.amount.toFixed(2)}
                           </span>
                         </div>
@@ -1293,7 +1269,7 @@ function RiderPageContent() {
                       <button
                         onClick={handleBook}
                         disabled={loading}
-                        className="w-full bg-[#00796B] text-white py-3 rounded-xl font-semibold text-base hover:bg-[#00695C] transition-colors"
+                        className="w-full bg-[#5C7E9B] text-white py-3 rounded-xl font-semibold text-base hover:bg-[#4A6B85] transition-colors"
                       >
                         {loading ? "Booking..." : "Confirm Booking"}
                       </button>
@@ -1318,7 +1294,7 @@ function RiderPageContent() {
             {/* Pickup Location Confirmation */}
             <div className="space-y-2 pb-3 border-b border-gray-200">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-[#00796B] rounded-full flex items-center justify-center shrink-0 mt-1">
+                <div className="w-8 h-8 bg-[#5C7E9B] rounded-full flex items-center justify-center shrink-0 mt-1">
                   <span className="text-white font-bold text-sm">A</span>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -1329,7 +1305,7 @@ function RiderPageContent() {
                     <button
                       onClick={handleUseCurrentLocation}
                       disabled={loadingLocation}
-                      className="flex items-center gap-2 text-sm text-[#00796B] hover:text-[#0F3D3E] font-medium disabled:opacity-50"
+                      className="flex items-center gap-2 text-sm text-[#5C7E9B] hover:text-[#5C7E9B] font-medium disabled:opacity-50"
                     >
                       <svg
                         className="w-4 h-4"
@@ -1356,12 +1332,12 @@ function RiderPageContent() {
                     </button>
                   ) : (
                     <div className="space-y-1">
-                      <p className="text-sm font-semibold text-[#0F3D3E] wrap-break-word">
+                      <p className="text-sm font-semibold text-[#5C7E9B] wrap-break-word">
                         {pickup}
                       </p>
                       <button
                         onClick={() => setEditingPickup(true)}
-                        className="text-xs text-[#00796B] hover:text-[#0F3D3E] font-medium"
+                        className="text-xs text-[#5C7E9B] hover:text-[#5C7E9B] font-medium"
                       >
                         Edit location
                       </button>
@@ -1374,12 +1350,12 @@ function RiderPageContent() {
             {/* Destination Info */}
             <div className="space-y-2">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-[#0F3D3E] rounded-full flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 bg-[#5C7E9B] rounded-full flex items-center justify-center shrink-0">
                   <span className="text-white font-bold text-sm">B</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-gray-600 font-medium">Going to</p>
-                  <p className="text-sm font-semibold text-[#0F3D3E] wrap-break-word">
+                  <p className="text-sm font-semibold text-[#5C7E9B] wrap-break-word">
                     {dropoff}
                   </p>
                 </div>
@@ -1391,7 +1367,7 @@ function RiderPageContent() {
               <button
                 onClick={handleEstimate}
                 disabled={loading}
-                className="w-full bg-[#00796B] text-white py-4 rounded-xl font-semibold text-base hover:bg-[#00695C] transition-colors disabled:opacity-50"
+                className="w-full bg-[#5C7E9B] text-white py-4 rounded-xl font-semibold text-base hover:bg-[#4A6B85] transition-colors disabled:opacity-50"
               >
                 {loading ? "Estimating..." : "See Prices"}
               </button>
@@ -1399,12 +1375,12 @@ function RiderPageContent() {
 
             {estimate && (
               <div className="space-y-3">
-                <div className="bg-[#E0F2F1] rounded-xl p-4">
+                <div className="bg-[#E0D5DB] rounded-xl p-4">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm text-gray-700">
                       Estimated Fare
                     </span>
-                    <span className="font-bold text-2xl text-[#0F3D3E]">
+                    <span className="font-bold text-2xl text-[#5C7E9B]">
                       £{estimate.amount.toFixed(2)}
                     </span>
                   </div>
@@ -1415,7 +1391,7 @@ function RiderPageContent() {
                 <button
                   onClick={handleBook}
                   disabled={loading}
-                  className="w-full bg-[#00796B] text-white py-4 rounded-xl font-semibold text-base hover:bg-[#00695C] transition-colors"
+                  className="w-full bg-[#5C7E9B] text-white py-4 rounded-xl font-semibold text-base hover:bg-[#4A6B85] transition-colors"
                 >
                   {loading ? "Booking..." : "Confirm Booking"}
                 </button>
@@ -1452,7 +1428,7 @@ function RiderPageContent() {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-[#0F3D3E]">
+              <h2 className="text-lg font-semibold text-[#5C7E9B]">
                 Edit Pickup Location
               </h2>
               <p className="text-sm text-gray-600 mt-1">
@@ -1479,7 +1455,7 @@ function RiderPageContent() {
               <button
                 onClick={handleUseCurrentLocation}
                 disabled={loadingLocation}
-                className="w-full flex items-center justify-center gap-2 text-sm text-[#00796B] hover:text-[#0F3D3E] font-medium disabled:opacity-50 py-2 border border-[#00796B] rounded-lg hover:bg-[#E0F2F1] transition-colors"
+                className="w-full flex items-center justify-center gap-2 text-sm text-[#5C7E9B] hover:text-[#5C7E9B] font-medium disabled:opacity-50 py-2 border border-[#5C7E9B] rounded-lg hover:bg-[#E0D5DB] transition-colors"
               >
                 <svg
                   className="w-4 h-4"
@@ -1521,7 +1497,7 @@ function RiderPageContent() {
                   }
                 }}
                 disabled={!pickup || !pickupCoords}
-                className="flex-1 px-4 py-3 bg-[#00796B] text-white rounded-lg font-semibold hover:bg-[#00695C] transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-3 bg-[#5C7E9B] text-white rounded-lg font-semibold hover:bg-[#4A6B85] transition-colors disabled:opacity-50"
               >
                 Confirm
               </button>
@@ -1535,7 +1511,7 @@ function RiderPageContent() {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col">
             <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-[#0F3D3E]">
+              <h2 className="text-lg font-semibold text-[#5C7E9B]">
                 Chat with Driver
               </h2>
               <button

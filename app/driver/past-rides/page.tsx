@@ -59,10 +59,10 @@ function DriverPastRidesContent() {
     .reduce((sum, b) => sum + b.finalFareAmount * 0.75, 0);
 
   return (
-    <div className="px-8 py-6 max-w-7xl mx-auto">
+    <div className="px-8 py-6 max-w-7xl mx-auto safe-area-content">
       {/* Header */}
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold text-[#0F3D3E] mb-1">Past Rides</h1>
+      <div className="mb-4 safe-area-top">
+        <h1 className="text-2xl font-bold text-[#5C7E9B] mb-1">Past Rides</h1>
         <p className="text-sm text-gray-600">View your completed rides history</p>
       </div>
 
@@ -70,19 +70,19 @@ function DriverPastRidesContent() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
         <div className="bg-white rounded-2xl p-4 shadow-sm">
           <div className="text-xs text-gray-600 mb-1">Total Rides</div>
-          <div className="text-xl font-bold text-[#0F3D3E]">
+          <div className="text-xl font-bold text-[#5C7E9B]">
             {filteredBookings.length}
           </div>
         </div>
         <div className="bg-white rounded-2xl p-4 shadow-sm">
           <div className="text-xs text-gray-600 mb-1">Total Earnings</div>
-          <div className="text-xl font-bold text-[#0F3D3E]">
+          <div className="text-xl font-bold text-[#5C7E9B]">
             £{totalEarnings.toFixed(2)}
           </div>
         </div>
         <div className="bg-white rounded-2xl p-4 shadow-sm">
           <div className="text-xs text-gray-600 mb-1">Avg Per Ride</div>
-          <div className="text-xl font-bold text-[#0F3D3E]">
+          <div className="text-xl font-bold text-[#5C7E9B]">
             £
             {filteredBookings.length > 0
               ? (
@@ -102,7 +102,7 @@ function DriverPastRidesContent() {
             onClick={() => setFilter("all")}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               filter === "all"
-                ? "bg-[#00796B] text-white"
+                ? "bg-[#5C7E9B] text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
@@ -112,7 +112,7 @@ function DriverPastRidesContent() {
             onClick={() => setFilter("completed")}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               filter === "completed"
-                ? "bg-[#00796B] text-white"
+                ? "bg-[#5C7E9B] text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
@@ -122,7 +122,7 @@ function DriverPastRidesContent() {
             onClick={() => setFilter("canceled")}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               filter === "canceled"
-                ? "bg-[#00796B] text-white"
+                ? "bg-[#5C7E9B] text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
@@ -193,7 +193,7 @@ function DriverPastRidesContent() {
                     <div className="text-xs text-gray-500 mb-0.5">
                       Earnings
                     </div>
-                    <div className="text-xl font-bold text-[#0F3D3E]">
+                    <div className="text-xl font-bold text-[#5C7E9B]">
                       £{(booking.finalFareAmount * 0.75).toFixed(2)}
                     </div>
                     <div className="text-xs text-gray-400">

@@ -320,7 +320,7 @@ function DispatcherPageContent() {
             </Link>
             <button
               onClick={() => setShowCreateBooking(true)}
-              className="px-3 py-2 sm:px-4 text-sm bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors font-medium"
+              className="px-3 py-2 sm:px-4 text-sm bg-[#5C7E9B] text-white rounded-lg hover:bg-[#4A6B85] transition-colors font-medium"
             >
               + Create
             </button>
@@ -331,7 +331,7 @@ function DispatcherPageContent() {
       {loading ? (
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00796B] mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5C7E9B] mx-auto mb-4"></div>
             <p className="text-neutral-600">Loading bookings...</p>
           </div>
         </div>
@@ -369,7 +369,7 @@ function DispatcherPageContent() {
                 requested.map((booking) => (
                   <div
                     key={booking.id}
-                    className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:border-[#00796B] hover:bg-[#E0F2F1]/20 transition-all"
+                    className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:border-[#5C7E9B] hover:bg-[#E0D5DB]/20 transition-all"
                   >
                     <div className="flex items-start justify-between mb-2 sm:mb-3 gap-2">
                       <div className="flex-1 min-w-0">
@@ -472,7 +472,7 @@ function DispatcherPageContent() {
                             setSelectedBooking(booking);
                             setShowAssignModal(true);
                           }}
-                          className="px-4 py-2 border border-[#00796B] text-[#00796B] rounded-lg hover:bg-[#E0F2F1] transition-colors font-medium text-sm"
+                          className="px-4 py-2 border border-[#5C7E9B] text-[#5C7E9B] rounded-lg hover:bg-[#E0D5DB] transition-colors font-medium text-sm"
                         >
                           Manual Assign
                         </button>
@@ -765,7 +765,7 @@ function DispatcherPageContent() {
                     })
                   }
                   placeholder="rider@example.com or +1234567890"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 />
               </div>
               <div>
@@ -782,7 +782,7 @@ function DispatcherPageContent() {
                     })
                   }
                   placeholder="Enter pickup location"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 />
               </div>
               <div>
@@ -799,7 +799,7 @@ function DispatcherPageContent() {
                     })
                   }
                   placeholder="Enter dropoff location"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -814,7 +814,7 @@ function DispatcherPageContent() {
                           wheelchairRequired: e.target.checked,
                         })
                       }
-                      className="rounded text-[#00796B]"
+                      className="rounded text-[#5C7E9B]"
                     />
                     <span className="text-sm text-gray-700">
                       Wheelchair Required
@@ -834,7 +834,7 @@ function DispatcherPageContent() {
                         scheduledFor: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                   />
                 </div>
               </div>
@@ -849,7 +849,7 @@ function DispatcherPageContent() {
                     setCreateForm({ ...createForm, notes: e.target.value })
                   }
                   placeholder="Add any special instructions..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 />
               </div>
             </div>
@@ -864,7 +864,7 @@ function DispatcherPageContent() {
               <button
                 onClick={handleCreateBooking}
                 disabled={creating}
-                className="px-6 py-2 bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 bg-[#5C7E9B] text-white rounded-lg hover:bg-[#4A6B85] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {creating ? "Creating..." : "Create Booking"}
               </button>
@@ -944,7 +944,7 @@ function DispatcherPageContent() {
                           setShowAssignModal(false);
                           setSelectedBooking(null);
                         }}
-                        className="w-full p-4 border border-gray-200 rounded-lg hover:border-[#00796B] hover:bg-[#00796B]/5 transition-all text-left"
+                        className="w-full p-4 border border-gray-200 rounded-lg hover:border-[#5C7E9B] hover:bg-[#5C7E9B]/5 transition-all text-left"
                       >
                         <div className="flex justify-between items-center">
                           <div>
@@ -1078,7 +1078,7 @@ function DispatcherPageContent() {
                     })
                   }
                   placeholder="Enter pickup location"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 />
               </div>
               <div>
@@ -1095,7 +1095,7 @@ function DispatcherPageContent() {
                     })
                   }
                   placeholder="Enter dropoff location"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -1110,7 +1110,7 @@ function DispatcherPageContent() {
                           wheelchairRequired: e.target.checked,
                         })
                       }
-                      className="rounded text-[#00796B]"
+                      className="rounded text-[#5C7E9B]"
                     />
                     <span className="text-sm text-gray-700">
                       Wheelchair Required
@@ -1130,7 +1130,7 @@ function DispatcherPageContent() {
                         scheduledFor: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                   />
                 </div>
               </div>
@@ -1145,7 +1145,7 @@ function DispatcherPageContent() {
                     setModifyForm({ ...modifyForm, notes: e.target.value })
                   }
                   placeholder="Add any special instructions..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 />
               </div>
             </div>
@@ -1161,7 +1161,7 @@ function DispatcherPageContent() {
               </button>
               <button
                 onClick={handleModifyBooking}
-                className="px-6 py-2 bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors"
+                className="px-6 py-2 bg-[#5C7E9B] text-white rounded-lg hover:bg-[#4A6B85] transition-colors"
               >
                 Update Booking
               </button>

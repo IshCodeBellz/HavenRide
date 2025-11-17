@@ -219,7 +219,7 @@ function ReportsPageContent() {
               </Link>
               <Link
                 href="/dispatcher"
-                className="px-4 sm:px-5 md:px-6 lg:px-7 py-2.5 sm:py-3 md:py-3.5 text-base sm:text-lg bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors whitespace-nowrap"
+                className="px-4 sm:px-5 md:px-6 lg:px-7 py-2.5 sm:py-3 md:py-3.5 text-base sm:text-lg bg-[#5C7E9B] text-white rounded-lg hover:bg-[#4A6B85] transition-colors whitespace-nowrap"
               >
                 Dashboard
               </Link>
@@ -243,7 +243,7 @@ function ReportsPageContent() {
                 onChange={(e) =>
                   setDateRange({ ...dateRange, from: e.target.value })
                 }
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -254,11 +254,11 @@ function ReportsPageContent() {
                 onChange={(e) =>
                   setDateRange({ ...dateRange, to: e.target.value })
                 }
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
               />
             </div>
             <button
-              className="px-4 py-1.5 text-sm bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors whitespace-nowrap"
+              className="px-4 py-1.5 text-sm bg-[#5C7E9B] text-white rounded-lg hover:bg-[#4A6B85] transition-colors whitespace-nowrap"
               onClick={() => {
                 fetchBookings();
                 fetchDrivers();
@@ -357,7 +357,7 @@ function ReportsPageContent() {
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="text-sm text-gray-600 mb-1">Total Revenue</div>
-            <div className="text-3xl font-bold text-[#00796B]">
+            <div className="text-3xl font-bold text-[#5C7E9B]">
               £{totalRevenue.toFixed(2)}
             </div>
           </div>
@@ -546,7 +546,7 @@ function ReportsPageContent() {
                           onClick={() => setCurrentPage(pageNum)}
                           className={`px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm rounded-lg transition-colors flex-shrink-0 min-w-[2rem] sm:min-w-[2.5rem] ${
                             currentPage === pageNum
-                              ? "bg-[#00796B] text-white"
+                              ? "bg-[#5C7E9B] text-white"
                               : "border border-gray-300 text-gray-700 hover:bg-gray-50"
                           }`}
                         >

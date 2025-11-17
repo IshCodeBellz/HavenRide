@@ -173,7 +173,7 @@ function UsersPageContent() {
           <div>
             <Link
               href="/admin"
-              className="text-sm text-neutral-500 hover:text-[#00796B] mb-2 inline-block"
+              className="text-sm text-neutral-500 hover:text-[#5C7E9B] mb-2 inline-block"
             >
               ← Back to Dashboard
             </Link>
@@ -199,7 +199,7 @@ function UsersPageContent() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by name or email..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
               />
             </div>
 
@@ -211,7 +211,7 @@ function UsersPageContent() {
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value as UserType)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
               >
                 <option value="ALL">All Users</option>
                 <option value="RIDER">Riders Only</option>
@@ -227,7 +227,7 @@ function UsersPageContent() {
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00796B] mx-auto mb-4"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5C7E9B] mx-auto mb-4"></div>
                 <p className="text-neutral-600">Loading users...</p>
               </div>
             </div>
@@ -401,7 +401,7 @@ function UsersPageContent() {
                   onChange={(e) =>
                     setEditingUser({ ...editingUser, name: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 />
               </div>
 
@@ -415,7 +415,7 @@ function UsersPageContent() {
                   onChange={(e) =>
                     setEditingUser({ ...editingUser, email: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 />
               </div>
 
@@ -428,7 +428,7 @@ function UsersPageContent() {
                   onChange={(e) =>
                     setEditingUser({ ...editingUser, role: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 >
                   <option value="">No Role</option>
                   <option value="RIDER">Rider</option>
@@ -450,7 +450,7 @@ function UsersPageContent() {
                 </button>
                 <button
                   onClick={handleSaveEdit}
-                  className="flex-1 px-6 py-3 bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors font-semibold"
+                  className="flex-1 px-6 py-3 bg-[#5C7E9B] text-white rounded-lg hover:bg-[#4A6B85] transition-colors font-semibold"
                 >
                   Save Changes
                 </button>

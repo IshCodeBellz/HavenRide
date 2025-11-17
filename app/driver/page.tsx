@@ -129,26 +129,57 @@ function DriverPageContent() {
       // Try to get real geolocation
       if (navigator.geolocation) {
         // Get initial position
-        navigator.geolocation.getCurrentPosition(updateLocation, (error) => {
-          console.error("Geolocation error:", error);
-          // Fallback to simulated location if geolocation fails
-          fetch("/api/drivers/update-location", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              driverId: user.id,
-              lat: 51.5074,
-              lng: -0.1278,
-            }),
-          });
-        });
+        navigator.geolocation.getCurrentPosition(
+          updateLocation,
+          (error) => {
+            // Provide more detailed error information
+            let errorMessage = "Unknown error";
+            switch (error.code) {
+              case error.PERMISSION_DENIED:
+                errorMessage = "Location permission denied. Please enable location permissions in your device settings.";
+                break;
+              case error.POSITION_UNAVAILABLE:
+                errorMessage = "Location information unavailable.";
+                break;
+              case error.TIMEOUT:
+                errorMessage = "Location request timed out.";
+                break;
+            }
+            console.warn("Geolocation error:", errorMessage, error);
+            
+            // Fallback to simulated location if geolocation fails
+            setDriverLocation({ lat: 51.5074, lng: -0.1278 });
+            fetch("/api/drivers/update-location", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                driverId: user.id,
+                lat: 51.5074,
+                lng: -0.1278,
+              }),
+            }).catch((err) => console.error("Failed to update fallback location:", err));
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
 
         // Watch position for continuous updates
         watchId = navigator.geolocation.watchPosition(
           updateLocation,
           (error) => {
-            // Handle watch position errors silently - user might have denied permission
-            console.warn("Location tracking stopped:", error.message || "Permission denied");
+            // Handle watch position errors - provide user-friendly messages
+            let errorMessage = "Location tracking unavailable";
+            switch (error.code) {
+              case error.PERMISSION_DENIED:
+                errorMessage = "Location permission denied";
+                break;
+              case error.POSITION_UNAVAILABLE:
+                errorMessage = "Location unavailable";
+                break;
+              case error.TIMEOUT:
+                errorMessage = "Location timeout";
+                break;
+            }
+            console.warn("Location tracking stopped:", errorMessage);
           },
           { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
         );
@@ -476,7 +507,7 @@ function DriverPageContent() {
         )}
 
         {/* Online Toggle - Top Left */}
-        <div className="absolute top-4 left-4 z-10">
+        <div className="absolute left-4 z-10 safe-area-top" style={{ top: 'calc(env(safe-area-inset-top, 0px) + 1rem)' }}>
           <label className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200">
             <span className="text-sm font-medium text-gray-700">
               {online ? "Online" : "Offline"}
@@ -485,7 +516,7 @@ function DriverPageContent() {
               type="checkbox"
               checked={online}
               onChange={(e) => toggleOnline(e.target.checked)}
-              className="w-11 h-6 appearance-none bg-gray-300 rounded-full relative cursor-pointer transition-colors checked:bg-[#00796B] before:content-[''] before:absolute before:w-5 before:h-5 before:rounded-full before:bg-white before:top-0.5 before:left-0.5 before:transition-transform checked:before:translate-x-5"
+              className="w-11 h-6 appearance-none bg-gray-300 rounded-full relative cursor-pointer transition-colors checked:bg-[#5C7E9B] before:content-[''] before:absolute before:w-5 before:h-5 before:rounded-full before:bg-white before:top-0.5 before:left-0.5 before:transition-transform checked:before:translate-x-5"
             />
           </label>
         </div>
@@ -519,9 +550,9 @@ function DriverPageContent() {
             </div>
           ) : requestedBookings.length === 0 ? (
             <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg text-center max-w-md mx-auto">
-              <div className="inline-block p-2 sm:p-3 bg-[#E0F2F1] rounded-full mb-3">
+              <div className="inline-block p-2 sm:p-3 bg-[#E0D5DB] rounded-full mb-3">
                 <svg
-                  className="w-8 h-8 sm:w-10 sm:h-10 text-[#00796B]"
+                  className="w-8 h-8 sm:w-10 sm:h-10 text-[#5C7E9B]"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -534,7 +565,7 @@ function DriverPageContent() {
                   />
                 </svg>
               </div>
-              <h2 className="text-lg sm:text-xl font-bold text-[#0F3D3E] mb-2">
+              <h2 className="text-lg sm:text-xl font-bold text-[#5C7E9B] mb-2">
                 No Available Jobs
               </h2>
               <p className="text-sm text-gray-600 mb-3">
@@ -545,7 +576,7 @@ function DriverPageContent() {
               {!online && (
                 <button
                   onClick={() => toggleOnline(true)}
-                  className="px-5 py-2.5 bg-[#00796B] text-white rounded-lg font-semibold hover:bg-[#00695C] transition-colors text-sm"
+                  className="px-5 py-2.5 bg-[#5C7E9B] text-white rounded-lg font-semibold hover:bg-[#4A6B85] transition-colors text-sm"
                 >
                   Go Online
                 </button>
@@ -565,7 +596,7 @@ function DriverPageContent() {
                     <div className="p-3 h-full flex flex-col justify-between">
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-[#00796B] rounded-full flex items-center justify-center shrink-0">
+                          <div className="w-6 h-6 bg-[#5C7E9B] rounded-full flex items-center justify-center shrink-0">
                             <span className="text-white text-xs font-bold">
                               A
                             </span>
@@ -581,7 +612,7 @@ function DriverPageContent() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-[#0F3D3E] rounded-full flex items-center justify-center shrink-0">
+                          <div className="w-6 h-6 bg-[#5C7E9B] rounded-full flex items-center justify-center shrink-0">
                             <span className="text-white text-xs font-bold">
                               B
                             </span>
@@ -625,7 +656,7 @@ function DriverPageContent() {
                     {/* Route Information */}
                     <div className="space-y-3 sm:space-y-4 md:space-y-5 mb-4 sm:mb-6 md:mb-8">
                       <div className="flex items-start gap-3 sm:gap-4 md:gap-5">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-[#00796B] rounded-full flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-[#5C7E9B] rounded-full flex items-center justify-center shrink-0">
                           <span className="text-white font-bold text-sm sm:text-base md:text-lg">
                             A
                           </span>
@@ -634,14 +665,14 @@ function DriverPageContent() {
                           <p className="text-xs sm:text-sm text-gray-600 font-medium mb-1 sm:mb-2">
                             Pickup
                           </p>
-                          <p className="text-sm sm:text-base md:text-lg font-semibold text-[#0F3D3E] wrap-break-word leading-snug">
+                          <p className="text-sm sm:text-base md:text-lg font-semibold text-[#5C7E9B] wrap-break-word leading-snug">
                             {currentBooking.pickupAddress}
                           </p>
                         </div>
                       </div>
 
                       <div className="flex items-start gap-3 sm:gap-4 md:gap-5">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-[#0F3D3E] rounded-full flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-[#5C7E9B] rounded-full flex items-center justify-center shrink-0">
                           <span className="text-white font-bold text-sm sm:text-base md:text-lg">
                             B
                           </span>
@@ -650,7 +681,7 @@ function DriverPageContent() {
                           <p className="text-xs sm:text-sm text-gray-600 font-medium mb-1 sm:mb-2">
                             Dropoff
                           </p>
-                          <p className="text-sm sm:text-base md:text-lg font-semibold text-[#0F3D3E] wrap-break-word leading-snug">
+                          <p className="text-sm sm:text-base md:text-lg font-semibold text-[#5C7E9B] wrap-break-word leading-snug">
                             {currentBooking.dropoffAddress}
                           </p>
                         </div>
@@ -684,7 +715,7 @@ function DriverPageContent() {
                           <span className="text-gray-600 text-sm sm:text-base md:text-lg">
                             Estimated Fare:
                           </span>
-                          <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0F3D3E]">
+                          <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#5C7E9B]">
                             £{currentBooking.priceEstimate.amount?.toFixed(2)}
                           </span>
                         </div>
@@ -695,7 +726,7 @@ function DriverPageContent() {
                     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                       <button
                         onClick={() => take(currentBooking.id)}
-                        className="flex-1 bg-[#00796B] text-white py-3 sm:py-4 md:py-5 rounded-lg sm:rounded-xl text-sm sm:text-base md:text-lg font-semibold hover:bg-[#00695C] transition-colors"
+                        className="flex-1 bg-[#5C7E9B] text-white py-3 sm:py-4 md:py-5 rounded-lg sm:rounded-xl text-sm sm:text-base md:text-lg font-semibold hover:bg-[#4A6B85] transition-colors"
                       >
                         Take Ride
                       </button>
@@ -713,7 +744,7 @@ function DriverPageContent() {
                         markAsRead();
                         setActiveBookingId(currentBooking.id);
                       }}
-                      className="w-full mt-3 sm:mt-4 text-sm sm:text-base text-[#00796B] hover:text-[#0F3D3E] font-semibold underline relative"
+                      className="w-full mt-3 sm:mt-4 text-sm sm:text-base text-[#5C7E9B] hover:text-[#5C7E9B] font-semibold underline relative"
                     >
                       Open Chat
                       {unreadCount > 0 && (
@@ -735,7 +766,7 @@ function DriverPageContent() {
                       <div className="p-3 h-full flex flex-col justify-between">
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-[#00796B] rounded-full flex items-center justify-center shrink-0">
+                            <div className="w-6 h-6 bg-[#5C7E9B] rounded-full flex items-center justify-center shrink-0">
                               <span className="text-white text-xs font-bold">
                                 A
                               </span>
@@ -751,7 +782,7 @@ function DriverPageContent() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-[#0F3D3E] rounded-full flex items-center justify-center shrink-0">
+                            <div className="w-6 h-6 bg-[#5C7E9B] rounded-full flex items-center justify-center shrink-0">
                               <span className="text-white text-xs font-bold">
                                 B
                               </span>
@@ -769,7 +800,7 @@ function DriverPageContent() {
                         </div>
                         {requestedBookings[currentIndex + 1].priceEstimate && (
                           <div className="mt-2 pt-2 border-t border-gray-200">
-                            <p className="text-xs font-bold text-[#0F3D3E] text-center">
+                            <p className="text-xs font-bold text-[#5C7E9B] text-center">
                               £
                               {requestedBookings[
                                 currentIndex + 1
@@ -828,7 +859,7 @@ function DriverPageContent() {
                       onClick={() => setCurrentIndex(index)}
                       className={`h-2 rounded-full transition-all ${
                         index === currentIndex
-                          ? "w-8 bg-[#00796B]"
+                          ? "w-8 bg-[#5C7E9B]"
                           : "w-2 bg-gray-300"
                       }`}
                     />
@@ -865,7 +896,7 @@ function DriverPageContent() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-6 z-50">
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col">
               <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-[#0F3D3E]">
+                <h3 className="text-lg font-semibold text-[#5C7E9B]">
                   Chat with Rider
                 </h3>
                 <button

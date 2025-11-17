@@ -38,7 +38,7 @@ function AdminOpsContent() {
         {loading ? (
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00796B] mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5C7E9B] mx-auto mb-4"></div>
               <p className="text-neutral-600">Loading bookings...</p>
             </div>
           </div>
@@ -97,7 +97,7 @@ function AdminOpsContent() {
                     bookings.map((booking) => (
                       <tr
                         key={booking.id}
-                        className="hover:bg-[#E0F2F1]/30 transition-colors"
+                        className="hover:bg-[#E0D5DB]/30 transition-colors"
                       >
                         <td className="px-6 py-4 font-mono text-xs text-neutral-600">
                           {booking.id.slice(0, 8)}...

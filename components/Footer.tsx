@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <footer className="w-full bg-white">
       {/* Become a Driver CTA Section */}
-      <div className="w-full bg-[#00796B] py-16">
+      <div className="w-full bg-[#5C7E9B] py-16">
         <CenteredContainer>
           <div className="text-center text-white">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
@@ -16,7 +16,7 @@ export default function Footer() {
             </p>
             <Link
               href="/driver-signup"
-              className="inline-block bg-white text-[#00796B] px-10 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
+              className="inline-block bg-white text-[#5C7E9B] px-10 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
             >
               Become a Driver
             </Link>
@@ -29,16 +29,16 @@ export default function Footer() {
         <CenteredContainer>
           <div className="flex flex-col gap-6 items-center justify-center text-center">
             <div className="flex flex-wrap gap-4 text-sm text-neutral-600 justify-center">
-              <Link href="#" className="hover:text-[#00796B]">
+              <Link href="#" className="hover:text-[#5C7E9B]">
                 Support
               </Link>
-              <Link href="#" className="hover:text-[#00796B]">
+              <Link href="#" className="hover:text-[#5C7E9B]">
                 Privacy
               </Link>
-              <Link href="#" className="hover:text-[#00796B]">
+              <Link href="#" className="hover:text-[#5C7E9B]">
                 Terms
               </Link>
-              <Link href="#" className="hover:text-[#00796B]">
+              <Link href="#" className="hover:text-[#5C7E9B]">
                 Accessibility
               </Link>
             </div>

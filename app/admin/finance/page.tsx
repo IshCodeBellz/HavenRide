@@ -43,7 +43,7 @@ function FinancePageContent() {
           <div>
             <Link
               href="/admin"
-              className="text-sm text-neutral-500 hover:text-[#00796B] mb-2 inline-block"
+              className="text-sm text-neutral-500 hover:text-[#5C7E9B] mb-2 inline-block"
             >
               ← Back to Dashboard
             </Link>
@@ -58,7 +58,7 @@ function FinancePageContent() {
             <select
               value={timeframe}
               onChange={(e) => setTimeframe(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
             >
               <option value="week">Last 7 Days</option>
               <option value="month">Last 30 Days</option>
@@ -71,7 +71,7 @@ function FinancePageContent() {
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00796B] mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5C7E9B] mx-auto mb-4"></div>
               <p className="text-neutral-600">Loading financial data...</p>
             </div>
           </div>
@@ -79,7 +79,7 @@ function FinancePageContent() {
           <>
             {/* Revenue Overview */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-gradient-to-br from-[#00796B] to-[#26A69A] rounded-xl shadow-lg p-6 text-white">
+              <div className="bg-gradient-to-br from-[#5C7E9B] to-[#DAAAB2] rounded-xl shadow-lg p-6 text-white">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm opacity-90">Total Revenue</p>
                   <svg
@@ -110,7 +110,7 @@ function FinancePageContent() {
                     Platform Commission
                   </p>
                   <svg
-                    className="w-6 h-6 text-[#00796B]"
+                    className="w-6 h-6 text-[#5C7E9B]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -217,7 +217,7 @@ function FinancePageContent() {
 
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-[#00796B] rounded-lg flex items-center justify-center">
+                      <div className="w-12 h-12 bg-[#5C7E9B] rounded-lg flex items-center justify-center">
                         <svg
                           className="w-6 h-6 text-white"
                           fill="none"
@@ -339,7 +339,7 @@ function FinancePageContent() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             £{payout.commission?.toFixed(2)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#00796B]">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#5C7E9B]">
                             £{payout.netPayout?.toFixed(2)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

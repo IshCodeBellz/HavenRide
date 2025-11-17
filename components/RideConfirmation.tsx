@@ -322,7 +322,7 @@ export default function RideConfirmation({
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header - Hidden on mobile, visible on desktop */}
       <div className="hidden lg:block bg-white border-b border-gray-200 px-6 py-4">
-        <h1 className="text-xl font-semibold text-[#0F3D3E]">
+        <h1 className="text-xl font-semibold text-[#5C7E9B]">
           {userRole === "RIDER"
             ? `Confirm your ride to ${booking.dropoffAddress.split(",")[0]}`
             : `Ride to ${booking.dropoffAddress.split(",")[0]}`}
@@ -361,7 +361,7 @@ export default function RideConfirmation({
                 <>
                   {/* Driver Arrived Banner - Exact same component */}
                   {booking.status === "ARRIVED" && booking.driver && (
-                    <div className="p-5 bg-gradient-to-r from-[#00796B] to-[#00695C] rounded-xl text-white shadow-lg border-2 border-[#005A4F] animate-pulse">
+                    <div className="p-5 bg-gradient-to-r from-[#5C7E9B] to-[#4A6B85] rounded-xl text-white shadow-lg border-2 border-[#005A4F] animate-pulse">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0">
                           <svg
@@ -409,12 +409,12 @@ export default function RideConfirmation({
                     )}
                 </>
               ) : (
-                <div className="bg-gradient-to-r from-[#00796B] to-[#0F3D3E] text-white rounded-lg shadow-lg p-3">
+                <div className="bg-gradient-to-r from-[#5C7E9B] to-[#5C7E9B] text-white rounded-lg shadow-lg p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
                         <svg
-                          className="w-6 h-6 text-[#00796B]"
+                          className="w-6 h-6 text-[#5C7E9B]"
                           fill="currentColor"
                           viewBox="0 0 24 24"
                         >
@@ -461,12 +461,12 @@ export default function RideConfirmation({
               (booking.status !== "IN_PROGRESS" &&
                 booking.pickupLat &&
                 booking.pickupLng)) && (
-              <div className="absolute top-4 left-4 right-4 bg-gradient-to-r from-[#00796B] to-[#0F3D3E] text-white rounded-lg shadow-lg p-3 z-10">
+              <div className="absolute top-4 left-4 right-4 bg-gradient-to-r from-[#5C7E9B] to-[#5C7E9B] text-white rounded-lg shadow-lg p-3 z-10">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
                       <svg
-                        className="w-6 h-6 text-[#00796B]"
+                        className="w-6 h-6 text-[#5C7E9B]"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -531,11 +531,11 @@ export default function RideConfirmation({
           {/* Route Information - Minimal on mobile */}
           <div className="absolute bottom-20 left-4 right-4 bg-white rounded-lg shadow-lg p-3 space-y-2 z-10">
             <div className="flex items-start gap-2">
-              <div className="w-6 h-6 bg-[#00796B] rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-6 h-6 bg-[#5C7E9B] rounded-full flex items-center justify-center flex-shrink-0">
                 <div className="w-2 h-2 bg-white rounded-full"></div>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-[#0F3D3E] text-xs">
+                <p className="font-medium text-[#5C7E9B] text-xs">
                   Pickup location
                 </p>
                 <p className="text-xs text-gray-600 truncate">
@@ -544,7 +544,7 @@ export default function RideConfirmation({
               </div>
             </div>
             <div className="flex items-start gap-2">
-              <div className="w-6 h-6 bg-[#0F3D3E] rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-6 h-6 bg-[#5C7E9B] rounded-full flex items-center justify-center flex-shrink-0">
                 <svg
                   className="w-3 h-3 text-white"
                   fill="none"
@@ -560,7 +560,7 @@ export default function RideConfirmation({
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-[#0F3D3E] text-xs">
+                <p className="font-medium text-[#5C7E9B] text-xs">
                   {booking.dropoffAddress.split(",")[0]}
                 </p>
                 <p className="text-xs text-gray-600">
@@ -604,13 +604,13 @@ export default function RideConfirmation({
           {!isDetailsExpanded && (
             <div className="px-6 pb-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-[#0F3D3E] rounded-full flex items-center justify-center text-white text-xl font-bold">
+                <div className="w-12 h-12 bg-[#5C7E9B] rounded-full flex items-center justify-center text-white text-xl font-bold">
                   {userRole === "RIDER"
                     ? booking.driver?.user.name?.charAt(0) || "D"
                     : booking.rider?.user.name?.charAt(0) || "R"}
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-lg font-semibold text-[#0F3D3E]">
+                  <h2 className="text-lg font-semibold text-[#5C7E9B]">
                     {userRole === "RIDER"
                       ? booking.driver?.user.name || "Your driver"
                       : booking.rider?.user.name || "Rider"}
@@ -656,7 +656,7 @@ export default function RideConfirmation({
                     setShowChat(true);
                     markAsRead();
                   }}
-                  className="flex-1 py-3 bg-white border-2 border-[#00796B] text-[#00796B] rounded-lg font-semibold text-sm relative"
+                  className="flex-1 py-3 bg-white border-2 border-[#5C7E9B] text-[#5C7E9B] rounded-lg font-semibold text-sm relative"
                 >
                   Chat
                   {unreadCount > 0 && (
@@ -744,7 +744,7 @@ export default function RideConfirmation({
                         onConfirm?.();
                       }
                     }}
-                    className="flex-1 bg-[#00796B] text-white py-3 rounded-lg font-semibold text-sm"
+                    className="flex-1 bg-[#5C7E9B] text-white py-3 rounded-lg font-semibold text-sm"
                   >
                     {userRole === "RIDER"
                       ? "Confirm"
@@ -769,13 +769,13 @@ export default function RideConfirmation({
               <div className="space-y-4">
                 {/* Driver/Rider Info */}
                 <div className="flex items-center gap-4 pb-4 border-b">
-                  <div className="w-16 h-16 bg-[#0F3D3E] rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                  <div className="w-16 h-16 bg-[#5C7E9B] rounded-full flex items-center justify-center text-white text-2xl font-bold">
                     {userRole === "RIDER"
                       ? booking.driver?.user.name?.charAt(0) || "D"
                       : booking.rider?.user.name?.charAt(0) || "R"}
                   </div>
                   <div>
-                    <h2 className="text-xl font-semibold text-[#0F3D3E]">
+                    <h2 className="text-xl font-semibold text-[#5C7E9B]">
                       {userRole === "RIDER"
                         ? booking.driver?.user.name || "Your driver"
                         : booking.rider?.user.name || "Rider"}
@@ -814,7 +814,7 @@ export default function RideConfirmation({
                 {userRole === "RIDER" &&
                   booking.status === "ARRIVED" &&
                   booking.driver && (
-                    <div className="mb-4 p-5 bg-gradient-to-r from-[#00796B] to-[#00695C] rounded-xl text-white shadow-lg border-2 border-[#005A4F]">
+                    <div className="mb-4 p-5 bg-gradient-to-r from-[#5C7E9B] to-[#4A6B85] rounded-xl text-white shadow-lg border-2 border-[#005A4F]">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0">
                           <svg
@@ -853,14 +853,14 @@ export default function RideConfirmation({
                       className={`mb-4 p-5 ${
                         booking.status === "ARRIVED"
                           ? "bg-yellow-50 border-4 border-yellow-400 shadow-xl"
-                          : "bg-[#E0F2F1] border-2 border-[#00796B]"
+                          : "bg-[#E0D5DB] border-2 border-[#5C7E9B]"
                       } rounded-xl text-center`}
                     >
                       <div
                         className={`text-sm ${
                           booking.status === "ARRIVED"
                             ? "text-yellow-800"
-                            : "text-[#00796B]"
+                            : "text-[#5C7E9B]"
                         } font-semibold mb-2`}
                       >
                         {booking.status === "ARRIVED"
@@ -871,7 +871,7 @@ export default function RideConfirmation({
                         className={`text-5xl font-bold ${
                           booking.status === "ARRIVED"
                             ? "text-yellow-900"
-                            : "text-[#0F3D3E]"
+                            : "text-[#5C7E9B]"
                         } tracking-wider`}
                       >
                         {booking.pinCode}
@@ -937,7 +937,7 @@ export default function RideConfirmation({
                         onChange={(e) =>
                           setSelectedPaymentMethod(e.target.value)
                         }
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C7E9B]"
                       >
                         {paymentMethods.map((method) => (
                           <option key={method.id} value={method.id}>
@@ -1051,7 +1051,7 @@ export default function RideConfirmation({
                           onConfirm?.();
                         }
                       }}
-                      className="flex-1 bg-[#00796B] text-white py-3 rounded-lg font-semibold"
+                      className="flex-1 bg-[#5C7E9B] text-white py-3 rounded-lg font-semibold"
                     >
                       {userRole === "RIDER"
                         ? "Confirm Ride"
@@ -1083,7 +1083,7 @@ export default function RideConfirmation({
                             console.error("onConfirm handler is not available");
                           }
                         }}
-                        className="w-full bg-[#0F3D3E] text-white py-3 rounded-lg font-semibold hover:bg-[#0a2d2e] transition-colors flex items-center justify-center gap-2"
+                        className="w-full bg-[#5C7E9B] text-white py-3 rounded-lg font-semibold hover:bg-[#0a2d2e] transition-colors flex items-center justify-center gap-2"
                       >
                         <svg
                           className="w-5 h-5"
@@ -1108,7 +1108,7 @@ export default function RideConfirmation({
                     setShowChat(true);
                     markAsRead();
                   }}
-                  className="w-full py-3 bg-white border-2 border-[#00796B] text-[#00796B] rounded-lg font-semibold relative"
+                  className="w-full py-3 bg-white border-2 border-[#5C7E9B] text-[#5C7E9B] rounded-lg font-semibold relative"
                 >
                   Chat with {userRole === "RIDER" ? "Driver" : "Rider"}
                   {unreadCount > 0 && (
@@ -1130,13 +1130,13 @@ export default function RideConfirmation({
           {/* Driver/Rider Info Card */}
           <div className="bg-white rounded-2xl p-6 shadow-sm">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 bg-[#0F3D3E] rounded-full flex items-center justify-center text-white text-2xl font-bold">
+              <div className="w-16 h-16 bg-[#5C7E9B] rounded-full flex items-center justify-center text-white text-2xl font-bold">
                 {userRole === "RIDER"
                   ? booking.driver?.user.name?.charAt(0) || "D"
                   : booking.rider?.user.name?.charAt(0) || "R"}
               </div>
               <div>
-                <h2 className="text-2xl font-semibold text-[#0F3D3E]">
+                <h2 className="text-2xl font-semibold text-[#5C7E9B]">
                   {userRole === "RIDER"
                     ? booking.driver?.user.name || "Your driver"
                     : booking.rider?.user.name || "Rider"}
@@ -1175,7 +1175,7 @@ export default function RideConfirmation({
             {userRole === "RIDER" &&
               booking.status === "ARRIVED" &&
               booking.driver && (
-                <div className="mb-4 p-5 bg-gradient-to-r from-[#00796B] to-[#00695C] rounded-xl text-white shadow-lg border-2 border-[#005A4F]">
+                <div className="mb-4 p-5 bg-gradient-to-r from-[#5C7E9B] to-[#4A6B85] rounded-xl text-white shadow-lg border-2 border-[#005A4F]">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0">
                       <svg
@@ -1214,14 +1214,14 @@ export default function RideConfirmation({
                   className={`mb-6 p-5 ${
                     booking.status === "ARRIVED"
                       ? "bg-yellow-50 border-4 border-yellow-400 shadow-xl"
-                      : "bg-[#E0F2F1] border-2 border-[#00796B]"
+                      : "bg-[#E0D5DB] border-2 border-[#5C7E9B]"
                   } rounded-xl text-center`}
                 >
                   <div
                     className={`text-sm ${
                       booking.status === "ARRIVED"
                         ? "text-yellow-800"
-                        : "text-[#00796B]"
+                        : "text-[#5C7E9B]"
                     } font-semibold mb-2`}
                   >
                     {booking.status === "ARRIVED"
@@ -1232,7 +1232,7 @@ export default function RideConfirmation({
                     className={`text-5xl font-bold ${
                       booking.status === "ARRIVED"
                         ? "text-yellow-900"
-                        : "text-[#0F3D3E]"
+                        : "text-[#5C7E9B]"
                     } tracking-wider`}
                   >
                     {booking.pinCode}
@@ -1292,7 +1292,7 @@ export default function RideConfirmation({
                   <select
                     value={selectedPaymentMethod}
                     onChange={(e) => setSelectedPaymentMethod(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C7E9B]"
                   >
                     {paymentMethods.map((method) => (
                       <option key={method.id} value={method.id}>
@@ -1402,7 +1402,7 @@ export default function RideConfirmation({
                       onConfirm?.();
                     }
                   }}
-                  className="flex-1 bg-[#00796B] text-white py-3 rounded-lg font-semibold hover:bg-[#00695C] transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 bg-[#5C7E9B] text-white py-3 rounded-lg font-semibold hover:bg-[#4A6B85] transition-colors flex items-center justify-center gap-2"
                 >
                   {userRole === "DRIVER" && (
                     <svg
@@ -1448,7 +1448,7 @@ export default function RideConfirmation({
                       console.error("onConfirm handler is not available");
                     }
                   }}
-                  className="w-full bg-[#0F3D3E] text-white py-3 rounded-lg font-semibold hover:bg-[#0a2d2e] transition-colors flex items-center justify-center gap-2"
+                  className="w-full bg-[#5C7E9B] text-white py-3 rounded-lg font-semibold hover:bg-[#0a2d2e] transition-colors flex items-center justify-center gap-2"
                 >
                   <svg
                     className="w-5 h-5"
@@ -1474,7 +1474,7 @@ export default function RideConfirmation({
                 setShowChat(true);
                 markAsRead();
               }}
-              className="w-full mt-3 py-3 bg-white border-2 border-[#00796B] text-[#00796B] rounded-lg font-semibold hover:bg-[#E0F2F1] transition-colors flex items-center justify-center gap-2 relative"
+              className="w-full mt-3 py-3 bg-white border-2 border-[#5C7E9B] text-[#5C7E9B] rounded-lg font-semibold hover:bg-[#E0D5DB] transition-colors flex items-center justify-center gap-2 relative"
             >
               <svg
                 className="w-5 h-5"
@@ -1522,7 +1522,7 @@ export default function RideConfirmation({
                   <>
                     {/* Driver Arrived Banner - Exact same component */}
                     {booking.status === "ARRIVED" && booking.driver && (
-                      <div className="p-5 bg-gradient-to-r from-[#00796B] to-[#00695C] rounded-xl text-white shadow-lg border-2 border-[#005A4F] animate-pulse">
+                      <div className="p-5 bg-gradient-to-r from-[#5C7E9B] to-[#4A6B85] rounded-xl text-white shadow-lg border-2 border-[#005A4F] animate-pulse">
                         <div className="flex items-center gap-3 mb-3">
                           <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0">
                             <svg
@@ -1570,12 +1570,12 @@ export default function RideConfirmation({
                       )}
                   </>
                 ) : (
-                  <div className="bg-gradient-to-r from-[#00796B] to-[#0F3D3E] text-white rounded-lg shadow-lg p-4">
+                  <div className="bg-gradient-to-r from-[#5C7E9B] to-[#5C7E9B] text-white rounded-lg shadow-lg p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
                           <svg
-                            className="w-7 h-7 text-[#00796B]"
+                            className="w-7 h-7 text-[#5C7E9B]"
                             fill="currentColor"
                             viewBox="0 0 24 24"
                           >
@@ -1622,12 +1622,12 @@ export default function RideConfirmation({
                 (booking.status !== "IN_PROGRESS" &&
                   booking.pickupLat &&
                   booking.pickupLng)) && (
-                <div className="absolute top-4 left-4 right-4 bg-gradient-to-r from-[#00796B] to-[#0F3D3E] text-white rounded-lg shadow-lg p-4 z-10">
+                <div className="absolute top-4 left-4 right-4 bg-gradient-to-r from-[#5C7E9B] to-[#5C7E9B] text-white rounded-lg shadow-lg p-4 z-10">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
                         <svg
-                          className="w-7 h-7 text-[#00796B]"
+                          className="w-7 h-7 text-[#5C7E9B]"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -1697,7 +1697,7 @@ export default function RideConfirmation({
             >
               {/* Pickup */}
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-[#00796B] rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 bg-[#5C7E9B] rounded-full flex items-center justify-center flex-shrink-0">
                   <svg
                     className="w-5 h-5 text-white"
                     fill="currentColor"
@@ -1707,7 +1707,7 @@ export default function RideConfirmation({
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-[#0F3D3E] text-sm">
+                  <p className="font-medium text-[#5C7E9B] text-sm">
                     Pickup location
                   </p>
                   <p className="text-xs text-gray-600 line-clamp-1">
@@ -1718,7 +1718,7 @@ export default function RideConfirmation({
 
               {/* Dropoff */}
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-[#0F3D3E] rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 bg-[#5C7E9B] rounded-full flex items-center justify-center flex-shrink-0">
                   <svg
                     className="w-5 h-5 text-white"
                     fill="none"
@@ -1734,7 +1734,7 @@ export default function RideConfirmation({
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-[#0F3D3E] text-sm">
+                  <p className="font-medium text-[#5C7E9B] text-sm">
                     {booking.dropoffAddress.split(",")[0]}
                   </p>
                   <p className="text-xs text-gray-600 line-clamp-1">
@@ -1753,7 +1753,7 @@ export default function RideConfirmation({
                   <>
                     <p className="text-sm text-gray-600">
                       Driver arrives in:{" "}
-                      <span className="font-bold text-[#00796B]">
+                      <span className="font-bold text-[#5C7E9B]">
                         {Math.round(driverETA)} mins
                       </span>
                     </p>
@@ -1767,7 +1767,7 @@ export default function RideConfirmation({
                   </p>
                 )}
               </div>
-              <span className="text-xl font-bold text-[#0F3D3E]">
+              <span className="text-xl font-bold text-[#5C7E9B]">
                 Total: {symbol}
                 {totalAmount.toFixed(2)}
               </span>
@@ -1790,7 +1790,7 @@ export default function RideConfirmation({
             className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between p-6 bg-gradient-to-r from-[#00796B] to-[#0F3D3E]">
+            <div className="flex items-center justify-between p-6 bg-gradient-to-r from-[#5C7E9B] to-[#5C7E9B]">
               <h3 className="text-xl font-bold text-white">
                 Chat with {userRole === "RIDER" ? "Driver" : "Rider"}
               </h3>
@@ -1813,7 +1813,7 @@ export default function RideConfirmation({
                 </svg>
               </button>
             </div>
-            <div className="flex-1 overflow-hidden bg-[#E0F2F1]">
+            <div className="flex-1 overflow-hidden bg-[#E0D5DB]">
               <ChatWidget
                 bookingId={booking.id}
                 sender={userRole}

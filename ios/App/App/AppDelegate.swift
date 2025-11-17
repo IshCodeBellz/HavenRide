@@ -1,5 +1,6 @@
 import UIKit
 import Capacitor
+import WebKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -9,6 +10,42 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         return true
+    }
+    
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+        
+        // Set up navigation delegate to prevent external browser launches
+        setupWebViewNavigation()
+    }
+    
+    func setupWebViewNavigation() {
+        // Get the bridge view controller and set navigation delegate
+        // Try multiple times with delays to ensure WebView is loaded
+        var attempts = 0
+        let maxAttempts = 5
+        
+        func trySetup() {
+            attempts += 1
+            if let window = self.window,
+               let rootViewController = window.rootViewController as? CAPBridgeViewController {
+                if let webView = rootViewController.webView {
+                    webView.navigationDelegate = self
+                    return
+                }
+            }
+            
+            // Retry if WebView not ready yet
+            if attempts < maxAttempts {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    trySetup()
+                }
+            }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            trySetup()
+        }
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
@@ -23,10 +60,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillEnterForeground(_ application: UIApplication) {
         // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
-    }
-
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+        // Set up navigation delegate when app comes to foreground
+        setupWebViewNavigation()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
@@ -46,4 +81,33 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
     }
 
+}
+
+// MARK: - WKNavigationDelegate
+extension AppDelegate: WKNavigationDelegate {
+    // Prevent external browser from opening
+    // Force all navigation to stay within the WebView
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        guard let url = navigationAction.request.url else {
+            decisionHandler(.cancel)
+            return
+        }
+        
+        // Check if this is a navigation action that would open externally
+        if navigationAction.targetFrame == nil {
+            // This is a new window/tab - prevent it and load in current WebView
+            webView.load(navigationAction.request)
+            decisionHandler(.cancel)
+            return
+        }
+        
+        // Always allow navigation within the WebView
+        // This prevents external browser (Safari) from opening
+        decisionHandler(.allow)
+    }
+    
+    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        // Always allow navigation responses within the WebView
+        decisionHandler(.allow)
+    }
 }

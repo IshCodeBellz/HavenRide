@@ -4,8 +4,8 @@
   "description": "Accessible transportation service for everyone",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0F3D3E",
-  "theme_color": "#0F3D3E",
+  "background_color": "#5C7E9B",
+  "theme_color": "#5C7E9B",
   "orientation": "portrait-primary",
   "icons": [
     {

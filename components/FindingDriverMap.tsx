@@ -157,7 +157,7 @@ export default function FindingDriverMap({
       el.style.width = "16px";
       el.style.height = "16px";
       el.style.borderRadius = "50%";
-      el.style.backgroundColor = "#00796B";
+      el.style.backgroundColor = "#5C7E9B";
       el.style.border = "3px solid white";
       el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.4)";
       el.style.cursor = "pointer";

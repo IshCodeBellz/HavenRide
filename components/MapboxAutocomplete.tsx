@@ -102,12 +102,12 @@ export default function MapboxAutocomplete({
         onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
         placeholder={placeholder}
         required={required}
-        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
       />
 
       {loading && (
         <div className="absolute right-3 top-[50%] translate-y-[-50%]">
-          <div className="w-5 h-5 border-2 border-[#00796B] border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-5 h-5 border-2 border-[#5C7E9B] border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
 

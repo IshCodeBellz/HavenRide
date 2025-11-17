@@ -87,7 +87,7 @@ function RidesPageContent() {
           <div>
             <Link
               href="/admin"
-              className="text-sm text-neutral-500 hover:text-[#00796B] mb-2 inline-block"
+              className="text-sm text-neutral-500 hover:text-[#5C7E9B] mb-2 inline-block"
             >
               ← Back to Dashboard
             </Link>
@@ -133,7 +133,7 @@ function RidesPageContent() {
                 onChange={(e) =>
                   setStatusFilter(e.target.value as StatusFilter)
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="REQUESTED">Requested</option>
@@ -154,7 +154,7 @@ function RidesPageContent() {
               <select
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
               >
                 <option value="all">All Time</option>
                 <option value="today">Today</option>
@@ -170,7 +170,7 @@ function RidesPageContent() {
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00796B] mx-auto mb-4"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5C7E9B] mx-auto mb-4"></div>
                 <p className="text-neutral-600">Loading rides...</p>
               </div>
             </div>

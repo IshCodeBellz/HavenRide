@@ -41,7 +41,7 @@ function AdminMetricsContent() {
         <div className="max-w-7xl mx-auto p-6">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00796B] mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5C7E9B] mx-auto mb-4"></div>
               <p className="text-neutral-600">Loading metrics...</p>
             </div>
           </div>
@@ -108,7 +108,7 @@ function AdminMetricsContent() {
             <div className="mt-3 text-xs text-amber-600">Awaiting action</div>
           </div>
 
-          <div className="bg-gradient-to-br from-[#00796B] to-[#26A69A] rounded-xl shadow-sm p-6 text-white hover:shadow-md transition-shadow">
+          <div className="bg-gradient-to-br from-[#5C7E9B] to-[#DAAAB2] rounded-xl shadow-sm p-6 text-white hover:shadow-md transition-shadow">
             <h3 className="text-sm font-semibold mb-2 uppercase tracking-wide opacity-90">
               Total Revenue
             </h3>

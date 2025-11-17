@@ -25,13 +25,13 @@ export default function Hero({ isSignedIn }: HeroProps) {
               {isSignedIn ? (
                 <Link
                   href="/rider"
-                  className="inline-block bg-[#00796B] text-white px-10 py-4 rounded-xl font-semibold hover:bg-[#00796B]/90 transition-colors"
+                  className="inline-block bg-[#5C7E9B] text-white px-10 py-4 rounded-xl font-semibold hover:bg-[#5C7E9B]/90 transition-colors"
                 >
                   Book a Ride
                 </Link>
               ) : (
                 <SignInButton mode="modal" forceRedirectUrl="/auth-callback">
-                  <button className="inline-block bg-[#00796B] text-white px-10 py-4 rounded-xl font-semibold hover:bg-[#00796B]/90 transition-colors">
+                  <button className="inline-block bg-[#5C7E9B] text-white px-10 py-4 rounded-xl font-semibold hover:bg-[#5C7E9B]/90 transition-colors">
                     Book a Ride
                   </button>
                 </SignInButton>

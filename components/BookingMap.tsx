@@ -26,20 +26,44 @@ export default function BookingMap({
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
+    
+    if (!token) {
+      console.error("Mapbox access token is missing!");
+      return;
+    }
 
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: "mapbox://styles/mapbox/streets-v12",
-      center: [-0.1278, 51.5074], // London default
-      zoom: 12,
-    });
+    mapboxgl.accessToken = token;
 
-    map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+    try {
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: "mapbox://styles/mapbox/streets-v12",
+        center: [-0.1278, 51.5074], // London default
+        zoom: 12,
+        antialias: true, // Enable antialiasing for better rendering
+      });
+
+      map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+
+      // Handle map load errors
+      map.current.on("error", (e) => {
+        console.error("Mapbox error:", e);
+      });
+
+      // Log when map loads successfully
+      map.current.on("load", () => {
+        console.log("Mapbox map loaded successfully");
+      });
+    } catch (error) {
+      console.error("Error initializing Mapbox map:", error);
+    }
 
     return () => {
-      map.current?.remove();
-      map.current = null;
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
+      }
     };
   }, []);
 
@@ -83,11 +107,11 @@ export default function BookingMap({
     el.innerHTML = `
       <svg width="40" height="50" viewBox="0 0 40 50" xmlns="http://www.w3.org/2000/svg">
         <path d="M20 0C12.268 0 6 6.268 6 14C6 24.5 20 48 20 48C20 48 34 24.5 34 14C34 6.268 27.732 0 20 0Z" 
-              fill="#00796B" 
+              fill="#5C7E9B" 
               stroke="white" 
               stroke-width="2"/>
         <circle cx="20" cy="14" r="8" fill="white"/>
-        <text x="20" y="19" text-anchor="middle" font-size="14" font-weight="bold" fill="#00796B" font-family="Arial, sans-serif">A</text>
+        <text x="20" y="19" text-anchor="middle" font-size="14" font-weight="bold" fill="#5C7E9B" font-family="Arial, sans-serif">A</text>
       </svg>
     `;
 
@@ -126,11 +150,11 @@ export default function BookingMap({
     el.innerHTML = `
       <svg width="40" height="50" viewBox="0 0 40 50" xmlns="http://www.w3.org/2000/svg">
         <path d="M20 0C12.268 0 6 6.268 6 14C6 24.5 20 48 20 48C20 48 34 24.5 34 14C34 6.268 27.732 0 20 0Z" 
-              fill="#0F3D3E" 
+              fill="#5C7E9B" 
               stroke="white" 
               stroke-width="2"/>
         <circle cx="20" cy="14" r="8" fill="white"/>
-        <text x="20" y="19" text-anchor="middle" font-size="14" font-weight="bold" fill="#0F3D3E" font-family="Arial, sans-serif">B</text>
+        <text x="20" y="19" text-anchor="middle" font-size="14" font-weight="bold" fill="#5C7E9B" font-family="Arial, sans-serif">B</text>
       </svg>
     `;
 
@@ -195,12 +219,12 @@ export default function BookingMap({
             </defs>
             <g filter="url(#car-shadow-booking)">
               <path d="M8 20L10 14C10.5 12.5 12 11.5 13.5 11.5H34.5C36 11.5 37.5 12.5 38 14L40 20H44C45.1 20 46 20.9 46 22V24C46 25.1 45.1 26 44 26H42V36C42 37.1 41.1 38 40 38H38C36.9 38 36 37.1 36 36V34H12V36C12 37.1 11.1 38 10 38H8C6.9 38 6 37.1 6 36V26H4C2.9 26 2 25.1 2 24V22C2 20.9 2.9 20 4 20H8Z" 
-                    fill="#00796B" 
+                    fill="#5C7E9B" 
                     stroke="white" 
                     stroke-width="2"/>
               <circle cx="14" cy="30" r="3" fill="white"/>
               <circle cx="34" cy="30" r="3" fill="white"/>
-              <path d="M10 20H38L36 15H12L10 20Z" fill="#0F3D3E"/>
+              <path d="M10 20H38L36 15H12L10 20Z" fill="#5C7E9B"/>
             </g>
           </svg>
         `;
@@ -276,7 +300,7 @@ export default function BookingMap({
               "line-cap": "round",
             },
             paint: {
-              "line-color": "#00796B",
+              "line-color": "#5C7E9B",
               "line-width": 4,
               "line-opacity": 0.75,
             },

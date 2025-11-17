@@ -45,5 +45,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>HavenRide needs your location to track your ride and provide accurate pickup/dropoff services.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>HavenRide needs your location to track your ride and provide accurate pickup/dropoff services.</string>
 </dict>
 </plist>

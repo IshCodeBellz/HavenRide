@@ -98,7 +98,7 @@ function DriverEarningsContent() {
   return (
     <div className="px-8 py-6 max-w-7xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#0F3D3E] mb-2">My Earnings</h1>
+        <h1 className="text-3xl font-bold text-[#5C7E9B] mb-2">My Earnings</h1>
         <p className="text-gray-600">View your earnings breakdown</p>
       </div>
 
@@ -108,7 +108,7 @@ function DriverEarningsContent() {
           <h3 className="text-sm font-medium text-gray-600 mb-1">
             Total Earnings
           </h3>
-          <p className="text-3xl font-bold text-[#0F3D3E]">
+          <p className="text-3xl font-bold text-[#5C7E9B]">
             £{summary?.totalEarnings.toFixed(2) || earnings.totalEarnings.toFixed(2)}
           </p>
           <p className="text-xs text-gray-500 mt-1">
@@ -120,7 +120,7 @@ function DriverEarningsContent() {
           <h3 className="text-sm font-medium text-gray-600 mb-1">
             This Week
           </h3>
-          <p className="text-3xl font-bold text-[#0F3D3E]">
+          <p className="text-3xl font-bold text-[#5C7E9B]">
             £{summary?.thisWeekEarnings.toFixed(2) || earnings.thisWeek.toFixed(2)}
           </p>
         </div>
@@ -129,7 +129,7 @@ function DriverEarningsContent() {
           <h3 className="text-sm font-medium text-gray-600 mb-1">
             This Month
           </h3>
-          <p className="text-3xl font-bold text-[#0F3D3E]">
+          <p className="text-3xl font-bold text-[#5C7E9B]">
             £{summary?.thisMonthEarnings.toFixed(2) || "0.00"}
           </p>
         </div>
@@ -138,7 +138,7 @@ function DriverEarningsContent() {
           <h3 className="text-sm font-medium text-gray-600 mb-1">
             Avg Per Ride
           </h3>
-          <p className="text-3xl font-bold text-[#0F3D3E]">
+          <p className="text-3xl font-bold text-[#5C7E9B]">
             £{summary?.totalEarnings && summary.totalRides > 0
               ? (summary.totalEarnings / summary.totalRides).toFixed(2)
               : earnings.averagePerRide.toFixed(2)}
@@ -148,7 +148,7 @@ function DriverEarningsContent() {
 
       {/* Payout Information */}
       <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-[#0F3D3E]">
+        <h2 className="text-xl font-semibold mb-4 text-[#5C7E9B]">
           Payout Information
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -174,7 +174,7 @@ function DriverEarningsContent() {
           </div>
           <div>
             <div className="text-sm text-gray-600 mb-1">Pending Payout</div>
-            <div className="text-lg font-semibold text-[#00796B]">
+            <div className="text-lg font-semibold text-[#5C7E9B]">
               £{summary?.pendingPayout.toFixed(2) || "0.00"}
             </div>
           </div>
@@ -184,12 +184,12 @@ function DriverEarningsContent() {
       {/* Payout History */}
       <div className="bg-white rounded-2xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-[#0F3D3E]">
+          <h2 className="text-xl font-semibold text-[#5C7E9B]">
             Payout History
           </h2>
           <button
             onClick={() => setShowHistory(!showHistory)}
-            className="px-4 py-2 text-[#00796B] hover:bg-[#00796B]/10 rounded-lg font-semibold transition-colors text-sm"
+            className="px-4 py-2 text-[#5C7E9B] hover:bg-[#5C7E9B]/10 rounded-lg font-semibold transition-colors text-sm"
           >
             {showHistory ? "Hide" : "Show"} History ({payoutHistory.length})
           </button>
@@ -256,7 +256,7 @@ function DriverEarningsContent() {
                       <td className="py-3 px-4 text-sm text-right text-gray-600">
                         -£{payout.commission.toFixed(2)}
                       </td>
-                      <td className="py-3 px-4 text-sm text-right font-semibold text-[#0F3D3E]">
+                      <td className="py-3 px-4 text-sm text-right font-semibold text-[#5C7E9B]">
                         £{payout.driverEarnings.toFixed(2)}
                       </td>
                       <td className="py-3 px-4 text-center">
@@ -278,7 +278,7 @@ function DriverEarningsContent() {
                     <td className="py-3 px-4 text-sm text-right text-gray-900">
                       -£{summary?.totalCommission.toFixed(2) || "0.00"}
                     </td>
-                    <td className="py-3 px-4 text-sm text-right text-[#0F3D3E]">
+                    <td className="py-3 px-4 text-sm text-right text-[#5C7E9B]">
                       £{summary?.totalEarnings.toFixed(2) || "0.00"}
                     </td>
                     <td></td>

@@ -27,6 +27,40 @@ HavenRide uses **Capacitor** to wrap your Next.js web application into native iO
 - Android SDK (installed via Android Studio)
 - Google Play Developer Account ($25 one-time fee)
 
+#### Finding Your Android SDK Path
+
+After installing Android Studio, the Android SDK is typically located at:
+
+- **macOS**: `~/Library/Android/sdk` or `/Users/<your-username>/Library/Android/sdk`
+- **Linux**: `~/Android/Sdk` or `/home/<your-username>/Android/Sdk`
+- **Windows**: `%LOCALAPPDATA%\Android\Sdk` or `C:\Users\<your-username>\AppData\Local\Android\Sdk`
+
+**To find your SDK path in Android Studio:**
+
+1. Open Android Studio
+2. Go to **Preferences** (macOS) or **Settings** (Windows/Linux)
+3. Navigate to **Appearance & Behavior** → **System Settings** → **Android SDK**
+4. The SDK location is shown at the top of the SDK Manager window
+
+**Set ANDROID_HOME environment variable:**
+
+Add to your shell profile (`~/.zshrc` for zsh, `~/.bashrc` for bash):
+
+```bash
+# macOS/Linux
+export ANDROID_HOME=$HOME/Library/Android/sdk
+export PATH=$PATH:$ANDROID_HOME/emulator
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+export PATH=$PATH:$ANDROID_HOME/tools
+export PATH=$PATH:$ANDROID_HOME/tools/bin
+```
+
+Then reload your shell:
+
+```bash
+source ~/.zshrc  # or source ~/.bashrc
+```
+
 ## Initial Setup
 
 ### 1. Install Dependencies
@@ -63,14 +97,44 @@ This creates `ios/` and `android/` directories in your project root.
 
 ### Environment Variables
 
-For production mobile apps, you'll want to point Capacitor to your deployed Next.js app:
+**For Production:**
+Point Capacitor to your deployed Next.js app:
 
 ```env
 # In your .env file
 CAPACITOR_SERVER_URL=https://your-app.vercel.app
 ```
 
-**Important**: Your Next.js app must be deployed and accessible via HTTPS for the mobile app to work properly.
+**For Local Development:**
+Android emulators cannot access `localhost` on your host machine. Use one of these options:
+
+**Option 1: Use Android Emulator Special IP (Recommended)**
+
+```env
+# Android emulator uses 10.0.2.2 to access host's localhost
+CAPACITOR_SERVER_URL=http://10.0.2.2:3000
+```
+
+**Option 2: Use Your Local Network IP**
+
+```env
+# Find your IP: ifconfig (macOS/Linux) or ipconfig (Windows)
+CAPACITOR_SERVER_URL=http://192.168.1.XXX:3000
+```
+
+**Option 3: Build and Sync (No Server Needed)**
+Build your Next.js app and sync it to the native project. The app will use the built static files instead of connecting to a server:
+
+```bash
+npm run build
+npm run mobile:sync
+```
+
+**Important**:
+
+- For production, your Next.js app must be deployed and accessible via HTTPS
+- For local development with emulator, use `10.0.2.2` instead of `localhost`
+- Make sure your Next.js dev server is running if using Option 1 or 2
 
 ### Capacitor Configuration
 
@@ -150,19 +214,33 @@ This builds Next.js and syncs Capacitor in one command.
 
 ### Android Setup
 
-1. **Open Android Studio**:
+1. **Configure Android SDK Path** (if prompted):
+
+   When you first open Android Studio, you may be prompted to provide the Android SDK path. Use one of these common locations:
+
+   - **macOS**: `/Users/<your-username>/Library/Android/sdk`
+   - **Linux**: `/home/<your-username>/Android/Sdk`
+   - **Windows**: `C:\Users\<your-username>\AppData\Local\Android\Sdk`
+
+   If Android Studio doesn't detect your SDK automatically:
+
+   - Click the **Browse** button (folder icon) next to the SDK path field
+   - Navigate to the SDK location listed above
+   - Select the folder and click **OK**
+
+2. **Open Android Studio**:
 
    ```bash
    npm run mobile:android
    ```
 
-2. **Configure App Icons**:
+3. **Configure App Icons**:
 
    - Navigate to `android/app/src/main/res/`
    - Replace icons in `mipmap-*` folders
    - Use Android Asset Studio: [assetstudio.appspot.com](https://romannurik.github.io/AndroidAssetStudio/)
 
-3. **Configure Signing**:
+4. **Configure Signing**:
 
    - Create a keystore for release builds:
      ```bash
@@ -187,9 +265,22 @@ This builds Next.js and syncs Capacitor in one command.
      }
      ```
 
-4. **Run on Emulator or Device**:
-   - Create/start an Android Virtual Device (AVD) in Android Studio
-   - Click Run or press `Shift+F10`
+5. **Run on Emulator or Device**:
+
+   **Using an Emulator:**
+
+   - In Android Studio, open **Device Manager** (toolbar icon or Tools → Device Manager)
+   - Click **Create Device** if you don't have one
+   - Select a device (e.g., Pixel 5) and system image (e.g., API 33)
+   - Click the **Play** button to start the emulator
+   - Wait for it to fully boot, then click **Run** or press `Shift+F10`
+
+   **Using a Physical Device:**
+
+   - Enable Developer Options and USB Debugging on your Android device
+   - Connect via USB
+   - Accept the USB debugging prompt
+   - Click **Run** or press `Shift+F10` in Android Studio
 
 ## App Store Distribution
 
@@ -265,16 +356,84 @@ Available plugins: [capacitorjs.com/docs/plugins](https://capacitorjs.com/docs/p
 
 **Issue**: Android build fails
 
-- **Solution**: Make sure Android SDK is installed and `ANDROID_HOME` is set
+- **Solution**:
+  1. Make sure Android SDK is installed via Android Studio
+  2. Set `ANDROID_HOME` environment variable (see Prerequisites section)
+  3. Verify SDK path is correct: `echo $ANDROID_HOME` (macOS/Linux) or `echo %ANDROID_HOME%` (Windows)
+  4. Ensure Android SDK Platform Tools are installed in Android Studio SDK Manager
+
+**Issue**: Android Studio prompts for SDK path
+
+- **Solution**:
+  1. If you see a dialog asking for SDK path, click Browse and navigate to:
+     - macOS: `~/Library/Android/sdk`
+     - Linux: `~/Android/Sdk`
+     - Windows: `%LOCALAPPDATA%\Android\Sdk`
+  2. If SDK doesn't exist, install it via Android Studio:
+     - Open Android Studio → Preferences/Settings → Android SDK
+     - Install Android SDK Platform and SDK Platform-Tools
+
+**Issue**: "No target device found" error
+
+- **Solution**: You need to either start an Android emulator or connect a physical device:
+
+  **Option 1: Create and Start an Android Emulator (AVD)**
+
+  1. In Android Studio, click the **Device Manager** icon in the toolbar (or Tools → Device Manager)
+  2. Click **Create Device**
+  3. Select a device definition (e.g., Pixel 5, Pixel 6)
+  4. Click **Next**
+  5. Select a system image (e.g., API 33, API 34) - download if needed
+  6. Click **Next** → **Finish**
+  7. Click the **Play** button next to your AVD to start it
+  8. Wait for the emulator to fully boot (home screen visible)
+  9. Try running your app again
+
+  **Option 2: Connect a Physical Android Device**
+
+  1. Enable **Developer Options** on your Android device:
+     - Go to Settings → About Phone
+     - Tap **Build Number** 7 times
+  2. Enable **USB Debugging**:
+     - Go to Settings → Developer Options
+     - Enable **USB Debugging**
+  3. Connect device via USB
+  4. Accept the USB debugging prompt on your device
+  5. Verify device is detected: `adb devices` (should show your device)
+  6. Try running your app again
+
+  **Quick Check**: Run `adb devices` in terminal to see available devices
 
 ### Runtime Issues
+
+**Issue**: "ERR_CONNECTION_REFUSED" or "Webpage not available" error
+
+- **Solution**: This happens when the app tries to connect to `localhost` but can't reach your dev server:
+
+  **For Android Emulator:**
+
+  1. Android emulators can't access `localhost` on your host machine
+  2. Set `CAPACITOR_SERVER_URL=http://10.0.2.2:3000` in your `.env` file (10.0.2.2 is the special IP for Android emulator)
+  3. Make sure your Next.js dev server is running: `npm run dev`
+  4. Rebuild and sync: `npm run mobile:build`
+  5. Or build the app instead: `npm run build && npm run mobile:sync` (no server needed)
+
+  **For Physical Android Device:**
+
+  1. Find your computer's local IP address: `ifconfig` (macOS/Linux) or `ipconfig` (Windows)
+  2. Set `CAPACITOR_SERVER_URL=http://YOUR_IP:3000` (e.g., `http://192.168.1.100:3000`)
+  3. Make sure your device and computer are on the same WiFi network
+  4. Make sure your Next.js dev server is running
+  5. Rebuild and sync: `npm run mobile:build`
 
 **Issue**: App shows blank screen
 
 - **Solution**:
   1. Check that Next.js app is built: `npm run build`
-  2. Check `CAPACITOR_SERVER_URL` points to a valid HTTPS URL
-  3. Check browser console in native IDE for errors
+  2. Check `CAPACITOR_SERVER_URL` points to a valid URL (or remove it to use built files)
+  3. Sync Capacitor: `npm run mobile:sync`
+  4. Check browser console in native IDE for errors
+  5. If using a server URL, verify the server is accessible from your device/emulator
 
 **Issue**: API calls fail
 

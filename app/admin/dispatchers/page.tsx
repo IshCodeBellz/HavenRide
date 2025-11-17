@@ -109,7 +109,7 @@ function DispatcherManagementContent() {
         <div className="mb-8">
           <Link
             href="/admin"
-            className="text-sm text-neutral-500 hover:text-[#00796B] mb-2 inline-block"
+            className="text-sm text-neutral-500 hover:text-[#5C7E9B] mb-2 inline-block"
           >
             ← Back to Dashboard
           </Link>
@@ -135,7 +135,7 @@ function DispatcherManagementContent() {
             <p className="text-sm text-neutral-600 mb-2">
               Total Rides Dispatched
             </p>
-            <p className="text-3xl font-bold text-[#00796B]">
+            <p className="text-3xl font-bold text-[#5C7E9B]">
               {stats.totalRides}
             </p>
           </div>
@@ -155,7 +155,7 @@ function DispatcherManagementContent() {
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+            className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
           >
             <option value="ALL">All Dispatchers</option>
             <option value="ACTIVE">Active</option>
@@ -168,7 +168,7 @@ function DispatcherManagementContent() {
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00796B] mx-auto mb-4"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5C7E9B] mx-auto mb-4"></div>
                 <p className="text-neutral-600">Loading dispatchers...</p>
               </div>
             </div>
@@ -232,7 +232,7 @@ function DispatcherManagementContent() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="h-10 w-10 flex-shrink-0">
-                            <div className="h-10 w-10 rounded-full bg-[#00796B] flex items-center justify-center text-white font-semibold">
+                            <div className="h-10 w-10 rounded-full bg-[#5C7E9B] flex items-center justify-center text-white font-semibold">
                               {dispatcher.user?.name?.charAt(0).toUpperCase() ||
                                 "D"}
                             </div>
@@ -282,7 +282,7 @@ function DispatcherManagementContent() {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <Link
                           href={`/admin/dispatchers/${dispatcher.id}`}
-                          className="text-[#00796B] hover:text-[#00695C] mr-3"
+                          className="text-[#5C7E9B] hover:text-[#4A6B85] mr-3"
                         >
                           View
                         </Link>
@@ -303,7 +303,7 @@ function DispatcherManagementContent() {
 
         {/* Performance Insights */}
         {!loading && dispatchers.length > 0 && (
-          <div className="bg-gradient-to-br from-[#00796B] to-[#26A69A] rounded-xl shadow-lg p-8 text-white">
+          <div className="bg-gradient-to-br from-[#5C7E9B] to-[#DAAAB2] rounded-xl shadow-lg p-8 text-white">
             <h2 className="text-2xl font-bold mb-4">Performance Overview</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
@@ -431,7 +431,7 @@ function DispatcherManagementContent() {
                   onChange={(e) =>
                     setAssignData({ ...assignData, region: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 >
                   <option value="">Select Region</option>
                   <option value="North London">North London</option>
@@ -452,7 +452,7 @@ function DispatcherManagementContent() {
                   onChange={(e) =>
                     setAssignData({ ...assignData, shift: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 >
                   <option value="">Select Shift</option>
                   <option value="Morning (6AM-2PM)">Morning (6AM-2PM)</option>
@@ -478,7 +478,7 @@ function DispatcherManagementContent() {
                 </button>
                 <button
                   onClick={handleSaveAssignment}
-                  className="flex-1 px-6 py-3 bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors font-semibold"
+                  className="flex-1 px-6 py-3 bg-[#5C7E9B] text-white rounded-lg hover:bg-[#4A6B85] transition-colors font-semibold"
                 >
                   Save Assignment
                 </button>

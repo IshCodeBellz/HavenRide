@@ -87,7 +87,7 @@ function MapPageContent() {
               </Link>
               <Link
                 href="/dispatcher"
-                className="px-4 sm:px-5 md:px-6 lg:px-7 py-2.5 sm:py-3 md:py-3.5 text-base sm:text-lg bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors whitespace-nowrap"
+                className="px-4 sm:px-5 md:px-6 lg:px-7 py-2.5 sm:py-3 md:py-3.5 text-base sm:text-lg bg-[#5C7E9B] text-white rounded-lg hover:bg-[#4A6B85] transition-colors whitespace-nowrap"
               >
                 Dashboard
               </Link>
@@ -144,11 +144,11 @@ function MapPageContent() {
               <span>Requested Pickup</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-[#00796B] rounded-full"></div>
+              <div className="w-4 h-4 bg-[#5C7E9B] rounded-full"></div>
               <span>Active Pickup</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-[#0F3D3E] rounded-full"></div>
+              <div className="w-4 h-4 bg-[#5C7E9B] rounded-full"></div>
               <span>Drop-off</span>
             </div>
           </div>

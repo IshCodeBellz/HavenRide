@@ -98,7 +98,7 @@ export default function RoleSwitcher({
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={switching}
-        className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200 hover:border-[#00796B] hover:bg-[#E0F2F1]/20 transition-all disabled:opacity-50"
+        className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200 hover:border-[#5C7E9B] hover:bg-[#E0D5DB]/20 transition-all disabled:opacity-50"
       >
         <span className="text-lg">{currentRoleData?.icon}</span>
         <span className="text-sm font-medium text-[#263238]">
@@ -143,9 +143,9 @@ export default function RoleSwitcher({
                 handleRoleSwitch(adminOption.value, adminOption.path)
               }
               disabled={switching}
-              className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[#E0F2F1]/30 transition-colors disabled:opacity-50 border-b border-gray-100 ${
+              className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[#E0D5DB]/30 transition-colors disabled:opacity-50 border-b border-gray-100 ${
                 currentRole === "ADMIN"
-                  ? "bg-[#E0F2F1]/50 text-[#00796B] font-medium"
+                  ? "bg-[#E0D5DB]/50 text-[#5C7E9B] font-medium"
                   : "text-[#263238]"
               }`}
             >
@@ -153,7 +153,7 @@ export default function RoleSwitcher({
               <span className="text-sm">{adminOption.label}</span>
               {currentRole === "ADMIN" && (
                 <svg
-                  className="w-4 h-4 ml-auto text-[#00796B]"
+                  className="w-4 h-4 ml-auto text-[#5C7E9B]"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -172,9 +172,9 @@ export default function RoleSwitcher({
                 key={role.value}
                 onClick={() => handleRoleSwitch(role.value, role.path)}
                 disabled={switching}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[#E0F2F1]/30 transition-colors disabled:opacity-50 ${
+                className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[#E0D5DB]/30 transition-colors disabled:opacity-50 ${
                   role.value === currentRole
-                    ? "bg-[#E0F2F1]/50 text-[#00796B] font-medium"
+                    ? "bg-[#E0D5DB]/50 text-[#5C7E9B] font-medium"
                     : "text-[#263238]"
                 }`}
               >
@@ -182,7 +182,7 @@ export default function RoleSwitcher({
                 <span className="text-sm">{role.label}</span>
                 {role.value === currentRole && (
                   <svg
-                    className="w-4 h-4 ml-auto text-[#00796B]"
+                    className="w-4 h-4 ml-auto text-[#5C7E9B]"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >

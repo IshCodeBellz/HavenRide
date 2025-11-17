@@ -187,10 +187,10 @@ function DriverSupportContent() {
   );
 
   return (
-    <div className="px-8 py-6 max-w-7xl mx-auto">
+    <div className="px-8 py-6 max-w-7xl mx-auto safe-area-content">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#0F3D3E] mb-2">
+      <div className="mb-8 safe-area-top">
+        <h1 className="text-3xl font-bold text-[#5C7E9B] mb-2">
           Driver Support
         </h1>
         <p className="text-gray-600">How can we help you today?</p>
@@ -204,7 +204,7 @@ function DriverSupportContent() {
             placeholder="Search for help..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+            className="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C7E9B]"
           />
           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
             🔍
@@ -214,7 +214,7 @@ function DriverSupportContent() {
 
       {/* Help Articles */}
       <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-        <h2 className="text-xl font-semibold text-[#0F3D3E] mb-4">
+        <h2 className="text-xl font-semibold text-[#5C7E9B] mb-4">
           Help Articles
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -222,7 +222,7 @@ function DriverSupportContent() {
             filteredArticles.map((article) => (
               <div
                 key={article.id}
-                className="border rounded-xl p-4 hover:border-[#00796B] hover:shadow-md transition-all cursor-pointer"
+                className="border rounded-xl p-4 hover:border-[#5C7E9B] hover:shadow-md transition-all cursor-pointer"
               >
                 <div className="flex items-start gap-3">
                   <div className="text-3xl">{article.icon}</div>
@@ -248,10 +248,10 @@ function DriverSupportContent() {
       {/* My Tickets Section */}
       <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-[#0F3D3E]">My Tickets</h2>
+          <h2 className="text-xl font-semibold text-[#5C7E9B]">My Tickets</h2>
           <button
             onClick={() => setShowMyTickets(!showMyTickets)}
-            className="px-4 py-2 text-[#00796B] hover:bg-[#00796B]/10 rounded-lg font-semibold transition-colors text-sm"
+            className="px-4 py-2 text-[#5C7E9B] hover:bg-[#5C7E9B]/10 rounded-lg font-semibold transition-colors text-sm"
           >
             {showMyTickets ? "Hide" : "View"} My Tickets ({tickets.length})
           </button>
@@ -267,7 +267,7 @@ function DriverSupportContent() {
               tickets.map((ticket) => (
                 <div
                   key={ticket.id}
-                  className="border rounded-lg p-4 hover:border-[#00796B] transition-colors"
+                  className="border rounded-lg p-4 hover:border-[#5C7E9B] transition-colors"
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
@@ -311,7 +311,7 @@ function DriverSupportContent() {
       {/* Create Ticket Form */}
       {showTicketForm && (
         <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-          <h2 className="text-xl font-semibold text-[#0F3D3E] mb-4">
+          <h2 className="text-xl font-semibold text-[#5C7E9B] mb-4">
             Create Support Ticket
           </h2>
           <div className="space-y-4">
@@ -388,7 +388,7 @@ function DriverSupportContent() {
               <button
                 onClick={handleCreateTicket}
                 disabled={submitting}
-                className="flex-1 px-4 py-2 bg-[#00796B] text-white rounded-lg font-semibold hover:bg-[#00695C] transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-2 bg-[#5C7E9B] text-white rounded-lg font-semibold hover:bg-[#4A6B85] transition-colors disabled:opacity-50"
               >
                 {submitting ? "Submitting..." : "Submit Ticket"}
               </button>
@@ -413,23 +413,23 @@ function DriverSupportContent() {
 
       {/* Contact Options */}
       <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-        <h2 className="text-xl font-semibold text-[#0F3D3E] mb-4">
+        <h2 className="text-xl font-semibold text-[#5C7E9B] mb-4">
           Contact Support
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button className="border-2 border-[#00796B] rounded-xl p-4 hover:bg-[#00796B] hover:text-white transition-colors">
+          <button className="border-2 border-[#5C7E9B] rounded-xl p-4 hover:bg-[#5C7E9B] hover:text-white transition-colors">
             <div className="text-3xl mb-2">💬</div>
             <div className="font-semibold">Chat with Us</div>
             <div className="text-sm text-gray-600 mt-1">
               Average response: 2 mins
             </div>
           </button>
-          <button className="border-2 border-[#00796B] rounded-xl p-4 hover:bg-[#00796B] hover:text-white transition-colors">
+          <button className="border-2 border-[#5C7E9B] rounded-xl p-4 hover:bg-[#5C7E9B] hover:text-white transition-colors">
             <div className="text-3xl mb-2">📞</div>
             <div className="font-semibold">Call Support</div>
             <div className="text-sm text-gray-600 mt-1">Available 24/7</div>
           </button>
-          <button className="border-2 border-[#00796B] rounded-xl p-4 hover:bg-[#00796B] hover:text-white transition-colors">
+          <button className="border-2 border-[#5C7E9B] rounded-xl p-4 hover:bg-[#5C7E9B] hover:text-white transition-colors">
             <div className="text-3xl mb-2">📧</div>
             <div className="font-semibold">Email Us</div>
             <div className="text-sm text-gray-600 mt-1">
@@ -441,13 +441,13 @@ function DriverSupportContent() {
 
       {/* Quick Actions */}
       <div className="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-[#0F3D3E] mb-4">
+        <h2 className="text-xl font-semibold text-[#5C7E9B] mb-4">
           Quick Actions
         </h2>
         <div className="space-y-3">
           <button
             onClick={() => handleQuickAction("safety")}
-            className="w-full text-left p-4 border rounded-xl hover:border-[#00796B] hover:bg-gray-50 transition-colors"
+            className="w-full text-left p-4 border rounded-xl hover:border-[#5C7E9B] hover:bg-gray-50 transition-colors"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -463,7 +463,7 @@ function DriverSupportContent() {
           </button>
           <button
             onClick={() => handleQuickAction("vehicle")}
-            className="w-full text-left p-4 border rounded-xl hover:border-[#00796B] hover:bg-gray-50 transition-colors"
+            className="w-full text-left p-4 border rounded-xl hover:border-[#5C7E9B] hover:bg-gray-50 transition-colors"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -479,7 +479,7 @@ function DriverSupportContent() {
           </button>
           <button
             onClick={() => handleQuickAction("payment")}
-            className="w-full text-left p-4 border rounded-xl hover:border-[#00796B] hover:bg-gray-50 transition-colors"
+            className="w-full text-left p-4 border rounded-xl hover:border-[#5C7E9B] hover:bg-gray-50 transition-colors"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -503,7 +503,7 @@ function DriverSupportContent() {
                 priority: "MEDIUM",
               });
             }}
-            className="w-full text-left p-4 border rounded-xl hover:border-[#00796B] hover:bg-gray-50 transition-colors"
+            className="w-full text-left p-4 border rounded-xl hover:border-[#5C7E9B] hover:bg-gray-50 transition-colors"
           >
             <div className="flex items-center justify-between">
               <div>

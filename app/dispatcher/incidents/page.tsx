@@ -244,7 +244,7 @@ function IncidentsPageContent() {
               </Link>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="px-4 sm:px-5 md:px-6 lg:px-7 py-2.5 sm:py-3 md:py-3.5 text-base sm:text-lg bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors whitespace-nowrap"
+                className="px-4 sm:px-5 md:px-6 lg:px-7 py-2.5 sm:py-3 md:py-3.5 text-base sm:text-lg bg-[#5C7E9B] text-white rounded-lg hover:bg-[#4A6B85] transition-colors whitespace-nowrap"
               >
                 + Report Incident
               </button>
@@ -293,7 +293,7 @@ function IncidentsPageContent() {
                 onChange={(e) =>
                   setFilters({ ...filters, status: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
               >
                 <option value="">All</option>
                 <option value="OPEN">Open</option>
@@ -312,7 +312,7 @@ function IncidentsPageContent() {
                 onChange={(e) =>
                   setFilters({ ...filters, priority: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
               >
                 <option value="">All</option>
                 <option value="LOW">Low</option>
@@ -330,7 +330,7 @@ function IncidentsPageContent() {
                 onChange={(e) =>
                   setFilters({ ...filters, type: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
               >
                 <option value="">All</option>
                 <option value="SOS">SOS</option>
@@ -351,7 +351,7 @@ function IncidentsPageContent() {
           </h2>
           {loading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00796B] mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5C7E9B] mx-auto mb-4"></div>
               <p className="text-neutral-600">Loading incidents...</p>
             </div>
           ) : incidents.length === 0 ? (
@@ -476,7 +476,7 @@ function IncidentsPageContent() {
                     setCreateForm({ ...createForm, bookingId: e.target.value })
                   }
                   placeholder="Leave empty if not related to a booking"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -489,7 +489,7 @@ function IncidentsPageContent() {
                     onChange={(e) =>
                       setCreateForm({ ...createForm, type: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                   >
                     <option value="SOS">SOS</option>
                     <option value="ACCIDENT">Accident</option>
@@ -508,7 +508,7 @@ function IncidentsPageContent() {
                     onChange={(e) =>
                       setCreateForm({ ...createForm, priority: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                   >
                     <option value="LOW">Low</option>
                     <option value="MEDIUM">Medium</option>
@@ -528,7 +528,7 @@ function IncidentsPageContent() {
                     setCreateForm({ ...createForm, title: e.target.value })
                   }
                   placeholder="Brief incident title"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 />
               </div>
               <div>
@@ -542,7 +542,7 @@ function IncidentsPageContent() {
                     setCreateForm({ ...createForm, description: e.target.value })
                   }
                   placeholder="Detailed description of the incident"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 />
               </div>
               <div>
@@ -556,7 +556,7 @@ function IncidentsPageContent() {
                     setCreateForm({ ...createForm, location: e.target.value })
                   }
                   placeholder="Incident location"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 />
               </div>
             </div>
@@ -569,7 +569,7 @@ function IncidentsPageContent() {
               </button>
               <button
                 onClick={handleCreateIncident}
-                className="px-6 py-2 bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors"
+                className="px-6 py-2 bg-[#5C7E9B] text-white rounded-lg hover:bg-[#4A6B85] transition-colors"
               >
                 Report Incident
               </button>
@@ -619,7 +619,7 @@ function IncidentsPageContent() {
                     onChange={(e) =>
                       handleUpdateStatus(selectedIncident.id, e.target.value)
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                   >
                     <option value="OPEN">Open</option>
                     <option value="IN_PROGRESS">In Progress</option>

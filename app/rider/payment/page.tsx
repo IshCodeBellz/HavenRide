@@ -236,7 +236,7 @@ function CheckoutForm({
       <button
         type="submit"
         disabled={!stripe || processing}
-        className="w-full bg-[#00796B] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#00695C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+        className="w-full bg-[#5C7E9B] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#4A6B85] transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
       >
         {processing ? (
           <span className="flex items-center justify-center gap-2">
@@ -433,7 +433,7 @@ function PaymentPageContent() {
       <div className="max-w-2xl mx-auto px-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#0F3D3E]">Confirm & Pay</h1>
+          <h1 className="text-3xl font-bold text-[#5C7E9B]">Confirm & Pay</h1>
           <p className="text-gray-600 mt-2">
             Review your ride details and confirm payment
           </p>
@@ -441,30 +441,30 @@ function PaymentPageContent() {
 
         {/* Trip Details Card */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold text-[#0F3D3E] mb-4">
+          <h2 className="text-xl font-semibold text-[#5C7E9B] mb-4">
             Trip Details
           </h2>
 
           <div className="space-y-4">
             {/* Pickup */}
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-[#00796B] rounded-full flex items-center justify-center shrink-0 mt-1">
+              <div className="w-8 h-8 bg-[#5C7E9B] rounded-full flex items-center justify-center shrink-0 mt-1">
                 <span className="text-white font-bold text-sm">A</span>
               </div>
               <div className="flex-1">
                 <p className="text-xs text-gray-600 font-medium">Pickup</p>
-                <p className="text-sm font-semibold text-[#0F3D3E]">{pickup}</p>
+                <p className="text-sm font-semibold text-[#5C7E9B]">{pickup}</p>
               </div>
             </div>
 
             {/* Dropoff */}
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-[#0F3D3E] rounded-full flex items-center justify-center shrink-0 mt-1">
+              <div className="w-8 h-8 bg-[#5C7E9B] rounded-full flex items-center justify-center shrink-0 mt-1">
                 <span className="text-white font-bold text-sm">B</span>
               </div>
               <div className="flex-1">
                 <p className="text-xs text-gray-600 font-medium">Drop-off</p>
-                <p className="text-sm font-semibold text-[#0F3D3E]">
+                <p className="text-sm font-semibold text-[#5C7E9B]">
                   {dropoff}
                 </p>
               </div>
@@ -488,7 +488,7 @@ function PaymentPageContent() {
 
         {/* Payment Summary Card */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold text-[#0F3D3E] mb-4">
+          <h2 className="text-xl font-semibold text-[#5C7E9B] mb-4">
             Payment Summary
           </h2>
 
@@ -504,10 +504,10 @@ function PaymentPageContent() {
               <span>Included</span>
             </div>
             <div className="border-t pt-3 flex justify-between items-center">
-              <span className="text-lg font-semibold text-[#0F3D3E]">
+              <span className="text-lg font-semibold text-[#5C7E9B]">
                 Total
               </span>
-              <span className="text-2xl font-bold text-[#00796B]">
+              <span className="text-2xl font-bold text-[#5C7E9B]">
                 £{parseFloat(amount || "0").toFixed(2)}
               </span>
             </div>
@@ -516,7 +516,7 @@ function PaymentPageContent() {
 
         {/* Payment Method Card with Stripe Elements */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold text-[#0F3D3E] mb-4">
+          <h2 className="text-xl font-semibold text-[#5C7E9B] mb-4">
             Payment Method
           </h2>
 
@@ -528,7 +528,7 @@ function PaymentPageContent() {
                   key={method.id}
                   className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-colors ${
                     selectedPaymentMethod === method.id
-                      ? "border-[#00796B] bg-[#E0F2F1]"
+                      ? "border-[#5C7E9B] bg-[#E0D5DB]"
                       : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
@@ -538,7 +538,7 @@ function PaymentPageContent() {
                     value={method.id}
                     checked={selectedPaymentMethod === method.id}
                     onChange={(e) => setSelectedPaymentMethod(e.target.value)}
-                    className="w-4 h-4 text-[#00796B] border-gray-300 focus:ring-[#00796B]"
+                    className="w-4 h-4 text-[#5C7E9B] border-gray-300 focus:ring-[#5C7E9B]"
                   />
                   <div className="flex items-center gap-3 flex-1">
                     <div className="w-10 h-10 bg-blue-100 rounded flex items-center justify-center">
@@ -566,7 +566,7 @@ function PaymentPageContent() {
               <label
                 className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-colors ${
                   selectedPaymentMethod === "new"
-                    ? "border-[#00796B] bg-[#E0F2F1]"
+                    ? "border-[#5C7E9B] bg-[#E0D5DB]"
                     : "border-gray-200 hover:border-gray-300"
                 }`}
               >
@@ -576,7 +576,7 @@ function PaymentPageContent() {
                   value="new"
                   checked={selectedPaymentMethod === "new"}
                   onChange={(e) => setSelectedPaymentMethod(e.target.value)}
-                  className="w-4 h-4 text-[#00796B] border-gray-300 focus:ring-[#00796B]"
+                  className="w-4 h-4 text-[#5C7E9B] border-gray-300 focus:ring-[#5C7E9B]"
                 />
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
@@ -603,7 +603,7 @@ function PaymentPageContent() {
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <svg
-                className="animate-spin h-8 w-8 text-[#00796B]"
+                className="animate-spin h-8 w-8 text-[#5C7E9B]"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -635,9 +635,9 @@ function PaymentPageContent() {
                 appearance: {
                   theme: "stripe",
                   variables: {
-                    colorPrimary: "#00796B",
+                    colorPrimary: "#5C7E9B",
                     colorBackground: "#ffffff",
-                    colorText: "#0F3D3E",
+                    colorText: "#5C7E9B",
                     colorDanger: "#df1b41",
                     fontFamily: "system-ui, sans-serif",
                     spacingUnit: "4px",

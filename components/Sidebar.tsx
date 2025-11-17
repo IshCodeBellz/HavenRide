@@ -23,16 +23,21 @@ export default function Sidebar({ userRole }: SidebarProps) {
   const basePath = getRoleBasePath();
 
   return (
-    <div className="w-16 sm:w-20 md:w-64 min-h-screen bg-[#0F3D3E] text-white flex flex-col">
+    <div className="w-16 sm:w-20 md:w-64 min-h-screen bg-[#5C7E9B] text-white flex flex-col safe-area-sidebar">
       {/* Logo */}
-      <div className="p-2 sm:p-3 md:p-6 flex justify-center">
-        <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-32 md:h-32 bg-white rounded-full flex items-center justify-center">
+      <div
+        className="p-2 sm:p-3 md:p-6 flex justify-center safe-area-top"
+        style={{
+          paddingTop: "calc(env(safe-area-inset-top, 0px) + 0.5rem)",
+        }}
+      >
+        <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-32 md:h-32 bg-[#FEF9FA] rounded-full flex items-center justify-center p-1 sm:p-2 md:p-4">
           <Image
             src="/images/HavenRideIcon.png"
             alt="HavenRide Logo"
-            width={120}
-            height={120}
-            className="object-contain"
+            width={32}
+            height={32}
+            className="object-contain w-full h-full"
           />
         </div>
       </div>
@@ -43,8 +48,8 @@ export default function Sidebar({ userRole }: SidebarProps) {
           href={basePath}
           className={`flex items-center justify-center md:justify-start gap-0 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg transition-colors ${
             isActive(basePath)
-              ? "bg-[#1a5557]"
-              : "hover:bg-[#1a5557] hover:bg-opacity-50"
+              ? "bg-[#4A6B85]"
+              : "hover:bg-[#4A6B85] hover:bg-opacity-50"
           }`}
           title="Home"
         >
@@ -68,8 +73,8 @@ export default function Sidebar({ userRole }: SidebarProps) {
           href={`${basePath}/past-rides`}
           className={`flex items-center justify-center md:justify-start gap-0 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg transition-colors ${
             isActive(`${basePath}/past-rides`)
-              ? "bg-[#1a5557]"
-              : "hover:bg-[#1a5557] hover:bg-opacity-50"
+              ? "bg-[#4A6B85]"
+              : "hover:bg-[#4A6B85] hover:bg-opacity-50"
           }`}
           title="Past Rides"
         >
@@ -93,8 +98,8 @@ export default function Sidebar({ userRole }: SidebarProps) {
           href={`${basePath}/support`}
           className={`flex items-center justify-center md:justify-start gap-0 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg transition-colors ${
             isActive(`${basePath}/support`)
-              ? "bg-[#1a5557]"
-              : "hover:bg-[#1a5557] hover:bg-opacity-50"
+              ? "bg-[#4A6B85]"
+              : "hover:bg-[#4A6B85] hover:bg-opacity-50"
           }`}
           title="Support"
         >
@@ -118,8 +123,8 @@ export default function Sidebar({ userRole }: SidebarProps) {
           href={`${basePath}/profile`}
           className={`flex items-center justify-center md:justify-start gap-0 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg transition-colors ${
             isActive(`${basePath}/profile`)
-              ? "bg-[#1a5557]"
-              : "hover:bg-[#1a5557] hover:bg-opacity-50"
+              ? "bg-[#4A6B85]"
+              : "hover:bg-[#4A6B85] hover:bg-opacity-50"
           }`}
           title="Profile"
         >
@@ -145,8 +150,8 @@ export default function Sidebar({ userRole }: SidebarProps) {
             href="/driver/earnings"
             className={`flex items-center justify-center md:justify-start gap-0 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg transition-colors ${
               isActive("/driver/earnings")
-                ? "bg-[#1a5557]"
-                : "hover:bg-[#1a5557] hover:bg-opacity-50"
+                ? "bg-[#4A6B85]"
+                : "hover:bg-[#4A6B85] hover:bg-opacity-50"
             }`}
             title="Earnings"
           >
@@ -169,7 +174,7 @@ export default function Sidebar({ userRole }: SidebarProps) {
       </nav>
 
       {/* User Profile at bottom */}
-      <div className="p-2 md:p-4 border-t border-[#1a5557]">
+      <div className="p-2 md:p-4 border-t border-[#4A6B85] safe-area-bottom">
         <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3">
           <UserButton afterSignOutUrl="/" />
           <div className="hidden md:block flex-1">

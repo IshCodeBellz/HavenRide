@@ -298,7 +298,7 @@ function DriverProfileContent() {
   return (
     <div className="px-8 py-6 max-w-7xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#0F3D3E] mb-2">
+        <h1 className="text-3xl font-bold text-[#5C7E9B] mb-2">
           Driver Profile
         </h1>
         <p className="text-gray-600">Manage your driver information</p>
@@ -313,7 +313,7 @@ function DriverProfileContent() {
                 key={imageUrl || user?.imageUrl}
                 src={imageUrl || user?.imageUrl || ""}
                 alt="Profile"
-                className="w-24 h-24 rounded-full object-cover border-4 border-[#00796B]"
+                className="w-24 h-24 rounded-full object-cover border-4 border-[#5C7E9B]"
                 onError={(e) => {
                   console.error("Image failed to load:", imageUrl || user?.imageUrl);
                   (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "Driver")}&background=00796B&color=fff&size=128`;
@@ -323,7 +323,7 @@ function DriverProfileContent() {
                 }}
               />
             ) : (
-              <div className="w-24 h-24 rounded-full bg-[#00796B] flex items-center justify-center text-white text-2xl font-bold border-4 border-[#00796B]">
+              <div className="w-24 h-24 rounded-full bg-[#5C7E9B] flex items-center justify-center text-white text-2xl font-bold border-4 border-[#5C7E9B]">
                 {(name || user?.fullName || "D")[0].toUpperCase()}
               </div>
             )}
@@ -347,7 +347,7 @@ function DriverProfileContent() {
 
         {/* Driver Rating Section */}
         <div className="border-t pt-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4 text-[#0F3D3E]">
+          <h2 className="text-xl font-semibold mb-4 text-[#5C7E9B]">
             Driver Rating
           </h2>
           {rating !== null && rating !== undefined && rating > 0 ? (
@@ -367,7 +367,7 @@ function DriverProfileContent() {
                 ))}
               </div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-2xl font-bold text-[#0F3D3E]">
+                <span className="text-2xl font-bold text-[#5C7E9B]">
                   {rating.toFixed(1)}
                 </span>
                 <span className="text-sm text-gray-500">out of 5</span>
@@ -386,7 +386,7 @@ function DriverProfileContent() {
         </div>
 
         <div>
-          <h2 className="text-xl font-semibold mb-4 text-[#0F3D3E]">
+          <h2 className="text-xl font-semibold mb-4 text-[#5C7E9B]">
             Account Information
           </h2>
           <div className="space-y-4">
@@ -433,7 +433,7 @@ function DriverProfileContent() {
         </div>
 
         <div className="border-t pt-6">
-          <h2 className="text-xl font-semibold mb-4 text-[#0F3D3E]">
+          <h2 className="text-xl font-semibold mb-4 text-[#5C7E9B]">
             Vehicle Information
           </h2>
           <div className="space-y-4">
@@ -503,7 +503,7 @@ function DriverProfileContent() {
         </div>
 
         <div className="border-t pt-6">
-          <h2 className="text-xl font-semibold mb-4 text-[#0F3D3E]">
+          <h2 className="text-xl font-semibold mb-4 text-[#5C7E9B]">
             Contact Information
           </h2>
           <div className="space-y-4">
@@ -524,12 +524,12 @@ function DriverProfileContent() {
 
         <div className="border-t pt-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-[#0F3D3E]">
+            <h2 className="text-xl font-semibold text-[#5C7E9B]">
               Verification Documents
             </h2>
             <button
               onClick={() => setShowUploadForm(!showUploadForm)}
-              className="px-4 py-2 bg-[#00796B] text-white rounded-lg font-semibold hover:bg-[#00695C] transition-colors text-sm"
+              className="px-4 py-2 bg-[#5C7E9B] text-white rounded-lg font-semibold hover:bg-[#4A6B85] transition-colors text-sm"
             >
               {showUploadForm ? "Cancel" : "+ Upload Document"}
             </button>
@@ -602,7 +602,7 @@ function DriverProfileContent() {
               <button
                 onClick={handleUploadDocument}
                 disabled={uploading}
-                className="w-full px-4 py-2 bg-[#00796B] text-white rounded-lg font-semibold hover:bg-[#00695C] transition-colors disabled:opacity-50"
+                className="w-full px-4 py-2 bg-[#5C7E9B] text-white rounded-lg font-semibold hover:bg-[#4A6B85] transition-colors disabled:opacity-50"
               >
                 {uploading ? "Uploading..." : "Upload Document"}
               </button>
@@ -654,7 +654,7 @@ function DriverProfileContent() {
                       href={doc.documentUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-[#00796B] hover:underline mt-1 inline-block"
+                      className="text-sm text-[#5C7E9B] hover:underline mt-1 inline-block"
                     >
                       View Document →
                     </a>
@@ -666,7 +666,7 @@ function DriverProfileContent() {
         </div>
 
         <div className="border-t pt-6">
-          <h2 className="text-xl font-semibold mb-4 text-[#0F3D3E]">
+          <h2 className="text-xl font-semibold mb-4 text-[#5C7E9B]">
             Verification Status
           </h2>
           <div className="space-y-4">
@@ -715,7 +715,7 @@ function DriverProfileContent() {
           <button 
             onClick={handleSaveProfile}
             disabled={saving}
-            className="px-6 py-3 bg-[#00796B] text-white rounded-lg font-semibold hover:bg-[#00796B]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 bg-[#5C7E9B] text-white rounded-lg font-semibold hover:bg-[#5C7E9B]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>

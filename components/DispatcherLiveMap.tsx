@@ -211,13 +211,13 @@ export default function DispatcherLiveMap({
           <svg width="36" height="48" viewBox="0 0 36 48" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M18 2C10.268 2 4 8.268 4 16C4 26 18 46 18 46C18 46 32 26 32 16C32 8.268 25.732 2 18 2Z" 
                   fill="${
-                    booking.status === "REQUESTED" ? "#F59E0B" : "#00796B"
+                    booking.status === "REQUESTED" ? "#F59E0B" : "#5C7E9B"
                   }" 
                   stroke="white" 
                   stroke-width="2"/>
             <circle cx="18" cy="16" r="6" fill="white"/>
             <text x="18" y="20" text-anchor="middle" font-size="10" font-weight="bold" fill="${
-              booking.status === "REQUESTED" ? "#F59E0B" : "#00796B"
+              booking.status === "REQUESTED" ? "#F59E0B" : "#5C7E9B"
             }">P</text>
           </svg>
         `;
@@ -230,7 +230,7 @@ export default function DispatcherLiveMap({
             }</div>
             <div class="text-xs mt-1">
               <span class="px-2 py-1 rounded text-white text-xs font-medium" style="background-color: ${
-                booking.status === "REQUESTED" ? "#F59E0B" : "#00796B"
+                booking.status === "REQUESTED" ? "#F59E0B" : "#5C7E9B"
               }">
                 ${booking.status}
               </span>
@@ -265,11 +265,11 @@ export default function DispatcherLiveMap({
           dropoffEl.innerHTML = `
             <svg width="36" height="48" viewBox="0 0 36 48" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M18 2C10.268 2 4 8.268 4 16C4 26 18 46 18 46C18 46 32 26 32 16C32 8.268 25.732 2 18 2Z" 
-                    fill="#0F3D3E" 
+                    fill="#5C7E9B" 
                     stroke="white" 
                     stroke-width="2"/>
               <circle cx="18" cy="16" r="6" fill="white"/>
-              <text x="18" y="20" text-anchor="middle" font-size="10" font-weight="bold" fill="#0F3D3E">D</text>
+              <text x="18" y="20" text-anchor="middle" font-size="10" font-weight="bold" fill="#5C7E9B">D</text>
             </svg>
           `;
 

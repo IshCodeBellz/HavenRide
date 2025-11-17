@@ -63,13 +63,13 @@ export default function RoleSelectPage() {
       id: "RIDER",
       name: "Rider",
       description: "Book and manage your rides",
-      color: "bg-[#00796B]",
+      color: "bg-[#5C7E9B]",
     },
     {
       id: "DRIVER",
       name: "Driver",
       description: "Go online and accept rides",
-      color: "bg-[#26A69A]",
+      color: "bg-[#DAAAB2]",
     },
   ];
 
@@ -114,7 +114,7 @@ export default function RoleSelectPage() {
         <div className="text-center">
           <div className="inline-block p-4 bg-white rounded-full shadow-lg mb-4">
             <svg
-              className="w-12 h-12 text-[#00796B] animate-spin"
+              className="w-12 h-12 text-[#5C7E9B] animate-spin"
               fill="none"
               viewBox="0 0 24 24"
             >
@@ -169,14 +169,14 @@ export default function RoleSelectPage() {
                 key={role.id}
                 onClick={() => selectRole(role.id)}
                 disabled={assigning || !user?.id}
-                className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:shadow-xl hover:border-[#00796B] transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed group"
+                className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:shadow-xl hover:border-[#5C7E9B] transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed group"
               >
                 <div
                   className={`w-16 h-16 ${role.color} rounded-2xl mb-6 flex items-center justify-center text-white text-2xl font-bold`}
                 >
                   {role.name.charAt(0)}
                 </div>
-                <h3 className="text-2xl font-semibold text-[#263238] mb-2 group-hover:text-[#00796B] transition-colors">
+                <h3 className="text-2xl font-semibold text-[#263238] mb-2 group-hover:text-[#5C7E9B] transition-colors">
                   {role.name}
                 </h3>
                 <p className="text-neutral-600">{role.description}</p>

@@ -153,7 +153,7 @@ export default function MapboxNavigation({
             "line-cap": "round",
           },
           paint: {
-            "line-color": "#00796B",
+            "line-color": "#5C7E9B",
             "line-width": 6,
             "line-opacity": 0.75,
           },
@@ -218,7 +218,7 @@ export default function MapboxNavigation({
           }
 
           // Add user location marker
-          new mapboxgl.Marker({ color: "#00796B" })
+          new mapboxgl.Marker({ color: "#5C7E9B" })
             .setLngLat([longitude, latitude])
             .addTo(map.current);
 
@@ -273,7 +273,7 @@ export default function MapboxNavigation({
     }
 
     // Add destination marker
-    new mapboxgl.Marker({ color: "#0F3D3E" })
+    new mapboxgl.Marker({ color: "#5C7E9B" })
       .setLngLat([destinationLng, destinationLat])
       .setPopup(
         new mapboxgl.Popup({ offset: 25 }).setHTML(
@@ -313,7 +313,7 @@ export default function MapboxNavigation({
     el.style.width = "20px";
     el.style.height = "20px";
     el.style.borderRadius = "50%";
-    el.style.backgroundColor = "#00796B";
+    el.style.backgroundColor = "#5C7E9B";
     el.style.border = "3px solid white";
     el.style.boxShadow = "0 0 10px rgba(0,0,0,0.3)";
 
@@ -334,7 +334,7 @@ export default function MapboxNavigation({
       <div className="absolute top-4 left-4 right-4 z-10">
         <div className="bg-white rounded-lg shadow-lg p-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="font-bold text-lg text-[#0F3D3E]">Navigation</h3>
+            <h3 className="font-bold text-lg text-[#5C7E9B]">Navigation</h3>
             {onClose && (
               <button
                 onClick={onClose}
@@ -357,7 +357,7 @@ export default function MapboxNavigation({
             )}
           </div>
           <div className="space-y-2">
-            <p className="text-sm font-semibold text-[#00796B]">
+            <p className="text-sm font-semibold text-[#5C7E9B]">
               {instructions || "Calculating route..."}
             </p>
             <div className="flex items-center gap-4 text-xs text-gray-600">
@@ -384,7 +384,7 @@ export default function MapboxNavigation({
                   key={currentStep + index}
                   className={`text-xs ${
                     index === 0
-                      ? "text-[#00796B] font-semibold"
+                      ? "text-[#5C7E9B] font-semibold"
                       : "text-gray-600"
                   }`}
                 >

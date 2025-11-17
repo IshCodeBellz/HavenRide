@@ -65,9 +65,9 @@ function AdminSettingsContent() {
           {/* Fare Settings Section */}
           <div className="pb-8 border-b border-gray-200">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-[#E0F2F1] rounded-lg">
+              <div className="p-2 bg-[#E0D5DB] rounded-lg">
                 <svg
-                  className="w-6 h-6 text-[#00796B]"
+                  className="w-6 h-6 text-[#5C7E9B]"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -99,7 +99,7 @@ function AdminSettingsContent() {
                       baseFare: parseFloat(e.target.value),
                     })
                   }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00796B]/20 focus:border-[#00796B] transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C7E9B]/20 focus:border-[#5C7E9B] transition-all"
                 />
               </div>
 
@@ -117,7 +117,7 @@ function AdminSettingsContent() {
                       perKm: parseFloat(e.target.value),
                     })
                   }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00796B]/20 focus:border-[#00796B] transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C7E9B]/20 focus:border-[#5C7E9B] transition-all"
                 />
               </div>
 
@@ -135,12 +135,12 @@ function AdminSettingsContent() {
                       wheelchairMult: parseFloat(e.target.value),
                     })
                   }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00796B]/20 focus:border-[#00796B] transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C7E9B]/20 focus:border-[#5C7E9B] transition-all"
                 />
-                <div className="mt-3 p-3 bg-[#E0F2F1] rounded-lg">
+                <div className="mt-3 p-3 bg-[#E0D5DB] rounded-lg">
                   <p className="text-sm text-[#263238] font-medium">
                     Current Formula:{" "}
-                    <span className="text-[#00796B]">
+                    <span className="text-[#5C7E9B]">
                       £{settings.baseFare} + £{settings.perKm}/km ×{" "}
                       {settings.wheelchairMult}
                     </span>
@@ -153,9 +153,9 @@ function AdminSettingsContent() {
           {/* Feature Flags Section */}
           <div>
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-[#E0F2F1] rounded-lg">
+              <div className="p-2 bg-[#E0D5DB] rounded-lg">
                 <svg
-                  className="w-6 h-6 text-[#00796B]"
+                  className="w-6 h-6 text-[#5C7E9B]"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -173,7 +173,7 @@ function AdminSettingsContent() {
               </h2>
             </div>
             <div className="space-y-4">
-              <label className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:bg-[#E0F2F1]/20 transition-colors cursor-pointer">
+              <label className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:bg-[#E0D5DB]/20 transition-colors cursor-pointer">
                 <input
                   type="checkbox"
                   checked={settings.requirePickupPin}
@@ -183,7 +183,7 @@ function AdminSettingsContent() {
                       requirePickupPin: e.target.checked,
                     })
                   }
-                  className="w-5 h-5 text-[#00796B] border-gray-300 rounded focus:ring-[#00796B] focus:ring-2"
+                  className="w-5 h-5 text-[#5C7E9B] border-gray-300 rounded focus:ring-[#5C7E9B] focus:ring-2"
                 />
                 <div className="flex-1">
                   <span className="text-[#263238] font-medium">
@@ -195,14 +195,14 @@ function AdminSettingsContent() {
                 </div>
               </label>
 
-              <label className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:bg-[#E0F2F1]/20 transition-colors cursor-pointer">
+              <label className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:bg-[#E0D5DB]/20 transition-colors cursor-pointer">
                 <input
                   type="checkbox"
                   checked={settings.sendReceipts}
                   onChange={(e) =>
                     setSettings({ ...settings, sendReceipts: e.target.checked })
                   }
-                  className="w-5 h-5 text-[#00796B] border-gray-300 rounded focus:ring-[#00796B] focus:ring-2"
+                  className="w-5 h-5 text-[#5C7E9B] border-gray-300 rounded focus:ring-[#5C7E9B] focus:ring-2"
                 />
                 <div className="flex-1">
                   <span className="text-[#263238] font-medium">
@@ -221,7 +221,7 @@ function AdminSettingsContent() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-8 py-3 bg-gradient-to-r from-[#00796B] to-[#26A69A] text-white font-medium rounded-lg hover:shadow-lg hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="px-8 py-3 bg-gradient-to-r from-[#5C7E9B] to-[#DAAAB2] text-white font-medium rounded-lg hover:shadow-lg hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               {saving ? (
                 <span className="flex items-center gap-2">

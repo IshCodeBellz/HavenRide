@@ -160,7 +160,7 @@ function IncidentsPageContent() {
           <div>
             <Link
               href="/admin"
-              className="text-sm text-neutral-500 hover:text-[#00796B] mb-2 inline-block"
+              className="text-sm text-neutral-500 hover:text-[#5C7E9B] mb-2 inline-block"
             >
               ← Back to Dashboard
             </Link>
@@ -209,7 +209,7 @@ function IncidentsPageContent() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="OPEN">Open</option>
@@ -226,7 +226,7 @@ function IncidentsPageContent() {
               <select
                 value={priorityFilter}
                 onChange={(e) => setPriorityFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
               >
                 <option value="ALL">All Priorities</option>
                 <option value="CRITICAL">Critical</option>
@@ -242,7 +242,7 @@ function IncidentsPageContent() {
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
               >
                 <option value="ALL">All Types</option>
                 <option value="SOS">SOS</option>
@@ -261,7 +261,7 @@ function IncidentsPageContent() {
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00796B] mx-auto mb-4"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5C7E9B] mx-auto mb-4"></div>
                 <p className="text-neutral-600">Loading incidents...</p>
               </div>
             </div>
@@ -372,7 +372,7 @@ function IncidentsPageContent() {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
                           onClick={() => handleViewIncident(incident)}
-                          className="text-[#00796B] hover:text-[#00695C]"
+                          className="text-[#5C7E9B] hover:text-[#4A6B85]"
                         >
                           View & Manage
                         </button>
@@ -498,7 +498,7 @@ function IncidentsPageContent() {
                       onChange={(e) =>
                         setUpdateData({ ...updateData, status: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                     >
                       <option value="OPEN">Open</option>
                       <option value="IN_PROGRESS">In Progress</option>
@@ -519,7 +519,7 @@ function IncidentsPageContent() {
                           priority: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                     >
                       <option value="LOW">Low</option>
                       <option value="MEDIUM">Medium</option>
@@ -543,7 +543,7 @@ function IncidentsPageContent() {
                     }
                     placeholder="Enter resolution details..."
                     rows={4}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                   />
                 </div>
 
@@ -556,7 +556,7 @@ function IncidentsPageContent() {
                   </button>
                   <button
                     onClick={handleUpdateIncident}
-                    className="flex-1 px-6 py-3 bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors font-semibold"
+                    className="flex-1 px-6 py-3 bg-[#5C7E9B] text-white rounded-lg hover:bg-[#4A6B85] transition-colors font-semibold"
                   >
                     Save Changes
                   </button>
@@ -577,5 +577,7 @@ export default function IncidentsPage() {
     </RoleGate>
   );
 }
+
+
 
 

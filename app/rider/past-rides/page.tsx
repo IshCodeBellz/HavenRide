@@ -136,10 +136,10 @@ export default function PastRidesPage() {
   return (
     <RoleGate requiredRole={["RIDER"]}>
       <AppLayout userRole="RIDER">
-        <div className="px-8 py-6 max-w-7xl mx-auto">
+        <div className="px-8 py-6 max-w-7xl mx-auto safe-area-content">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-[#0F3D3E] mb-2">
+          <div className="mb-8 safe-area-top">
+            <h1 className="text-3xl font-bold text-[#5C7E9B] mb-2">
               Past Rides
             </h1>
             <p className="text-gray-600">View your ride history</p>
@@ -152,7 +152,7 @@ export default function PastRidesPage() {
                 onClick={() => setFilter("all")}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   filter === "all"
-                    ? "bg-[#00796B] text-white"
+                    ? "bg-[#5C7E9B] text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
@@ -162,7 +162,7 @@ export default function PastRidesPage() {
                 onClick={() => setFilter("completed")}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   filter === "completed"
-                    ? "bg-[#00796B] text-white"
+                    ? "bg-[#5C7E9B] text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
@@ -172,7 +172,7 @@ export default function PastRidesPage() {
                 onClick={() => setFilter("canceled")}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   filter === "canceled"
-                    ? "bg-[#00796B] text-white"
+                    ? "bg-[#5C7E9B] text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
@@ -243,7 +243,7 @@ export default function PastRidesPage() {
                     </div>
                     {(booking.finalFareAmount || (booking.priceEstimate as any)?.amount) && (
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-[#0F3D3E]">
+                        <div className="text-2xl font-bold text-[#5C7E9B]">
                           £{(booking.finalFareAmount || (booking.priceEstimate as any)?.amount || 0).toFixed(2)}
                         </div>
                         {booking.finalFareAmount && (booking.priceEstimate as any)?.amount && 
@@ -395,7 +395,7 @@ export default function PastRidesPage() {
                         </div>
                         <button
                           onClick={() => setRatingBookingId(booking.id)}
-                          className="px-3 py-1.5 bg-[#00796B] text-white rounded-lg text-xs font-medium hover:bg-[#00695C] transition-colors"
+                          className="px-3 py-1.5 bg-[#5C7E9B] text-white rounded-lg text-xs font-medium hover:bg-[#4A6B85] transition-colors"
                         >
                           Rate Now
                         </button>
@@ -599,7 +599,7 @@ export default function PastRidesPage() {
                     <button
                       onClick={() => handleSubmitRating(ratingBookingId)}
                       disabled={submittingRating || driverRating === 0 || rideRating === 0}
-                      className="flex-1 bg-[#00796B] text-white py-2 rounded-lg font-medium hover:bg-[#00695C] disabled:opacity-50"
+                      className="flex-1 bg-[#5C7E9B] text-white py-2 rounded-lg font-medium hover:bg-[#4A6B85] disabled:opacity-50"
                     >
                       {submittingRating ? "Submitting..." : "Submit Rating"}
                     </button>

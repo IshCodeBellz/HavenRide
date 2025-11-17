@@ -54,7 +54,7 @@ export default function HomePage() {
     return (
       <div className="w-full h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-xl font-semibold text-[#0F3D3E]">
+          <div className="text-xl font-semibold text-[#5C7E9B]">
             Redirecting...
           </div>
         </div>

@@ -38,9 +38,9 @@ function RiderSupportContent() {
   ];
 
   return (
-    <div className="px-8 py-6 max-w-6xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#0F3D3E] mb-2">
+    <div className="px-8 py-6 max-w-6xl mx-auto safe-area-content">
+      <div className="mb-8 safe-area-top">
+        <h1 className="text-3xl font-bold text-[#5C7E9B] mb-2">
           Need help? We're here for you.
         </h1>
         <p className="text-gray-600">
@@ -56,7 +56,7 @@ function RiderSupportContent() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search help articles..."
-            className="w-full border border-gray-300 rounded-lg px-12 py-4 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+            className="w-full border border-gray-300 rounded-lg px-12 py-4 focus:outline-none focus:ring-2 focus:ring-[#5C7E9B]"
           />
           <svg
             className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400"
@@ -77,7 +77,7 @@ function RiderSupportContent() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Help Articles */}
         <div className="lg:col-span-2">
-          <h2 className="text-2xl font-semibold text-[#0F3D3E] mb-4">
+          <h2 className="text-2xl font-semibold text-[#5C7E9B] mb-4">
             Help Articles
           </h2>
           <div className="space-y-3">
@@ -87,11 +87,11 @@ function RiderSupportContent() {
                 className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer flex items-center justify-between"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-[#E0F2F1] rounded-full flex items-center justify-center text-2xl">
+                  <div className="w-12 h-12 bg-[#E0D5DB] rounded-full flex items-center justify-center text-2xl">
                     {article.icon}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-[#0F3D3E] mb-1">
+                    <h3 className="font-semibold text-[#5C7E9B] mb-1">
                       {article.title}
                     </h3>
                     <p className="text-sm text-gray-600">
@@ -119,14 +119,14 @@ function RiderSupportContent() {
 
         {/* Contact Us */}
         <div>
-          <h2 className="text-2xl font-semibold text-[#0F3D3E] mb-4">
+          <h2 className="text-2xl font-semibold text-[#5C7E9B] mb-4">
             Contact Us
           </h2>
           <div className="bg-white rounded-2xl p-6 shadow-sm space-y-3">
-            <button className="w-full bg-[#00796B] text-white py-3 rounded-lg font-semibold hover:bg-[#00695C] transition-colors">
+            <button className="w-full bg-[#5C7E9B] text-white py-3 rounded-lg font-semibold hover:bg-[#4A6B85] transition-colors">
               Chat with Support
             </button>
-            <button className="w-full border-2 border-[#00796B] text-[#00796B] py-3 rounded-lg font-semibold hover:bg-[#E0F2F1] transition-colors">
+            <button className="w-full border-2 border-[#5C7E9B] text-[#5C7E9B] py-3 rounded-lg font-semibold hover:bg-[#E0D5DB] transition-colors">
               Call Support
             </button>
             <button
@@ -143,7 +143,7 @@ function RiderSupportContent() {
       </div>
 
       {/* Emergency Notice */}
-      <div className="bg-[#0F3D3E] text-white rounded-2xl p-6 mt-8">
+      <div className="bg-[#5C7E9B] text-white rounded-2xl p-6 mt-8">
         <p className="text-center">
           For emergencies, please use the SOS option on your dashboard.
         </p>
@@ -154,7 +154,7 @@ function RiderSupportContent() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-[#0F3D3E]">
+              <h3 className="text-xl font-semibold text-[#5C7E9B]">
                 Report an Issue
               </h3>
               <button
@@ -232,7 +232,7 @@ function RiderSupportContent() {
                 <select
                   value={issueType}
                   onChange={(e) => setIssueType(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C7E9B]"
                 >
                   <option value="LOST_ITEM">Lost Item</option>
                   <option value="RIDE_ISSUE">Ride Issue</option>
@@ -251,7 +251,7 @@ function RiderSupportContent() {
                   value={issueSubject}
                   onChange={(e) => setIssueSubject(e.target.value)}
                   placeholder="Brief description of the issue"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C7E9B]"
                   required
                 />
               </div>
@@ -264,7 +264,7 @@ function RiderSupportContent() {
                   value={issueDescription}
                   onChange={(e) => setIssueDescription(e.target.value)}
                   placeholder="Please provide details about the issue..."
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C7E9B]"
                   rows={5}
                   required
                 />
@@ -279,7 +279,7 @@ function RiderSupportContent() {
                   value={issueBookingId}
                   onChange={(e) => setIssueBookingId(e.target.value)}
                   placeholder="If this issue is related to a specific ride"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00796B]"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5C7E9B]"
                 />
               </div>
 
@@ -300,7 +300,7 @@ function RiderSupportContent() {
                 <button
                   type="submit"
                   disabled={submittingIssue || !issueSubject || !issueDescription}
-                  className="flex-1 bg-[#00796B] text-white py-2 rounded-lg font-medium hover:bg-[#00695C] disabled:opacity-50"
+                  className="flex-1 bg-[#5C7E9B] text-white py-2 rounded-lg font-medium hover:bg-[#4A6B85] disabled:opacity-50"
                 >
                   {submittingIssue ? "Submitting..." : "Submit Report"}
                 </button>

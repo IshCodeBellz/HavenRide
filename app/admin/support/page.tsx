@@ -78,7 +78,7 @@ function SupportPageContent() {
           <div>
             <Link
               href="/admin"
-              className="text-sm text-neutral-500 hover:text-[#00796B] mb-2 inline-block"
+              className="text-sm text-neutral-500 hover:text-[#5C7E9B] mb-2 inline-block"
             >
               ← Back to Dashboard
             </Link>
@@ -91,7 +91,7 @@ function SupportPageContent() {
           </div>
           <button
             onClick={() => setShowBroadcastModal(true)}
-            className="px-6 py-3 bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors font-semibold flex items-center gap-2"
+            className="px-6 py-3 bg-[#5C7E9B] text-white rounded-lg hover:bg-[#4A6B85] transition-colors font-semibold flex items-center gap-2"
           >
             <svg
               className="w-5 h-5"
@@ -142,7 +142,7 @@ function SupportPageContent() {
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+            className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
           >
             <option value="ALL">All Tickets</option>
             <option value="OPEN">Open</option>
@@ -157,7 +157,7 @@ function SupportPageContent() {
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00796B] mx-auto mb-4"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5C7E9B] mx-auto mb-4"></div>
                 <p className="text-neutral-600">Loading support tickets...</p>
               </div>
             </div>
@@ -277,7 +277,7 @@ function SupportPageContent() {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <Link
                           href={`/admin/support/tickets/${ticket.id}`}
-                          className="text-[#00796B] hover:text-[#00695C]"
+                          className="text-[#5C7E9B] hover:text-[#4A6B85]"
                         >
                           View
                         </Link>
@@ -334,7 +334,7 @@ function SupportPageContent() {
                     })
                   }
                   placeholder="e.g., System Maintenance Notice"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 />
               </div>
 
@@ -352,7 +352,7 @@ function SupportPageContent() {
                   }
                   placeholder="Enter your message here..."
                   rows={5}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 />
               </div>
 
@@ -368,7 +368,7 @@ function SupportPageContent() {
                       targetRole: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00796B] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5C7E9B] focus:border-transparent"
                 >
                   <option value="ALL">All Users</option>
                   <option value="RIDER">Riders Only</option>
@@ -387,7 +387,7 @@ function SupportPageContent() {
                 <button
                   onClick={handleBroadcast}
                   disabled={!broadcastData.title || !broadcastData.message}
-                  className="flex-1 px-6 py-3 bg-[#00796B] text-white rounded-lg hover:bg-[#00695C] transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-6 py-3 bg-[#5C7E9B] text-white rounded-lg hover:bg-[#4A6B85] transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Send Broadcast
                 </button>
